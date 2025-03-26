@@ -1,4 +1,4 @@
-﻿namespace TranslationApi.Models
+﻿namespace TranslationApi.Application.Contracts
 {
     public class TranslationResponse
     {

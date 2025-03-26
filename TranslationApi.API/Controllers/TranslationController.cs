@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TranslationApi.Models;
-using TranslationApi.Services;
+using TranslationApi.Application.Interfaces;
+using TranslationApi.Application.Contracts;
 
-namespace TranslationApi.Controllers
+namespace TranslationApi.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -10,7 +10,7 @@ namespace TranslationApi.Controllers
     {
         private readonly ILogger<TranslationController> _logger;
         private readonly ITranslationService _translationService;
-        public TranslationController(ILogger<TranslationController> logger, ITranslationService translationService )
+        public TranslationController(ILogger<TranslationController> logger, ITranslationService translationService)
         {
             _logger = logger;
             _translationService = translationService;
@@ -47,7 +47,6 @@ namespace TranslationApi.Controllers
         [HttpGet("languages")]
         public ActionResult<IEnumerable<Language>> GetSupportedLanguages()
         {
-            // This will be expanded when we integrate with Gemini API
             var languages = new List<Language>
             {
                 new Language { Code = "en", Name = "English" },

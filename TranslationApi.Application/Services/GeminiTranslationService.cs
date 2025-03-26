@@ -1,22 +1,21 @@
-﻿using Google.Api.Gax.ResourceNames;
-using Google.Cloud.Translate.V3;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using TranslationApi.Models;
-namespace TranslationApi.Services
+using TranslationApi.Application.Contracts;
+using TranslationApi.Application.Interfaces;
+
+namespace TranslationApi.Application.Services
 {
     public class GeminiTranslationService : ITranslationService
     {
         private readonly ILogger<GeminiTranslationService> _logger;
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly TranslationServiceClient? _translationServiceClient;
         private readonly string _geminiApiKey;
-        private readonly LocationName _locationName = LocationName.FromProjectLocation("gen-lang-client-0347997282", "asia-east1");
         private readonly string _geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-        private readonly List<CustomTerm> _customTerms = new List<CustomTerm>();
         private static readonly JsonSerializerOptions SafeOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -52,48 +51,6 @@ namespace TranslationApi.Services
             _configuration = configuration;
             _httpClient = httpClient;
             _geminiApiKey = _configuration["GeminiApi:ApiKey"] ?? "AIzaSyB4ZJM1Mu8m6-ypPs_bajwh2UmzpKfi3PM";
-            try
-            {
-                _translationServiceClient = TranslationServiceClient.Create();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to initialize Google Cloud Translation client: {ex.Message}");
-                _logger.LogInformation("Will use Gemini API for translations");
-            }
-
-            // Add some sample custom terms for testing
-            _customTerms.Add(new CustomTerm
-            {
-                Id = 1,
-                SourceTerm = "hello",
-                TargetTerm = "xin chào",
-                SourceLanguage = "en",
-                TargetLanguage = "vi"
-            });
-        }
-
-        public async Task<CustomTerm> AddCustomTermAsync(CustomTerm term)
-        {
-            term.Id = _customTerms.Count > 0 ? _customTerms.Max(t => t.Id) + 1 : 1;
-            _customTerms.Add(term);
-            return await Task.FromResult(term);
-        }
-
-        public async Task<bool> DeleteCustomTermAsync(int id)
-        {
-            var term = _customTerms.FirstOrDefault(t => t.Id == id);
-            if (term != null)
-            {
-                _customTerms.Remove(term);
-                return await Task.FromResult(true);
-            }
-            return await Task.FromResult(false);
-        }
-
-        public async Task<IEnumerable<CustomTerm>> GetCustomTermsAsync()
-        {
-            return await Task.FromResult(_customTerms);
         }
 
         public async Task<IEnumerable<Language>> GetSupportedLanguagesAsync()
@@ -106,10 +63,6 @@ namespace TranslationApi.Services
             _logger.LogInformation($"Translating text from {request.SourceLanguage} to {request.TargetLanguage}");
             try
             {
-                if (_translationServiceClient != null)
-                {
-                    return await TranslateWithGoogleCloudAsync(request);
-                }
                 return await TranslateWithGeminiAsync(request);
             }
             catch (Exception ex)
@@ -127,18 +80,16 @@ namespace TranslationApi.Services
         private async Task<TranslationResponse> TranslateWithGeminiAsync(TranslationRequest request)
         {
             try
-            {            
+            {
                 var textChunks = SplitLongText(request.SourceText);
 
                 var translatedChunks = new List<string>();
 
                 foreach (var chunk in textChunks)
                 {
-                    string customTermsText = ProcessCustomTerms(request);
-
                     string prompt = $"Translate the following text from {GetLanguageName(request.SourceLanguage)} to {GetLanguageName(request.TargetLanguage)}. " +
                                     $"Provide only the most literal translation possible, avoiding any paraphrasing or invented content. " +
-                                    $"Do not include explanations or additional information.{customTermsText}\n\nText to translate: {chunk}";
+                                    $"Text to translate: {chunk}";
 
                     var requestBody = new
                     {
@@ -184,32 +135,6 @@ namespace TranslationApi.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error using Gemini API for translation");
-                throw;
-            }
-        }
-
-        private async Task<TranslationResponse> TranslateWithGoogleCloudAsync(TranslationRequest request)
-        {
-            try
-            {
-                IEnumerable<string> sourceTexts = SplitLongText(request.SourceText);
-                var response = await _translationServiceClient!.TranslateTextAsync(
-                    parent: _locationName,
-                    targetLanguageCode: request.TargetLanguage,
-                    contents: sourceTexts
-                    );
-
-                return new TranslationResponse
-                {
-                    TranslatedText = ConvertTranslationsToString(response.Translations),
-                    SourceLanguage = request.SourceLanguage,
-                    TargetLanguage = request.TargetLanguage,
-                    Success = true
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error using Google Cloud Translation");
                 throw;
             }
         }
@@ -269,17 +194,6 @@ namespace TranslationApi.Services
             }
             return chunks;
         }
-
-        public string ProcessCustomTerms(TranslationRequest request)
-        {
-            if (request.CustomTerms == null || !request.CustomTerms.Any())
-                return string.Empty;
-
-            return "\n\nPlease use these custom translations for specific terms:\n" +
-                string.Join("\n", request.CustomTerms.Select(term =>
-                    $"- \"{term}\" should be translated with specific attention"));
-        }
-
 
 
         public static string Serialize(object obj)
@@ -361,23 +275,6 @@ namespace TranslationApi.Services
                 _logger.LogError(ex, "Error extracting translated text");
                 return string.Empty;
             }
-        }
-
-        public static string ConvertTranslationsToString(IList<Translation> translations)
-        {
-            if (translations == null || translations.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            var result = new StringBuilder();
-
-            foreach (var translation in translations)
-            {
-                result.AppendLine(translation.TranslatedText);
-            }
-
-            return result.ToString().TrimEnd('\r', '\n');
         }
 
     }

@@ -1,49 +1,17 @@
-﻿using TranslationApi.Models;
+﻿using Microsoft.Extensions.Logging;
+using TranslationApi.Application.Contracts;
+using TranslationApi.Application.Interfaces;
 
-namespace TranslationApi.Services
+namespace TranslationApi.Application.Services
 {
     public class TranslationService : ITranslationService
     {
         private readonly ILogger<TranslationService> _logger;
-        private readonly List<CustomTerm> _customTerms = new List<CustomTerm>();
 
         public TranslationService(ILogger<TranslationService> logger)
         {
             _logger = logger;
-
-            _customTerms.Add(new CustomTerm
-            {
-                Id = 1,
-                SourceTerm = "hello",
-                TargetTerm = "xin chào",
-                SourceLanguage = "en",
-                TargetLanguage = "vi"
-            });
         }
-
-        public async Task<CustomTerm> AddCustomTermAsync(CustomTerm term)
-        {
-            term.Id = _customTerms.Count > 0 ? _customTerms.Max(t => t.Id) + 1 : 1;
-            _customTerms.Add(term);
-            return await Task.FromResult(term);
-        }
-
-        public async Task<bool> DeleteCustomTermAsync(int id)
-        {
-            var term = _customTerms.FirstOrDefault(x => x.Id == id);
-            if (term != null)
-            {
-                _customTerms.Remove(term);
-                return await Task.FromResult(true);
-            }
-            return await Task.FromResult(false);
-        }
-
-        public async Task<IEnumerable<CustomTerm>> GetCustomTermsAsync()
-        {
-            return await Task.FromResult(_customTerms);
-        }
-
         public async Task<IEnumerable<Language>> GetSupportedLanguagesAsync()
         {
             var languages = new List<Language>
