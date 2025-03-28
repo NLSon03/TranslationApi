@@ -13,7 +13,5 @@ namespace TranslationWeb.Models.Api
         [JsonPropertyName("targetLanguage")]
         public string TargetLanguage { get; set; } = string.Empty;
 
-        [JsonPropertyName("customTerms")]
-        public List<string>? CustomTerms { get; set; }
     }
 }

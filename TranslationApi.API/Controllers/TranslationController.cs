@@ -45,16 +45,9 @@ namespace TranslationApi.API.Controllers
         }
 
         [HttpGet("languages")]
-        public ActionResult<IEnumerable<Language>> GetSupportedLanguages()
+        public async Task<ActionResult<IEnumerable<Language>>> GetSupportedLanguages()
         {
-            var languages = new List<Language>
-            {
-                new Language { Code = "en", Name = "English" },
-                new Language { Code = "vi", Name = "Vietnamese" },
-                new Language { Code = "zh", Name = "Chinese" },
-                new Language { Code = "ja", Name = "Japanese" }
-            };
-
+            var languages = await _translationService.GetSupportedLanguagesAsync();
             return Ok(languages);
         }
     }

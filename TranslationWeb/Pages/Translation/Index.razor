@@ -61,33 +61,7 @@
                                 <div class="card-header bg-success text-white">
                                     <h5 class="mb-0">Từ điển tùy chỉnh</h5>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            <input @bind="customTerm" class="form-control" placeholder="Nhập cụm từ tùy chọn">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button @onclick="AddCustomTerm" class="btn btn-success w-100">
-                                                <i class="bi bi-plus-circle"></i> Thêm
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-3">
-                                        <div class="col-md-12">
-                                            <ul id="customTermsList" class="list-group">
-                                                @foreach (var term in customTerms)
-                                                {
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        @term
-                                                        <button @onclick="() => RemoveCustomTerm(term)" class="btn btn-sm btn-danger">
-                                                            <i class="bi bi-x"></i>
-                                                        </button>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
+                               
                             </div>
                         </div>
                     </div>
@@ -144,7 +118,6 @@
         {
             Models.Api.TranslationRequest request = new Models.Api.TranslationRequest {
                 SourceLanguage= sourceLanguage,
-                CustomTerms = customTerms,
                 SourceText = sourceText,
                 TargetLanguage = targetLanguage
             };
@@ -165,24 +138,6 @@
         }
     }
 
-    private void AddCustomTerm()
-    {
-        var term = customTerm.Trim();
-        if (!string.IsNullOrWhiteSpace(term) && !customTerms.Contains(term))
-        {
-            customTerms.Add(term);
-            customTerm = "";
-        }
-        else if (customTerms.Contains(term))
-        {
-            JS.InvokeVoidAsync("alert", "Cụm từ này đã tồn tại trong danh sách");
-        }
-    }
-
-    private void RemoveCustomTerm(string term)
-    {
-        customTerms.Remove(term);
-    }
 
     private void ToggleExpand()
     {

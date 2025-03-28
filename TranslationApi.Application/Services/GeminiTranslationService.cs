@@ -24,6 +24,7 @@ namespace TranslationApi.Application.Services
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
         };
         private readonly List<Language> _supportedLanguages = new List<Language>{
+            new Language{Code = "detect", Name = "Detect"},
             new Language { Code = "en", Name = "English" },
             new Language { Code = "vi", Name = "Vietnamese" },
             new Language { Code = "zh", Name = "Chinese" },
