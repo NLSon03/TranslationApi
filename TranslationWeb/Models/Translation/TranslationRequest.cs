@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace TranslationWeb.Models.Api
+namespace TranslationWeb.Models.Translation
 {
     public class TranslationRequest
     {
@@ -12,6 +12,5 @@ namespace TranslationWeb.Models.Api
 
         [JsonPropertyName("targetLanguage")]
         public string TargetLanguage { get; set; } = string.Empty;
-
     }
-}
+} 

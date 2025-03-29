@@ -1,0 +1,128 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using TranslationApi.Application.Interfaces;
+using TranslationApi.Domain.Entities;
+
+namespace TranslationApi.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class ChatSessionController : ControllerBase
+    {
+        private readonly IChatSessionService _sessionService;
+
+        public ChatSessionController(IChatSessionService sessionService)
+        {
+            _sessionService = sessionService;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ChatSession>>> GetAllSessions()
+        {
+            var sessions = await _sessionService.GetAllSessionsAsync();
+            return Ok(sessions);
+        }
+
+        [HttpGet("my")]
+        public async Task<ActionResult<IEnumerable<ChatSession>>> GetCurrentUserSessions()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
+            return Ok(sessions);
+        }
+
+        [HttpGet("active")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ChatSession>>> GetActiveSessions()
+        {
+            var sessions = await _sessionService.GetActiveSessionsAsync();
+            return Ok(sessions);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ChatSession>> GetSessionById(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var session = await _sessionService.GetSessionByIdAsync(id);
+            
+            if (session == null)
+                return NotFound();
+                
+            if (session.UserId != userId && !User.IsInRole("Admin"))
+                return Forbid();
+                
+            return Ok(session);
+        }
+
+        [HttpGet("{id}/messages")]
+        public async Task<ActionResult<ChatSession>> GetSessionWithMessages(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var session = await _sessionService.GetSessionWithMessagesAsync(id);
+            
+            if (session == null)
+                return NotFound();
+                
+            if (session.UserId != userId && !User.IsInRole("Admin"))
+                return Forbid();
+                
+            return Ok(session);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ChatSession>> CreateSession(Guid modelId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            try
+            {
+                var session = await _sessionService.CreateSessionAsync(userId, modelId);
+                return CreatedAtAction(nameof(GetSessionById), new { id = session.Id }, session);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id}/end")]
+        public async Task<IActionResult> EndSession(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var session = await _sessionService.GetSessionByIdAsync(id);
+            
+            if (session == null)
+                return NotFound();
+                
+            if (session.UserId != userId && !User.IsInRole("Admin"))
+                return Forbid();
+                
+            await _sessionService.EndSessionAsync(id);
+            
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteSession(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var session = await _sessionService.GetSessionByIdAsync(id);
+            
+            if (session == null)
+                return NotFound();
+                
+            if (session.UserId != userId && !User.IsInRole("Admin"))
+                return Forbid();
+                
+            await _sessionService.DeleteSessionAsync(id);
+            
+            return NoContent();
+        }
+    }
+} 

@@ -38,6 +38,7 @@ namespace TranslationApi.Infrastructure
             services.AddScoped<IChatSessionService, ChatSessionService>();
             services.AddScoped<IChatMessageService, ChatMessageService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<ITokenService, TokenService>();
 
             return services;
         }

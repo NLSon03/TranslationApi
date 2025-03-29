@@ -1,0 +1,85 @@
+@using Microsoft.AspNetCore.Components
+@using System.Text.Json
+@using TranslationWeb.Infrastructure.Services.LocalStorage
+@using TranslationWeb.Models.Translation
+@inject LocalStorageService LocalStorage
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<TranslationHistory> OnHistoryUpdated { get; set; }
+
+    private const string HISTORY_KEY = "translation_history";
+    private TranslationHistory _history = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadHistoryAsync();
+    }
+    
+    private async Task LoadHistoryAsync()
+    {
+        var savedHistory = await LocalStorage.GetItemAsync<TranslationHistory>(HISTORY_KEY);
+        if (savedHistory != null)
+        {
+            _history = savedHistory;
+            await OnHistoryUpdated.InvokeAsync(_history);
+        }
+    }
+    
+    public async Task AddToHistoryAsync(TranslationRequest request, TranslationResponse response)
+    {
+        if (response.Success && !string.IsNullOrEmpty(response.TranslatedText))
+        {
+            var entry = new TranslationHistoryEntry
+            {
+                SourceText = request.SourceText,
+                TranslatedText = response.TranslatedText,
+                SourceLanguage = response.SourceLanguage,
+                TargetLanguage = response.TargetLanguage,
+                Timestamp = DateTime.Now
+            };
+            
+            _history.Entries.Insert(0, entry);
+            
+            // Giới hạn lịch sử lưu trữ
+            if (_history.Entries.Count > 20)
+            {
+                _history.Entries.RemoveAt(_history.Entries.Count - 1);
+            }
+            
+            await LocalStorage.SetItemAsync(HISTORY_KEY, _history);
+            await OnHistoryUpdated.InvokeAsync(_history);
+        }
+    }
+    
+    public async Task ClearHistoryAsync()
+    {
+        _history = new TranslationHistory();
+        await LocalStorage.RemoveItemAsync(HISTORY_KEY);
+        await OnHistoryUpdated.InvokeAsync(_history);
+    }
+}
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    // Model cho lịch sử dịch
+    public class TranslationHistory
+    {
+        public List<TranslationHistoryEntry> Entries { get; set; } = new List<TranslationHistoryEntry>();
+    }
+
+    public class TranslationHistoryEntry
+    {
+        public string SourceText { get; set; } = string.Empty;
+        public string TranslatedText { get; set; } = string.Empty;
+        public string SourceLanguage { get; set; } = string.Empty;
+        public string TargetLanguage { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+} 

@@ -1,163 +1,19 @@
 ﻿@page "/translation"
+@using TranslationWeb.Features.Translation
+@using TranslationWeb.Features.Translation.Components
+@using TranslationWeb.Models.Translation
+@using TranslationWeb.Infrastructure.Services.Api
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
-@inject TranslationApiService TranslationApiService
+@inject ITranslationApiService TranslationService
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Dịch thuật</h4>
-                    <div>
-                        <button @onclick="ToggleExpand" class="btn btn-info btn-sm">
-                            <i class="bi bi-arrows-expand"></i> @expandText
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="form-group mb-3">
-                                <label for="sourceLanguage">Ngôn ngữ nguồn:</label>
-                                <select @bind="sourceLanguage" class="form-control">
-                                    @foreach (var language in languages)
-                                    {
-                                        <option value="@language.Code">@language.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="sourceText">Văn bản cần dịch:</label>
-                                <textarea @bind="sourceText" class="form-control" rows="8"></textarea>
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-center justify-content-center">
-                            <button @onclick="Translate" class="btn btn-primary">
-                                <i class="bi bi-translate"></i> Dịch
-                            </button>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group mb-3">
-                                <label for="targetLanguage">Ngôn ngữ đích:</label>
-                                <select @bind="targetLanguage" class="form-control">
-                                    @foreach (var language in languages)
-                                    {
-                                        <option value="@language.Code">@language.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="translatedText">Kết quả dịch:</label>
-                                <textarea @bind="translatedText" class="form-control" rows="8" readonly></textarea>
-                            </div>
-                        </div>
-                    </div>
+<PageTitle>Dịch văn bản</PageTitle>
 
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0">Từ điển tùy chỉnh</h5>
-                                </div>
-                               
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-between">
-                                <button @onclick="Manage" class="btn btn-secondary">
-                                    <i class="bi bi-gear"></i> Quản lý
-                                </button>
-                                <button @onclick="Play" class="btn btn-info">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                                <button @onclick="AddName" class="btn btn-warning">
-                                    <i class="bi bi-plus-circle"></i> Thêm name
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+<TranslationStateProvider>
+    <TranslationForm />
+</TranslationStateProvider>
 
 @code {
-    private List<Models.Api.Language> languages = new();
-    private string sourceLanguage = "vi";
-    private string targetLanguage = "en";
-    private string sourceText = "";
-    private string translatedText = "";
-    private string customTerm = "";
-    private List<string> customTerms = new List<string>();
-    private bool isExpanded = false;
-    private string expandText = "Mở rộng";
-
-    protected override async Task OnInitializedAsync()
-    {
-        languages = (await TranslationApiService.GetLanguagesAsync()).ToList();
-    }
-
-    private async Task Translate()
-    {
-        if (string.IsNullOrWhiteSpace(sourceText))
-        {
-            await JS.InvokeVoidAsync("alert", "Vui lòng nhập văn bản cần dịch");
-            return;
-        }
-
-        translatedText = "Đang dịch...";
-
-        try
-        {
-            Models.Api.TranslationRequest request = new Models.Api.TranslationRequest {
-                SourceLanguage= sourceLanguage,
-                SourceText = sourceText,
-                TargetLanguage = targetLanguage
-            };
-            var response = await TranslationApiService.TranslateTextAsync(request);
-
-            if (response.Success)
-            {
-                translatedText = response.TranslatedText;
-            }
-            else
-            {
-                translatedText = $"Lỗi: {response.ErrorMessage}";
-            }
-        }catch(Exception ex)
-        {
-            translatedText = "Đã xảy ra lỗi khi gọi API dịch thuật";
-            Console.WriteLine(ex);
-        }
-    }
-
-
-    private void ToggleExpand()
-    {
-        isExpanded = !isExpanded;
-        expandText = isExpanded ? "Thu gọn" : "Mở rộng";
-    }
-
-    private void Manage()
-    {
-        JS.InvokeVoidAsync("alert", "Chức năng quản lý đang được phát triển");
-    }
-
-    private void Play()
-    {
-        JS.InvokeVoidAsync("alert", "Chức năng phát âm đang được phát triển");
-    }
-
-
-    private void AddName()
-    {
-        JS.InvokeVoidAsync("alert", "Chức năng thêm name đang được phát triển");
-    }
+ 
 }

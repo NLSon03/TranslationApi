@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+@using TranslationWeb.Features.Auth.Components
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><PageTitle/></title>
+    <link rel="stylesheet" href="/css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container">
+                <NavLink class="navbar-brand" href="/">
+                    <i class="bi bi-translate me-2"></i> Dịch thuật
+                </NavLink>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                                <i class="bi bi-house-door me-1"></i> Trang chủ
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/translation">
+                                <i class="bi bi-translate me-1"></i> Dịch thuật
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/feedback">
+                                <i class="bi bi-chat-left-text me-1"></i> Phản hồi
+                            </NavLink>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <UserProfileDisplay />
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @Body
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <div>
+                    &copy; 2025 - Dịch thuật
+                </div>
+                <div>
+                    <a href="/privacy" class="text-muted me-3">Chính sách bảo mật</a>
+                    <a href="/terms" class="text-muted me-3">Điều khoản sử dụng</a>
+                    <a href="/contact" class="text-muted">Liên hệ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js"></script>
+</body>
+</html>
+

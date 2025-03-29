@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace TranslationWeb.Models.Api
+namespace TranslationWeb.Models.Translation
 {
     public class TranslationResponse
     {
@@ -19,4 +19,4 @@ namespace TranslationWeb.Models.Api
         [JsonPropertyName("errorMessage")]
         public string? ErrorMessage { get; set; }
     }
-}
+} 
