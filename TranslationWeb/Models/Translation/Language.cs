@@ -10,4 +10,4 @@ namespace TranslationWeb.Models.Translation
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
     }
-} 
+}

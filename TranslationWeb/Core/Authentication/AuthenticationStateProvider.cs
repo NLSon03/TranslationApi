@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-using System.Text.Json;
-using TranslationWeb.Infrastructure.Services.LocalStorage;
+using TranslationWeb.Infrastructure.Services;
 using TranslationWeb.Models.Auth;
 
 namespace TranslationWeb.Core.Authentication
@@ -35,41 +34,88 @@ namespace TranslationWeb.Core.Authentication
 
         public async Task UpdateAuthenticationState(AuthResponse? userSession)
         {
-            ClaimsPrincipal claimsPrincipal;
+            try
+            {
+                ClaimsPrincipal claimsPrincipal;
 
-            if (userSession != null)
-            {
-                await _localStorage.SetItemAsync("user_session", userSession);
-                claimsPrincipal = CreateClaimsPrincipal(userSession);
+                if (userSession != null && !string.IsNullOrEmpty(userSession.Token))
+                {
+                    // Lưu session mới
+                    await _localStorage.SetItemAsync("user_session", userSession);
+                    
+                    // Tạo claims principal mới
+                    claimsPrincipal = CreateClaimsPrincipal(userSession);
+                    
+                    // Kiểm tra xem claims principal có được tạo đúng không
+                    if (claimsPrincipal.Identity?.IsAuthenticated != true)
+                    {
+                        // Nếu không authenticated, xóa session và sử dụng anonymous
+                        await _localStorage.RemoveItemAsync("user_session");
+                        claimsPrincipal = _anonymous;
+                    }
+                }
+                else
+                {
+                    // Xóa session cũ và sử dụng anonymous
+                    await _localStorage.RemoveItemAsync("user_session");
+                    claimsPrincipal = _anonymous;
+                }
+
+                // Thông báo thay đổi trạng thái xác thực
+                var authState = new AuthenticationState(claimsPrincipal);
+                NotifyAuthenticationStateChanged(Task.FromResult(authState));
             }
-            else
+            catch
             {
+                // Trong trường hợp lỗi, đảm bảo user được logout
                 await _localStorage.RemoveItemAsync("user_session");
-                claimsPrincipal = _anonymous;
+                NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
             }
-
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
         }
 
         private ClaimsPrincipal CreateClaimsPrincipal(AuthResponse userSession)
         {
-            // Kiểm tra token hết hạn
-            if (string.IsNullOrEmpty(userSession.Token) || userSession.ExpiresAt < DateTime.Now)
+            try
+            {
+                // Kiểm tra token hết hạn
+                if (string.IsNullOrEmpty(userSession.Token) || userSession.ExpiresAt < DateTime.Now)
+                {
+                    return _anonymous;
+                }
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userSession.UserId),
+                    new Claim(ClaimTypes.Name, userSession.UserName),
+                    new Claim(ClaimTypes.Email, userSession.Email),
+                    new Claim(ClaimTypes.Authentication, "true")
+                };
+
+                // Đảm bảo Roles không null và thêm role claims
+                if (userSession.Roles != null)
+                {
+                    foreach (var role in userSession.Roles)
+                    {
+                        if (!string.IsNullOrWhiteSpace(role))
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role));
+                        }
+                    }
+                }
+
+                // Tạo identity với authentication type và name/role selectors
+                var identity = new ClaimsIdentity(
+                    claims,
+                    "JWT Authentication",
+                    ClaimTypes.Name,
+                    ClaimTypes.Role);
+
+                return new ClaimsPrincipal(identity);
+            }
+            catch
             {
                 return _anonymous;
             }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userSession.UserId),
-                new Claim(ClaimTypes.Name, userSession.UserName),
-                new Claim(ClaimTypes.Email, userSession.Email),
-                // Thêm claim xác thực cần thiết
-                new Claim(ClaimTypes.Authentication, "true")
-            };
-
-            var identity = new ClaimsIdentity(claims, "JWT Authentication", ClaimTypes.Name, ClaimTypes.Role);
-            return new ClaimsPrincipal(identity);
         }
     }
 } 

@@ -1,20 +1,77 @@
-﻿<CascadingAuthenticationState>
+﻿﻿
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    <this.RedirectToLogin />
-                </NotAuthorized>
-            </AuthorizeRouteView>
+            <ErrorBoundary>
+                <ChildContent>
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                        <NotAuthorized>
+                            @if (context.User.Identity?.IsAuthenticated != true)
+                            {
+                                <RedirectToLogin />
+                            }
+                            else
+                            {
+                                <LayoutView Layout="@typeof(ErrorLayout)">
+                                    <div class="alert alert-danger">
+                                        <h3><i class="bi bi-exclamation-triangle me-2"></i>Không có quyền truy cập</h3>
+                                        <p>Bạn không có quyền truy cập vào trang này.</p>
+                                        <div class="mt-4">
+                                            <a href="/" class="btn btn-primary">
+                                                <i class="bi bi-house-door me-1"></i>Quay lại trang chủ
+                                            </a>
+                                        </div>
+                                    </div>
+                                </LayoutView>
+                            }
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                </ChildContent>
+                <ErrorContent Context="exception">
+                    <LayoutView Layout="@typeof(ErrorLayout)">
+                        <div class="alert alert-danger">
+                            <h3><i class="bi bi-exclamation-triangle me-2"></i>Đã xảy ra lỗi</h3>
+                            <p>Xin lỗi, đã có lỗi xảy ra khi xử lý yêu cầu của bạn.</p>
+                            @if (exception is HttpRequestException)
+                            {
+                                <p>Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng của bạn.</p>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary me-2" @onclick="ReloadPage">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Tải lại trang
+                                    </button>
+                                    <a href="/" class="btn btn-outline-primary">
+                                        <i class="bi bi-house-door me-1"></i>Về trang chủ
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mt-4">
+                                    <button class="btn btn-primary me-2" @onclick="ReloadPage">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Thử lại
+                                    </button>
+                                    <button class="btn btn-outline-primary" @onclick="() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true)">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Tải lại trang
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </LayoutView>
+                </ErrorContent>
+            </ErrorBoundary>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>
-            <PageTitle>Không tìm thấy</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
+            <PageTitle>Không tìm thấy trang</PageTitle>
+            <LayoutView Layout="@typeof(ErrorLayout)">
                 <div class="alert alert-danger">
-                    <h3>Xin lỗi, không tìm thấy trang bạn yêu cầu.</h3>
+                    <h3><i class="bi bi-exclamation-triangle me-2"></i>Không tìm thấy trang</h3>
                     <p>Trang bạn đang tìm kiếm có thể đã bị xóa, đổi tên hoặc tạm thời không khả dụng.</p>
-                    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary">
+                            <i class="bi bi-house-door me-1"></i>Quay lại trang chủ
+                        </a>
+                    </div>
                 </div>
             </LayoutView>
         </NotFound>
@@ -22,7 +79,17 @@
 </CascadingAuthenticationState>
 
 @code {
-    // Để chuyển hướng khi chưa được xác thực
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = default!;
+
+    private async Task ReloadPage()
+    {
+        await JSRuntime.InvokeVoidAsync("location.reload");
+    }
+
     public class RedirectToLogin : ComponentBase
     {
         [Inject]
@@ -30,7 +97,11 @@
 
         protected override void OnInitialized()
         {
-            Navigation.NavigateTo($"/auth/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+            var returnUrl = Uri.EscapeDataString(Navigation.Uri);
+            if (!returnUrl.Contains("/auth/login", StringComparison.OrdinalIgnoreCase))
+            {
+                Navigation.NavigateTo($"/auth/login?returnUrl={returnUrl}");
+            }
         }
     }
 }

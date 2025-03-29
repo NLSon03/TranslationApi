@@ -1,7 +1,7 @@
 using Microsoft.JSInterop;
 using System.Text.Json;
 
-namespace TranslationWeb.Infrastructure.Services.LocalStorage
+namespace TranslationWeb.Infrastructure.Services
 {
     public class LocalStorageService
     {
@@ -15,7 +15,7 @@ namespace TranslationWeb.Infrastructure.Services.LocalStorage
         public async Task<T?> GetItemAsync<T>(string key)
         {
             var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
-            
+
             if (string.IsNullOrEmpty(json))
                 return default;
 
@@ -32,4 +32,4 @@ namespace TranslationWeb.Infrastructure.Services.LocalStorage
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
         }
     }
-} 
+}

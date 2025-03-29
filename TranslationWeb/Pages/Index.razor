@@ -1,0 +1,104 @@
+@page "/"
+<PageTitle>Trang chủ - AI Translation</PageTitle>
+
+<div class="hero bg-white text-dark text-center p-5 rounded-4 mb-5 shadow">
+    <h1 class="display-4 fw-bold">AI Translation</h1>
+    <p class="lead fs-4">Nền tảng dịch thuật và chat với AI tiên tiến</p>
+    <hr class="my-4">
+    <p class="fs-5">Sử dụng công nghệ AI để dịch chính xác và tự nhiên giữa các ngôn ngữ, hoặc tương tác trực tiếp với các mô hình AI</p>
+    <div class="d-flex gap-3 justify-content-center mt-4">
+        <a class="btn btn-dark btn-lg rounded-pill" href="/translation" role="button">
+            <i class="bi bi-translate me-2"></i>Dịch thuật ngay
+        </a>
+        <AuthorizeView>
+            <Authorized>
+                <a class="btn btn-secondary btn-lg rounded-pill" href="/chat" role="button">
+                    <i class="bi bi-chat me-2"></i>Chat với AI
+                </a>
+            </Authorized>
+            <NotAuthorized>
+                <a class="btn btn-outline-dark btn-lg rounded-pill" href="auth/login" role="button">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>
+
+<h2 class="text-center mb-4 text-secondary">Dịch vụ của chúng tôi</h2>
+
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+    <div class="col">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
+                    <i class="bi bi-translate text-dark fs-1"></i>
+                </div>
+                <h5 class="card-title fw-bold">Dịch thuật đa ngôn ngữ</h5>
+                <p class="card-text">Hỗ trợ dịch thuật giữa nhiều ngôn ngữ khác nhau với độ chính xác cao và tự nhiên nhờ công nghệ AI.</p>
+                <a href="/translation" class="btn btn-outline-dark mt-2 rounded-pill">Dịch thuật ngay</a>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
+                    <i class="bi bi-chat-dots text-dark fs-1"></i>
+                </div>
+                <h5 class="card-title fw-bold">Chat với AI</h5>
+                <p class="card-text">Tương tác trực tiếp với các mô hình AI tiên tiến, hỏi đáp và nhận trợ giúp cho công việc của bạn.</p>
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/chat" class="btn btn-outline-dark mt-2 rounded-pill">Chat ngay</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="auth/login" class="btn btn-outline-secondary mt-2 rounded-pill">Đăng nhập để chat</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-0 shadow-sm rounded-4">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
+                    <i class="bi bi-bar-chart text-dark fs-1"></i>
+                </div>
+                <h5 class="card-title fw-bold">Phản hồi và cải tiến</h5>
+                <p class="card-text">Theo dõi lịch sử dịch thuật và chat, cung cấp phản hồi để cải thiện chất lượng dịch vụ.</p>
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/sessions" class="btn btn-outline-dark mt-2 rounded-pill">Xem phiên chat</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/feedback" class="btn btn-outline-dark mt-2 rounded-pill">Gửi phản hồi</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row align-items-center mb-5">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <h3 class="text-secondary">Về AI Translation</h3>
+        <p class="lead">Nền tảng dịch thuật và trí tuệ nhân tạo hàng đầu</p>
+        <p>Chúng tôi sử dụng công nghệ AI tiên tiến để cung cấp dịch vụ dịch thuật chính xác và tự nhiên. Ngoài ra, chúng tôi còn cung cấp khả năng tương tác trực tiếp với các mô hình AI thông qua giao diện chat thân thiện.</p>
+        <p>Với đội ngũ chuyên gia về ngôn ngữ và AI, chúng tôi cam kết mang đến trải nghiệm tốt nhất cho người dùng, đồng thời không ngừng cải thiện và phát triển dịch vụ.</p>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-3 text-secondary"><i class="bi bi-stars me-2"></i>Tính năng nổi bật</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Dịch thuật chính xác với nhiều ngôn ngữ</li>
+                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Chat với các mô hình AI tiên tiến</li>
+                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Lưu trữ lịch sử phiên chat</li>
+                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Hệ thống phản hồi và đánh giá</li>
+                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Giao diện người dùng thân thiện, dễ sử dụng</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div> 

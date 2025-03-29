@@ -1,0 +1,34 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="container">
+        <main role="main" class="pb-3 pt-3">
+            <div class="text-center mt-5">
+                <a href="/" class="text-decoration-none">
+                    <h1 class="display-4 mb-4">
+                        <i class="bi bi-translate me-2"></i>
+                        AI Translation
+                    </h1>
+                </a>
+                @Body
+            </div>
+        </main>
+    </div>
+
+    <footer class="border-top footer bg-light text-secondary mt-auto">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center py-3">
+                <div class="mb-2 mb-md-0">
+                    &copy; @DateTime.Now.Year - AI Translation
+                </div>
+                <div>
+                    <a href="/privacy" class="text-secondary me-3"><i class="bi bi-shield-check me-1"></i>Chính sách bảo mật</a>
+                    <a href="/terms" class="text-secondary me-3"><i class="bi bi-file-text me-1"></i>Điều khoản sử dụng</a>
+                    <a href="/contact" class="text-secondary"><i class="bi bi-envelope me-1"></i>Liên hệ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+@* Removed unnecessary JavaScript interop code *@

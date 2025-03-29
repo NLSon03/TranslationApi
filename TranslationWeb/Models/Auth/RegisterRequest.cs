@@ -25,4 +25,4 @@ namespace TranslationWeb.Models.Auth
         [JsonPropertyName("confirmPassword")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
-} 
+}

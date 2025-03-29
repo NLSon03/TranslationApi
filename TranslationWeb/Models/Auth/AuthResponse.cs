@@ -24,5 +24,11 @@ namespace TranslationWeb.Models.Auth
 
         [JsonPropertyName("message")]
         public string? Message { get; set; }
+        
+        [JsonPropertyName("roles")]
+        public List<string> Roles { get; set; } = new List<string>();
+        
+        [JsonIgnore]
+        public bool IsAdmin => Roles.Contains("Admin");
     }
-} 
+}

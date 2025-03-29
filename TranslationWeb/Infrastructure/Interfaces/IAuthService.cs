@@ -1,6 +1,6 @@
 using TranslationWeb.Models.Auth;
 
-namespace TranslationWeb.Infrastructure.Services.Api.Auth
+namespace TranslationWeb.Infrastructure.Interfaces
 {
     public interface IAuthService
     {

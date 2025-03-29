@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Headers;
-using System.Text.Json;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Core.Constants;
-using TranslationWeb.Infrastructure.Services.Http;
-using TranslationWeb.Infrastructure.Services.LocalStorage;
+using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Models.Auth;
 
-namespace TranslationWeb.Infrastructure.Services.Api.Auth
+namespace TranslationWeb.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
@@ -30,19 +27,19 @@ namespace TranslationWeb.Infrastructure.Services.Api.Auth
             try
             {
                 var response = await _httpService.PostAsync<AuthResponse>(ApiEndpoints.Auth.Login, loginRequest);
-                
+
                 if (response != null && !string.IsNullOrEmpty(response.Token))
                 {
                     if (response.ExpiresAt == default)
                     {
                         response.ExpiresAt = DateTime.Now.AddHours(24);
                     }
-                    
+
                     response.Success = true;
-                    
+
                     await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
                 }
-                
+
                 return response ?? new AuthResponse { Success = false, Message = "Đăng nhập thất bại" };
             }
             catch (Exception ex)
@@ -56,12 +53,20 @@ namespace TranslationWeb.Infrastructure.Services.Api.Auth
             try
             {
                 var response = await _httpService.PostAsync<AuthResponse>(ApiEndpoints.Auth.Register, registerRequest);
-                
-                if (response != null && response.Success)
+
+                if (response != null)
                 {
-                    await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
+                    if (!string.IsNullOrEmpty(response.Token))
+                    {
+                        response.Success = true;
+                    }
+
+                    if (response.Success)
+                    {
+                        await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
+                    }
                 }
-                
+
                 return response ?? new AuthResponse { Success = false, Message = "Đăng ký thất bại" };
             }
             catch (Exception ex)
@@ -77,12 +82,22 @@ namespace TranslationWeb.Infrastructure.Services.Api.Auth
                 var savedToken = await _localStorage.GetItemAsync<AuthResponse>("user_session");
                 if (savedToken == null)
                 {
+                    await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(null);
                     return new AuthResponse { Success = false, Message = "Người dùng chưa đăng nhập" };
                 }
 
                 // Add token to request
                 var response = await _httpService.GetAsync<AuthResponse>(ApiEndpoints.Auth.CurrentUser);
-                return response ?? new AuthResponse { Success = false, Message = "Không thể lấy thông tin người dùng" };
+                if (response != null && !string.IsNullOrEmpty(response.Token))
+                {
+                    // Cập nhật AuthenticationState với thông tin mới nhất
+                    await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
+                    return response;
+                }
+                
+                // Nếu không lấy được thông tin mới, xóa session cũ
+                await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(null);
+                return new AuthResponse { Success = false, Message = "Không thể lấy thông tin người dùng" };
             }
             catch (Exception ex)
             {
@@ -95,4 +110,4 @@ namespace TranslationWeb.Infrastructure.Services.Api.Auth
             await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(null);
         }
     }
-} 
+}

@@ -13,4 +13,4 @@ namespace TranslationWeb.Models.Translation
         [JsonPropertyName("targetLanguage")]
         public string TargetLanguage { get; set; } = string.Empty;
     }
-} 
+}

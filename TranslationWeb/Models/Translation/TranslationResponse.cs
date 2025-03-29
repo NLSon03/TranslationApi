@@ -19,4 +19,4 @@ namespace TranslationWeb.Models.Translation
         [JsonPropertyName("errorMessage")]
         public string? ErrorMessage { get; set; }
     }
-} 
+}

@@ -1,6 +1,6 @@
 using TranslationWeb.Models.Translation;
 
-namespace TranslationWeb.Infrastructure.Services.Api
+namespace TranslationWeb.Infrastructure.Interfaces
 {
     public interface ITranslationApiService
     {

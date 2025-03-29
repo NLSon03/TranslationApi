@@ -82,7 +82,8 @@ namespace TranslationApi.API.Controllers
                     UserName = user.UserName,
                     Email = user.Email,
                     Token = _tokenService.CreateToken(user, userRoles.ToList()),
-                    Expiration = _tokenService.GetExpirationDate()
+                    Expiration = _tokenService.GetExpirationDate(),
+                    Roles = userRoles.ToList()
                 };
             }
 
@@ -112,7 +113,8 @@ namespace TranslationApi.API.Controllers
                     UserName = user.UserName,
                     Email = user.Email,
                     Token = _tokenService.CreateToken(user, userRoles.ToList()),
-                    Expiration = _tokenService.GetExpirationDate()
+                    Expiration = _tokenService.GetExpirationDate(),
+                    Roles = userRoles.ToList()
                 };
             }
 
@@ -138,7 +140,8 @@ namespace TranslationApi.API.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 Token = _tokenService.CreateToken(user, userRoles.ToList()),
-                Expiration = _tokenService.GetExpirationDate()
+                Expiration = _tokenService.GetExpirationDate(),
+                Roles = userRoles.ToList()
             };
         }
     }

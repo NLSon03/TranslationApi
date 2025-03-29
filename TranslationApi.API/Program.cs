@@ -79,6 +79,9 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Add health checks
+builder.Services.AddHealthChecks();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -167,6 +170,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map health check endpoint
+app.MapHealthChecks("/api/health").RequireCors(MyAllowSpecificOrigins);
 
 // Log startup message
 var urls = app.Urls.Select(url => $"- {url}").ToList();

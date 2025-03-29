@@ -14,4 +14,4 @@ namespace TranslationWeb.Models.Auth
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;
     }
-} 
+}

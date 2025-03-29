@@ -1,9 +1,8 @@
-using Microsoft.Extensions.Logging;
 using TranslationWeb.Core.Constants;
-using TranslationWeb.Infrastructure.Services.Http;
+using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Models.Translation;
 
-namespace TranslationWeb.Infrastructure.Services.Api
+namespace TranslationWeb.Infrastructure.Services
 {
     public class TranslationApiService : ITranslationApiService
     {
@@ -54,4 +53,4 @@ namespace TranslationWeb.Infrastructure.Services.Api
             }
         }
     }
-} 
+}
