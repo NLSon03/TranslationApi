@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿﻿﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -263,18 +263,82 @@ namespace TranslationApi.Application.Services
             try
             {
                 using var doc = JsonDocument.Parse(responseBody);
-                return doc.RootElement
-                    .GetProperty("candidates")[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("text")
-                    .GetString() ?? string.Empty;
+                
+                // Log response for debugging
+                _logger.LogDebug($"Full API Response: {responseBody}");
+                
+                // Validate response structure
+                if (!doc.RootElement.TryGetProperty("candidates", out var candidates))
+                {
+                    throw new Exception("Response missing 'candidates' property");
+                }
+                
+                if (candidates.GetArrayLength() == 0)
+                {
+                    throw new Exception("No translation candidates found");
+                }
+
+                var candidate = candidates[0];
+                if (!candidate.TryGetProperty("content", out var content))
+                {
+                    throw new Exception("Response missing 'content' property");
+                }
+
+                if (!content.TryGetProperty("parts", out var parts))
+                {
+                    throw new Exception("Response missing 'parts' property");
+                }
+
+                if (parts.GetArrayLength() == 0)
+                {
+                    throw new Exception("No content parts found");
+                }
+
+                var translatedText = parts[0].GetProperty("text").GetString();
+                if (string.IsNullOrEmpty(translatedText))
+                {
+                    throw new Exception("Translated text is empty");
+                }
+
+                return translatedText;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error extracting translated text");
-                return string.Empty;
+                _logger.LogError(ex, "Error extracting translated text from response: {ResponseBody}", responseBody);
+                throw new Exception($"Failed to extract translation: {ex.Message}");
             }
+        }
+
+        private async Task<string> TranslateWithRetryAsync(string apiUrl, StringContent content)
+        {
+            int maxRetries = 3;
+            int currentRetry = 0;
+            int baseDelay = 1000; // 1 second
+
+            while (currentRetry < maxRetries)
+            {
+                try
+                {
+                    var response = await _httpClient.PostAsync(apiUrl, content);
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadAsStringAsync();
+                }
+                catch (Exception ex)
+                {
+                    currentRetry++;
+                    if (currentRetry >= maxRetries)
+                    {
+                        _logger.LogError(ex, "Failed to translate after {Retries} retries", maxRetries);
+                        throw;
+                    }
+
+                    var delay = baseDelay * Math.Pow(2, currentRetry - 1); // Exponential backoff
+                    _logger.LogWarning(ex, "Translation attempt {Attempt} failed, retrying in {Delay}ms", currentRetry, delay);
+                    await Task.Delay((int)delay);
+                }
+            }
+
+            throw new Exception("Unexpected error in retry logic");
         }
 
     }

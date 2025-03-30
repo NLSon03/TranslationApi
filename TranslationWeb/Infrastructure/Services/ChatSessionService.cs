@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Models.ChatSession;
 
@@ -7,31 +8,39 @@ namespace TranslationWeb.Infrastructure.Services
     public class ChatSessionService : IChatSessionService
     {
         private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _jsonOptions;
         private readonly string _baseUrl = "api/ChatSession";
 
-        public ChatSessionService(HttpClient httpClient)
+        public ChatSessionService(HttpClient httpClient, JsonSerializerOptions jsonOptions)
         {
             _httpClient = httpClient;
+            _jsonOptions = jsonOptions;
         }
 
         public async Task<ChatSessionResponse> CreateSessionAsync(CreateSessionRequest request)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync(_baseUrl, request);
+                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}?modelId={request.AIModelId}", new {});
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ChatSessionResponse>()
-                        ?? new ChatSessionResponse();
+                    var result = await response.Content.ReadFromJsonAsync<ChatSessionResponse>();
+                    if (result != null)
+                    {
+                        return result;
+                    }
                 }
 
-                // Handle error response
+                Console.WriteLine($"Failed to create session. Status code: {response.StatusCode}");
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error content: {error}");
+                
                 return new ChatSessionResponse();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception
+                Console.WriteLine($"Error creating session: {ex.Message}");
                 return new ChatSessionResponse();
             }
         }
@@ -40,12 +49,12 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<ChatSessionResponse>($"{_baseUrl}/{sessionId}")
+                return await _httpClient.GetFromJsonAsync<ChatSessionResponse>($"{_baseUrl}/{sessionId}/messages")
                     ?? new ChatSessionResponse();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception
+                Console.WriteLine($"Error getting session with messages: {ex.Message}");
                 return new ChatSessionResponse();
             }
         }
@@ -54,12 +63,57 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<IEnumerable<ChatSessionResponse>>($"{_baseUrl}/user/{userId}")
-                    ?? new List<ChatSessionResponse>();
+                Console.WriteLine("Calling API to get user sessions...");
+                var response = await _httpClient.GetAsync($"{_baseUrl}/my");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Raw API Response: {jsonString}");
+
+                    try
+                    {
+                        var sessions = JsonSerializer.Deserialize<IEnumerable<ChatSessionResponse>>(
+                            jsonString, 
+                            _jsonOptions
+                        );
+
+                        if (sessions != null)
+                        {
+                            var sessionsList = sessions.ToList();
+                            Console.WriteLine($"Successfully deserialized {sessionsList.Count} sessions");
+                            
+                            foreach (var session in sessionsList)
+                            {
+                                Console.WriteLine(session.ToString());
+                            }
+                            
+                            return sessionsList;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Deserialized sessions is null");
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        Console.WriteLine($"JSON Deserialization error: {ex.Message}");
+                        Console.WriteLine($"JSON content that failed to deserialize: {jsonString}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"API returned error status code: {response.StatusCode}");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error response content: {errorContent}");
+                }
+                
+                return new List<ChatSessionResponse>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log exception
+                Console.WriteLine($"Error getting user sessions: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return new List<ChatSessionResponse>();
             }
         }

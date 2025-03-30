@@ -28,5 +28,5 @@
     [Parameter]
     public bool IsLoading { get; set; }
 
-    private bool IsUserMessage => Message.SenderType.ToLower() == "user";
+    private bool IsUserMessage => Message.SenderType == SenderType.User;
 }

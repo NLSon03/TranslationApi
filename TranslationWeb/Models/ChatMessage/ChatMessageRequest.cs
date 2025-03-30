@@ -1,15 +1,18 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TranslationWeb.Models.ChatMessage
 {
     public class SendMessageRequest
     {
+        [Required]
         public Guid SessionId { get; set; }
 
         [Required(ErrorMessage = "Nội dung tin nhắn là bắt buộc")]
         public string Content { get; set; } = string.Empty;
 
-        public string MessageType { get; set; } = "Text";
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public MessageType MessageType { get; set; } = MessageType.Text;
 
         public string FromLanguage { get; set; } = "auto";
 

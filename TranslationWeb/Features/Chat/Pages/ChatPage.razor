@@ -29,7 +29,40 @@
                     }
                 </div>
                 <div class="overflow-auto flex-grow-1">
-                    @if (_sessions != null)
+                    @if (_isLoadingSessions)
+                    {
+                        <div class="text-center p-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Đang tải...</span>
+                            </div>
+                            <div class="mt-2">Đang tải danh sách phiên chat...</div>
+                        </div>
+                    }
+                    else if (_sessions == null)
+                    {
+                        <div class="text-center p-3">
+                            <div class="text-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Không thể tải danh sách phiên chat
+                            </div>
+                            <button class="btn btn-link" @onclick="LoadSessions">
+                                Thử lại
+                            </button>
+                        </div>
+                    }
+                    else if (!_sessions.Any())
+                    {
+                        <div class="text-center p-3">
+                            <div class="text-muted">
+                                <i class="bi bi-chat-dots me-2"></i>
+                                Chưa có phiên chat nào
+                            </div>
+                            <button class="btn btn-link" @onclick="() => _showCreateDialog = true">
+                                Tạo phiên chat mới
+                            </button>
+                        </div>
+                    }
+                    else
                     {
                         @foreach (var session in _sessions)
                         {
@@ -42,9 +75,13 @@
                                             @session.StartedAt.ToString("dd/MM/yyyy HH:mm")
                                         </div>
                                     </div>
-                                    @if (session.Status == "Active")
+                                    @if (session.IsActive)
                                     {
                                         <span class="badge bg-success rounded-pill">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary rounded-pill">Đã kết thúc</span>
                                     }
                                 </div>
                             </div>
@@ -67,12 +104,12 @@
                                     <i class="bi bi-chat-dots me-2"></i>
                                     Chat với @(_currentSession?.AIModelName ?? "AI")
                                 </h5>
-                                @if (_currentSession?.Status == "Active")
+                                @if (_currentSession?.Status.ToString() == "Active")
                                 {
                                     <small class="text-muted">Đang hoạt động</small>
                                 }
                             </div>
-                            @if (_currentSession?.Status != "Ended")
+                            @if (_currentSession?.Status.ToString() != "Ended")
                             {
                                 <button class="btn btn-outline-danger" @onclick="EndCurrentSession">
                                     <i class="bi bi-x-circle me-2"></i>Kết thúc
@@ -89,21 +126,24 @@
                         }
                         @if (_isLoading)
                         {
-                            var message = new ChatMessageResponse { SenderType = "AI", Content = "" };
+                            var message = new ChatMessageResponse { SenderType = SenderType.AI, Content = "" };
                             <ChatMessage Message="@message" IsLoading="true" />
                         }
                     </div>
 
                     <!-- Khu vực nhập tin nhắn -->
-                    @if (_currentSession?.Status != "Ended")
+                    @if (_currentSession != null)
                     {
-                        <ChatInput OnSend="HandleMessageSend" />
-                    }
-                    else
-                    {
-                        <div class="p-3 bg-light text-center">
-                            <span class="text-muted">Phiên chat đã kết thúc</span>
-                        </div>
+                        @if (_currentSession.IsActive)
+                        {
+                            <ChatInput OnSend="HandleMessageSend" />
+                        }
+                        else
+                        {
+                            <div class="p-3 bg-light text-center">
+                                <span class="text-muted">Phiên chat đã kết thúc</span>
+                            </div>
+                        }
                     }
                 }
                 else
@@ -129,49 +169,58 @@
 @* Dialog chọn AI Model *@
 @if (_showCreateDialog)
 {
-    <div class="modal fade show" style="display: block;" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chọn AI Model</h5>
-                    <button type="button" class="btn-close" @onclick="() => _showCreateDialog = false"></button>
-                </div>
-                <div class="modal-body">
-                    @if (_aiModels.Any())
-                    {
-                        <div class="list-group">
-                            @foreach (var model in _aiModels)
-                            {
-                                <button type="button" 
-                                        class="list-group-item list-group-item-action @(_selectedModelId == model.Id ? "active" : "")"
-                                        @onclick="() => _selectedModelId = model.Id">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1">@model.Name</h6>
-                                            <small>@model.Version</small>
+    <div class="modal-overlay" @onclick="CloseCreateDialog">
+        <div class="modal fade show" style="display: block;" tabindex="-1" @onclick:stopPropagation="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chọn AI Model</h5>
+                        <button type="button" class="btn-close" @onclick="CloseCreateDialog"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (_aiModels.Any())
+                        {
+                            <div class="list-group">
+                                @foreach (var model in _aiModels)
+                                {
+                                    <button type="button" 
+                                            class="list-group-item list-group-item-action @(_selectedModelId == model.Id ? "active" : "")"
+                                            @onclick="() => _selectedModelId = model.Id">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">@model.Name</h6>
+                                                <small>@model.Version</small>
+                                            </div>
                                         </div>
-                                    </div>
-                                </button>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                Không có AI Model nào khả dụng. Vui lòng thử lại sau.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseCreateDialog" disabled="@_isCreatingSession">Đóng</button>
+                        <button type="button" class="btn btn-primary" @onclick="CreateNewSession" 
+                                disabled="@(!_aiModels.Any() || _isCreatingSession)">
+                            @if (_isCreatingSession)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span>Đang tạo...</span>
                             }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-warning">
-                            Không có AI Model nào khả dụng. Vui lòng thử lại sau.
-                        </div>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => _showCreateDialog = false">Đóng</button>
-                    <button type="button" class="btn btn-primary" @onclick="CreateNewSession" 
-                            disabled="@(!_aiModels.Any())">
-                        Tạo phiên chat
-                    </button>
+                            else
+                            {
+                                <span>Tạo phiên chat</span>
+                            }
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="modal-backdrop fade show"></div>
     </div>
 }
 
@@ -188,13 +237,24 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthService.GetCurrentUserAsync();
-        _userId = authState.UserId;
-        
-        if (!string.IsNullOrEmpty(_userId))
+        try
         {
+            var authState = await AuthService.GetCurrentUserAsync();
+            _userId = authState.UserId;
+            
+            if (string.IsNullOrEmpty(_userId))
+            {
+                _errorMessage = "Không thể xác thực người dùng. Vui lòng đăng nhập lại.";
+                return;
+            }
+
             await LoadSessions();
             await LoadAIModels();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnInitializedAsync: {ex.Message}");
+            _errorMessage = "Đã xảy ra lỗi khi khởi tạo trang. Vui lòng thử lại.";
         }
     }
 
@@ -215,13 +275,78 @@
         }
     }
 
+    private bool _isLoadingSessions;
+
     private async Task LoadSessions()
     {
-        if (!string.IsNullOrEmpty(_userId))
+        if (string.IsNullOrEmpty(_userId))
         {
-            _sessions = (await ChatSessionService.GetUserSessionsAsync(_userId)).ToList();
+            Console.WriteLine("UserId is null or empty");
+            _errorMessage = "Không thể xác thực người dùng. Vui lòng đăng nhập lại.";
+            return;
+        }
+
+        try 
+        {
+            _isLoadingSessions = true;
+            _sessions = null; // Reset sessions to show loading state
+            StateHasChanged();
+                
+            Console.WriteLine($"Start loading sessions for user: {_userId}");
+            var sessions = await ChatSessionService.GetUserSessionsAsync(_userId);
+
+            // Kiểm tra và log sessions
+            if (sessions == null)
+            {
+                Console.WriteLine("Sessions response is null");
+                _errorMessage = "Không thể tải danh sách phiên chat. Vui lòng thử lại.";
+                return;
+            }
+
+            var sessionsList = sessions.ToList();
+            Console.WriteLine($"Received {sessionsList.Count} sessions from API");
+
+            // Log chi tiết từng session
+            foreach (var session in sessionsList)
+            {
+                Console.WriteLine($"Processing session:");
+                Console.WriteLine($"- ID: {session.Id}");
+                Console.WriteLine($"- AIModelName: {session.AIModelName}");
+                Console.WriteLine($"- Status: {session.Status}");
+                Console.WriteLine($"- IsActive: {session.IsActive}");
+                Console.WriteLine($"- StartedAt: {session.StartedAt}");
+                Console.WriteLine("---");
+            }
+
+            // Cập nhật UI
+            _sessions = sessionsList;
+            _errorMessage = string.Empty;
+            Console.WriteLine("Successfully updated sessions list");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading sessions: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            _errorMessage = "Không thể tải danh sách phiên chat. Vui lòng thử lại.";
+            _sessions = null;
+        }
+        finally
+        {
+            _isLoadingSessions = false;
+            StateHasChanged();
+            Console.WriteLine("LoadSessions completed");
         }
     }
+
+    private void CloseCreateDialog()
+    {
+        _showCreateDialog = false;
+        _selectedModelId = Guid.Empty;
+        _errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private bool _isCreatingSession;
 
     private async Task CreateNewSession()
     {
@@ -233,6 +358,9 @@
                 return;
             }
 
+            _isCreatingSession = true;
+            StateHasChanged();
+
             var request = new CreateSessionRequest
             {
                 AIModelId = _selectedModelId
@@ -241,19 +369,35 @@
             var newSession = await ChatSessionService.CreateSessionAsync(request);
             if (newSession.Id != Guid.Empty)
             {
-                _showCreateDialog = false;
                 _errorMessage = string.Empty;
+                CloseCreateDialog();
                 await LoadSessions();
-                await SelectSession(newSession.Id);
+                if (_sessions?.Any() == true)
+                {
+                    await SelectSession(newSession.Id);
+                    Console.WriteLine($"Created and selected new session: {newSession.Id}");
+                }
+                else
+                {
+                    Console.WriteLine("Sessions list is empty after creation");
+                    _errorMessage = "Phiên chat đã được tạo nhưng không thể tải danh sách. Vui lòng làm mới trang.";
+                }
             }
             else
             {
+                Console.WriteLine("Failed to create new session - returned empty ID");
                 _errorMessage = "Không thể tạo phiên chat mới. Vui lòng thử lại sau.";
             }
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"Error creating new session: {ex.Message}");
             _errorMessage = "Đã xảy ra lỗi khi tạo phiên chat. Vui lòng thử lại sau.";
+        }
+        finally
+        {
+            _isCreatingSession = false;
+            StateHasChanged();
         }
     }
 

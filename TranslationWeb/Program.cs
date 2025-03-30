@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
+using System.Text.Json.Serialization;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Core.Services;
@@ -21,37 +22,46 @@ if (builder.HostEnvironment.IsDevelopment())
     builder.Logging.SetMinimumLevel(LogLevel.Warning);
 }
 
-// Register HTTP client with retry policy
+// Configure JSON options
 builder.Services.AddScoped(sp =>
 {
-    var httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5292") };
-    httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-    httpClient.Timeout = TimeSpan.FromSeconds(30);
-    return httpClient;
+    var options = new System.Text.Json.JsonSerializerOptions
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        Converters = 
+        {
+            new JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase)
+        }
+    };
+    return options;
+});
+
+// Configure HTTP client with retry policy and JSON options
+builder.Services.AddHttpClient("API", (sp, client) =>
+{
+    client.BaseAddress = new Uri("http://localhost:5292");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.AddTransientHttpErrorPolicy(policy => policy
+    .WaitAndRetryAsync(3, retryAttempt =>
+        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))) // Exponential backoff
+.AddTransientHttpErrorPolicy(policy => policy
+    .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30))); // Circuit breaker
+
+// Register HttpClient factory with JSON options
+builder.Services.AddScoped(sp =>
+{
+    var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var client = clientFactory.CreateClient("API");
+    return client;
 });
 
 // Add error handling services
 builder.Services.AddScoped<GlobalExceptionHandler>();
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
-
-// Configure HTTP client with retry policy
-builder.Services.AddHttpClient("API", client =>
-{
-    client.BaseAddress = new Uri("http://localhost:5292");
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.Timeout = TimeSpan.FromSeconds(30);
-}).AddTransientHttpErrorPolicy(policy => policy
-    .WaitAndRetryAsync(3, retryAttempt =>
-        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))) // Exponential backoff
-    .AddTransientHttpErrorPolicy(policy => policy
-        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30))); // Circuit breaker
-
-// Register HttpClient factory
-builder.Services.AddScoped(sp =>
-{
-    var clientFactory = sp.GetRequiredService<IHttpClientFactory>();
-    return clientFactory.CreateClient("API");
-});
 
 // Register core services
 builder.Services.AddScoped<LocalStorageService>();
