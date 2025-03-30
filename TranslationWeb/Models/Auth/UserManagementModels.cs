@@ -1,3 +1,4 @@
+
 using System.ComponentModel.DataAnnotations;
 
 namespace TranslationWeb.Models.Auth
@@ -13,6 +14,7 @@ namespace TranslationWeb.Models.Auth
         public List<string> Roles { get; set; } = new List<string>();
     }
 
+    // Đổi tên và cấu trúc để khớp với backend
     public class UpdateUserRequest
     {
         [Required(ErrorMessage = "Tên người dùng là bắt buộc")]
