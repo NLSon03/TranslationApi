@@ -1,0 +1,288 @@
+@page "/admin/ai-models"
+@using TranslationWeb.Infrastructure.Interfaces
+@using TranslationWeb.Models.AIModel
+@attribute [Authorize(Roles = "Admin")]
+@inject IAIModelService AIModelService
+@inject IJSRuntime JSRuntime
+
+<h3>Quản lý AI Models</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="() => ShowCreateDialog()">
+        <i class="fas fa-plus"></i> Thêm Model Mới
+    </button>
+</div>
+
+@if (_loading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (_hasError)
+{
+    <div class="alert alert-danger">
+        <h5>Đã xảy ra lỗi:</h5>
+        <p>@_errorMessage</p>
+        <button class="btn btn-primary mt-2" @onclick="LoadModels">
+            <i class="fas fa-sync"></i> Thử lại
+        </button>
+    </div>
+}
+else if (_models == null || !_models.Any())
+{
+    <div class="alert alert-info">
+        <p>Chưa có AI Model nào được tạo.</p>
+        <button class="btn btn-primary mt-2" @onclick="LoadModels">
+            <i class="fas fa-sync"></i> Tải lại
+        </button>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tên</th>
+                    <th>Phiên bản</th>
+                    <th>Trạng thái</th>
+                    <th>Số phiên</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var model in _models)
+                {
+                    <tr>
+                        <td>@model.Name</td>
+                        <td>@model.Version</td>
+                        <td>
+                            <span class="badge @(model.IsActive ? "bg-success" : "bg-secondary")">
+                                @(model.IsActive ? "Đang hoạt động" : "Không hoạt động")
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(model)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                @if (model.IsActive)
+                                {
+                                    <button class="btn btn-sm btn-warning" @onclick="() => DeactivateModel(model.Id)">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="() => ActivateModel(model.Id)">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteModel(model.Id)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (_showDialog)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(_editingModel == null ? "Thêm Model Mới" : "Cập Nhật Model")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@_modelForm" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên Model</label>
+                            <InputText @bind-Value="_modelForm.Name" class="form-control" />
+                            <ValidationMessage For="@(() => _modelForm.Name)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phiên bản</label>
+                            <InputText @bind-Value="_modelForm.Version" class="form-control" />
+                            <ValidationMessage For="@(() => _modelForm.Version)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Config (JSON)</label>
+                            <InputTextArea @bind-Value="_modelForm.Config" class="form-control" rows="4" />
+                            <ValidationMessage For="@(() => _modelForm.Config)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-check">
+                                <InputCheckbox @bind-Value="_modelForm.IsActive" class="form-check-input" />
+                                <span class="form-check-label">Kích hoạt</span>
+                            </label>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDialog">Đóng</button>
+                            <button type="submit" class="btn btn-primary">
+                                @(_editingModel == null ? "Thêm" : "Cập nhật")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private bool _loading = true;
+    private bool _showDialog;
+    private List<AIModelResponse> _models = new();
+    private AIModelResponse? _editingModel;
+    private CreateAIModelRequest _modelForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModels();
+    }
+
+    private bool _hasError;
+    private string _errorMessage = string.Empty;
+
+    private async Task LoadModels()
+    {
+        try 
+        {
+            _loading = true;
+            _hasError = false;
+            _errorMessage = string.Empty;
+            
+            var response = await AIModelService.GetAllModelsAsync();
+            
+            if (response == null)
+            {
+                _hasError = true;
+                _errorMessage = "Không thể tải danh sách models";
+                return;
+            }
+
+            if (!response.Success)
+            {
+                _hasError = true;
+                _errorMessage = response.Message ?? "Lỗi khi tải danh sách models";
+                return;
+            }
+
+            _models = response.Models.ToList();
+            
+            // Log để debug
+            Console.WriteLine($"Loaded {_models.Count} models");
+            foreach (var model in _models)
+            {
+                Console.WriteLine($"Model: {model.Name}, Version: {model.Version}, Active: {model.IsActive}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _hasError = true;
+            _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+            Console.WriteLine($"Error in LoadModels: {ex}");
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadModels();
+        }
+    }
+
+    private void ShowCreateDialog()
+    {
+        _editingModel = null;
+        _modelForm = new CreateAIModelRequest();
+        _showDialog = true;
+    }
+
+    private void ShowEditDialog(AIModelResponse model)
+    {
+        _editingModel = model;
+        _modelForm = new CreateAIModelRequest
+        {
+            Name = model.Name,
+            Version = model.Version,
+            Config = model.Config,
+            IsActive = model.IsActive
+        };
+        _showDialog = true;
+    }
+
+    private void CloseDialog()
+    {
+        _showDialog = false;
+        _editingModel = null;
+        _modelForm = new CreateAIModelRequest();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (_editingModel == null)
+        {
+            await AIModelService.CreateModelAsync(_modelForm);
+        }
+        else
+        {
+            var updateRequest = new UpdateAIModelRequest
+            {
+                Id = _editingModel.Id,
+                Name = _modelForm.Name,
+                Version = _modelForm.Version,
+                Config = _modelForm.Config,
+                IsActive = _modelForm.IsActive
+            };
+            await AIModelService.UpdateModelAsync(updateRequest);
+        }
+
+        await LoadModels();
+        CloseDialog();
+    }
+
+    private async Task ActivateModel(Guid id)
+    {
+        await AIModelService.ActivateModelAsync(id);
+        await LoadModels();
+    }
+
+    private async Task DeactivateModel(Guid id)
+    {
+        await AIModelService.DeactivateModelAsync(id);
+        await LoadModels();
+    }
+    private async Task DeleteModel(Guid id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Bạn có chắc chắn muốn xóa model này?" }))
+        {
+            await AIModelService.DeleteModelAsync(id);
+            await LoadModels();
+        }
+    }
+}

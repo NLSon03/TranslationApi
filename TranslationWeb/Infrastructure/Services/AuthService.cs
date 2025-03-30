@@ -26,7 +26,10 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<AuthResponse>(ApiEndpoints.Auth.Login, loginRequest);
+                var response = await _httpService.PostAsync<LoginRequest,AuthResponse>(
+                    ApiEndpoints.Auth.Login,
+                    loginRequest
+                    );
 
                 if (response != null && !string.IsNullOrEmpty(response.Token))
                 {
@@ -52,7 +55,10 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<AuthResponse>(ApiEndpoints.Auth.Register, registerRequest);
+                var response = await _httpService.PostAsync<RegisterRequest,AuthResponse>(
+                    ApiEndpoints.Auth.Register,
+                    registerRequest
+                    );
 
                 if (response != null)
                 {

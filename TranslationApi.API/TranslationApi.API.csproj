@@ -24,8 +24,4 @@
     <ProjectReference Include="..\TranslationApi.Infrastructure\TranslationApi.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\" />
-  </ItemGroup>
-
 </Project>

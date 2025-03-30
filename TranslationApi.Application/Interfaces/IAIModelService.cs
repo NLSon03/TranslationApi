@@ -1,21 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using TranslationApi.Application.DTOs;
 using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Application.Interfaces
 {
     public interface IAIModelService
     {
-        Task<AIModel> CreateModelAsync(AIModel model);
-        Task<AIModel?> GetModelByIdAsync(Guid id);
-        Task<IEnumerable<AIModel>> GetAllModelsAsync();
-        Task<IEnumerable<AIModel>> GetActiveModelsAsync();
-        Task<AIModel?> GetModelByNameAndVersionAsync(string name, string version);
-        Task UpdateModelAsync(AIModel model);
+        // DTO based methods
+        Task<IEnumerable<AIModelListDto>> GetAllModelDtosAsync();
+        Task<IEnumerable<AIModelListDto>> GetActiveModelDtosAsync();
+        Task<AIModelDetailDto?> GetModelDtoByIdAsync(Guid id);
+        Task<AIModelDetailDto> CreateModelAsync(AIModelCreateDto createDto);
+        Task<bool> UpdateModelAsync(Guid id, AIModelUpdateDto updateDto);
+
+        // Existing methods for internal use
+        Task<bool> ModelExistsAsync(string name, string version);
         Task ActivateModelAsync(Guid id);
         Task DeactivateModelAsync(Guid id);
         Task<bool> DeleteModelAsync(Guid id);
-        Task<bool> ModelExistsAsync(string name, string version);
+
+        // Keep these methods internal for service layer use
+        Task<AIModel?> GetModelByIdAsync(Guid id);
+        Task<AIModel?> GetModelByNameAndVersionAsync(string name, string version);
     }
-} 
+}

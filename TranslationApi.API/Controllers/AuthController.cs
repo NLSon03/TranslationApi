@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using TranslationApi.API.DTOs;
+using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 
@@ -59,7 +58,7 @@ namespace TranslationApi.API.Controllers
                     {
                         await _roleManager.CreateAsync(new IdentityRole("Admin"));
                     }
-                    
+
                     await _userManager.AddToRoleAsync(user, "Admin");
                 }
                 else
@@ -69,7 +68,7 @@ namespace TranslationApi.API.Controllers
                     {
                         await _roleManager.CreateAsync(new IdentityRole("User"));
                     }
-                    
+
                     await _userManager.AddToRoleAsync(user, "User");
                 }
 
@@ -79,8 +78,8 @@ namespace TranslationApi.API.Controllers
                 return new AuthResponseDto
                 {
                     UserId = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
+                    UserName = user.UserName ?? "",
+                    Email = user.Email ?? "",
                     Token = _tokenService.CreateToken(user, userRoles.ToList()),
                     Expiration = _tokenService.GetExpirationDate(),
                     Roles = userRoles.ToList()
@@ -94,7 +93,7 @@ namespace TranslationApi.API.Controllers
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
-            
+
             if (user == null)
             {
                 return Unauthorized(new { error = "Email hoặc mật khẩu không đúng" });
@@ -109,9 +108,9 @@ namespace TranslationApi.API.Controllers
 
                 return new AuthResponseDto
                 {
-                    UserId = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
+                    UserId = user.Id ?? "",
+                    UserName = user.UserName ?? "",
+                    Email = user.Email ?? "",
                     Token = _tokenService.CreateToken(user, userRoles.ToList()),
                     Expiration = _tokenService.GetExpirationDate(),
                     Roles = userRoles.ToList()
@@ -126,7 +125,7 @@ namespace TranslationApi.API.Controllers
         public async Task<ActionResult<AuthResponseDto>> GetCurrentUser()
         {
             var user = await _userManager.FindByEmailAsync(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value);
-            
+
             if (user == null)
             {
                 return NotFound();
@@ -136,13 +135,13 @@ namespace TranslationApi.API.Controllers
 
             return new AuthResponseDto
             {
-                UserId = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
+                UserId = user.Id ?? "",
+                UserName = user.UserName ?? "",
+                Email = user.Email ?? "",
                 Token = _tokenService.CreateToken(user, userRoles.ToList()),
                 Expiration = _tokenService.GetExpirationDate(),
                 Roles = userRoles.ToList()
             };
         }
     }
-} 
+}

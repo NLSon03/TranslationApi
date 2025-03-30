@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TranslationApi.Domain.Entities;
 
@@ -16,6 +16,9 @@ namespace TranslationApi.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Configure table names
+            builder.Entity<AIModel>().ToTable("AIModel");
 
             // Configure relationships and constraints here
             builder.Entity<ChatSession>()

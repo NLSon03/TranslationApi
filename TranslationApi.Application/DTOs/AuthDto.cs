@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TranslationApi.API.DTOs
+namespace TranslationApi.Application.DTOs
 {
     public class RegisterDto
     {

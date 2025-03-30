@@ -31,6 +31,7 @@ namespace TranslationWeb.Infrastructure.Services
             _navigationManager = navigationManager;
         }
 
+
         private readonly int _maxRetries = 3;
         private readonly int _timeoutSeconds = 30;
         private readonly SemaphoreSlim _connectionCheckLock = new SemaphoreSlim(1, 1);
@@ -129,13 +130,8 @@ namespace TranslationWeb.Infrastructure.Services
             throw new HttpRequestException($"Failed to execute GET request to {url} after {_maxRetries} attempts");
         }
 
-        //private async Task HandleUnauthorized()
-        //{
-        //    await _localStorage.RemoveItemAsync("user_session");
-        //    _httpClient.DefaultRequestHeaders.Authorization = null;
-        //}
 
-        public async Task<T?> PostAsync<T>(string url, object data)
+        public async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest data)
         {
             for (int i = 0; i < _maxRetries; i++)
             {
@@ -145,7 +141,7 @@ namespace TranslationWeb.Infrastructure.Services
                     await AddJwtHeader();
 
                     var content = new StringContent(
-                        JsonSerializer.Serialize(data),
+                        JsonSerializer.Serialize(data, _jsonOptions),
                         Encoding.UTF8,
                         "application/json"
                     );
@@ -159,7 +155,7 @@ namespace TranslationWeb.Infrastructure.Services
                     }
 
                     response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                    return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
                 }
                 catch (OperationCanceledException)
                 {
@@ -184,86 +180,155 @@ namespace TranslationWeb.Infrastructure.Services
             throw new HttpRequestException($"Failed to execute POST request to {url} after {_maxRetries} attempts");
         }
 
-        public async Task<T?> PutAsync<T>(string url, object data)
+        public async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest data)
         {
-            try
+            for (int i = 0; i < _maxRetries; i++)
             {
-                await AddJwtHeader();
-                var content = new StringContent(
-                    JsonSerializer.Serialize(data),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
+                    await AddJwtHeader();
 
-                var response = await _httpClient.PutAsync(url, content);
-                response.EnsureSuccessStatusCode();
+                    var content = new StringContent(
+                        JsonSerializer.Serialize(data, _jsonOptions),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
 
-                return await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                    var response = await _httpClient.PutAsync(url, content, cts.Token);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await HandleUnauthorized();
+                        continue;
+                    }
+
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Request timeout for PUT {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex, "Error executing PUT request to {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error executing PUT request to {Url}", url);
+                    throw;
+                }
+
+                await Task.Delay((int)Math.Min(100 * Math.Pow(2, i), 1000));
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error executing PUT request to {Url}", url);
-                throw;
-            }
+
+            throw new HttpRequestException($"Failed to execute PUT request to {url} after {_maxRetries} attempts");
         }
 
-        public async Task<T?> PatchAsync<T>(string url, object data)
+        public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest data)
         {
-            try
+            for (int i = 0; i < _maxRetries; i++)
             {
-                await AddJwtHeader();
-                var content = new StringContent(
-                    JsonSerializer.Serialize(data ?? new { }),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
+                    await AddJwtHeader();
 
-                var response = await _httpClient.PatchAsync(url, content);
-                response.EnsureSuccessStatusCode();
+                    var content = new StringContent(
+                        JsonSerializer.Serialize(data, _jsonOptions),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
 
-                return await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                    var response = await _httpClient.PatchAsync(url, content, cts.Token);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await HandleUnauthorized();
+                        continue;
+                    }
+
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Request timeout for PATCH {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex, "Error executing PATCH request to {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error executing PATCH request to {Url}", url);
+                    throw;
+                }
+
+                await Task.Delay((int)Math.Min(100 * Math.Pow(2, i), 1000));
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error executing PATCH request to {Url}", url);
-                throw;
-            }
+
+            throw new HttpRequestException($"Failed to execute PATCH request to {url} after {_maxRetries} attempts");
         }
 
-        public async Task PatchAsync(string url, object data)
+        public async Task<T?> DeleteAsync<T>(string url)
         {
-            try
+            for (int i = 0; i < _maxRetries; i++)
             {
-                await AddJwtHeader();
-                var content = new StringContent(
-                    JsonSerializer.Serialize(data ?? new { }),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
+                    await AddJwtHeader();
 
-                var response = await _httpClient.PatchAsync(url, content);
-                response.EnsureSuccessStatusCode();
+                    var response = await _httpClient.DeleteAsync(url, cts.Token);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await HandleUnauthorized();
+                        continue;
+                    }
+
+                    response.EnsureSuccessStatusCode();
+                    return await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Request timeout for DELETE {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex, "Error executing DELETE request to {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error executing DELETE request to {Url}", url);
+                    throw;
+                }
+
+                await Task.Delay((int)Math.Min(100 * Math.Pow(2, i), 1000));
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error executing PATCH request to {Url}", url);
-                throw;
-            }
+
+            throw new HttpRequestException($"Failed to execute DELETE request to {url} after {_maxRetries} attempts");
         }
 
+        // 保持原有的非泛型DeleteAsync方法以保持向后兼容性
         public async Task<bool> DeleteAsync(string url)
         {
             try
             {
-                await AddJwtHeader();
-                var response = await _httpClient.DeleteAsync(url);
-                response.EnsureSuccessStatusCode();
+                await DeleteAsync<object>(url);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, "Error executing DELETE request to {Url}", url);
-                throw;
+                return false;
             }
         }
 

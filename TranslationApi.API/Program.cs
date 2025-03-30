@@ -45,7 +45,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
 // Cấu hình JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-
+builder.Services.AddAutoMapper(typeof(TranslationApi.Application.Mappings.AIModelMappingProfile).Assembly);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

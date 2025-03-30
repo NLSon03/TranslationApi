@@ -1,9 +1,10 @@
+
+using System.Text.Json.Serialization;
+
 namespace TranslationWeb.Models.AIModel
 {
-    public class AIModelListResponse
+    public class AIModelListResponse : AIModelApiResponse<IEnumerable<AIModelResponse>>
     {
-        public List<AIModelResponse> Models { get; set; } = new List<AIModelResponse>();
-        public int TotalCount { get; set; }
-        public int ActiveCount { get; set; }
+        public IEnumerable<AIModelResponse> Models => Data ?? new List<AIModelResponse>();
     }
 }

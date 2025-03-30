@@ -27,7 +27,6 @@ namespace TranslationApi.Infrastructure
             services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
             return services;
         }
 
@@ -43,4 +42,4 @@ namespace TranslationApi.Infrastructure
             return services;
         }
     }
-} 
+}
