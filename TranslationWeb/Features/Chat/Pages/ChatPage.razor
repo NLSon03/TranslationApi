@@ -1,12 +1,13 @@
-
 @page "/chat"
 @using System.Security.Claims
 @using TranslationWeb.Models.ChatSession
 @using TranslationWeb.Models.ChatMessage
+@using TranslationWeb.Models.AIModel
 @using TranslationWeb.Infrastructure.Interfaces
 @using TranslationWeb.Features.Chat.Components
 @inject IChatSessionService ChatSessionService
 @inject IChatMessageService ChatMessageService
+@inject IAIModelService AIModelService
 @inject IAuthService AuthService
 @inject IJSRuntime JS
 
@@ -16,9 +17,16 @@
         <div class="col-md-3 session-list">
             <div class="d-flex flex-column h-100">
                 <div class="p-3 border-bottom">
-                    <button class="btn btn-primary w-100" @onclick="CreateNewSession">
+                    <button class="btn btn-primary w-100" @onclick="() => _showCreateDialog = true">
                         <i class="bi bi-plus-circle me-2"></i>Tạo phiên chat mới
                     </button>
+                    @if (!string.IsNullOrEmpty(_errorMessage))
+                    {
+                        <div class="alert alert-danger mt-2">
+                            @_errorMessage
+                            <button type="button" class="btn-close" @onclick="() => _errorMessage = string.Empty"></button>
+                        </div>
+                    }
                 </div>
                 <div class="overflow-auto flex-grow-1">
                     @if (_sessions != null)
@@ -118,12 +126,65 @@
     </div>
 </div>
 
+@* Dialog chọn AI Model *@
+@if (_showCreateDialog)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chọn AI Model</h5>
+                    <button type="button" class="btn-close" @onclick="() => _showCreateDialog = false"></button>
+                </div>
+                <div class="modal-body">
+                    @if (_aiModels.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var model in _aiModels)
+                            {
+                                <button type="button" 
+                                        class="list-group-item list-group-item-action @(_selectedModelId == model.Id ? "active" : "")"
+                                        @onclick="() => _selectedModelId = model.Id">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@model.Name</h6>
+                                            <small>@model.Version</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            Không có AI Model nào khả dụng. Vui lòng thử lại sau.
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showCreateDialog = false">Đóng</button>
+                    <button type="button" class="btn btn-primary" @onclick="CreateNewSession" 
+                            disabled="@(!_aiModels.Any())">
+                        Tạo phiên chat
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+    </div>
+}
+
 @code {
     private List<ChatSessionResponse>? _sessions;
     private Guid _currentSessionId;
     private ChatSessionResponse? _currentSession;
     private string? _userId;
     private bool _isLoading;
+    private List<AIModelResponse> _aiModels = new();
+    private bool _showCreateDialog;
+    private Guid _selectedModelId;
+    private string _errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -133,6 +194,24 @@
         if (!string.IsNullOrEmpty(_userId))
         {
             await LoadSessions();
+            await LoadAIModels();
+        }
+    }
+
+    private async Task LoadAIModels()
+    {
+        var response = await AIModelService.GetAllModelsAsync();
+        if (response.Success)
+        {
+            _aiModels = response.Data.Where(m => m.IsActive).ToList();
+            if (_aiModels.Any())
+            {
+                _selectedModelId = _aiModels.First().Id;
+            }
+        }
+        else
+        {
+            _errorMessage = "Không thể tải danh sách AI Models. Vui lòng thử lại sau.";
         }
     }
 
@@ -146,16 +225,35 @@
 
     private async Task CreateNewSession()
     {
-        var request = new CreateSessionRequest
+        try
         {
-            AIModelId = Guid.Parse("00000000-0000-0000-0000-000000000000") // Thay bằng ID model mặc định
-        };
+            if (_selectedModelId == Guid.Empty)
+            {
+                _errorMessage = "Vui lòng chọn một AI Model";
+                return;
+            }
 
-        var newSession = await ChatSessionService.CreateSessionAsync(request);
-        if (newSession.Id != Guid.Empty)
+            var request = new CreateSessionRequest
+            {
+                AIModelId = _selectedModelId
+            };
+
+            var newSession = await ChatSessionService.CreateSessionAsync(request);
+            if (newSession.Id != Guid.Empty)
+            {
+                _showCreateDialog = false;
+                _errorMessage = string.Empty;
+                await LoadSessions();
+                await SelectSession(newSession.Id);
+            }
+            else
+            {
+                _errorMessage = "Không thể tạo phiên chat mới. Vui lòng thử lại sau.";
+            }
+        }
+        catch (Exception ex)
         {
-            await LoadSessions();
-            await SelectSession(newSession.Id);
+            _errorMessage = "Đã xảy ra lỗi khi tạo phiên chat. Vui lòng thử lại sau.";
         }
     }
 

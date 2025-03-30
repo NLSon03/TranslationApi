@@ -7,7 +7,7 @@ namespace TranslationWeb.Infrastructure.Services
     public class ChatSessionService : IChatSessionService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _baseUrl = "api/chatsessions";
+        private readonly string _baseUrl = "api/ChatSession";
 
         public ChatSessionService(HttpClient httpClient)
         {
