@@ -1,6 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using AutoMapper;
+using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Interfaces;
@@ -10,13 +9,15 @@ namespace TranslationApi.Application.Services
     public class ChatSessionService : IChatSessionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ChatSessionService(IUnitOfWork unitOfWork)
+        public ChatSessionService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<ChatSession> CreateSessionAsync(string userId, Guid modelId)
+        public async Task<ChatSessionDto> CreateSessionAsync(string userId, Guid modelId)
         {
             var model = await _unitOfWork.AIModels.GetByIdAsync(modelId);
             if (model == null)
@@ -34,37 +35,43 @@ namespace TranslationApi.Application.Services
 
             await _unitOfWork.ChatSessions.AddAsync(session);
             await _unitOfWork.CompleteAsync();
-            return session;
+            return _mapper.Map<ChatSessionDto>(session);
         }
 
-        public async Task<ChatSession?> GetSessionByIdAsync(Guid id)
+        public async Task<ChatSessionDto?> GetSessionByIdAsync(Guid id)
         {
-            return await _unitOfWork.ChatSessions.GetByIdAsync(id);
+            var session = await _unitOfWork.ChatSessions.GetByIdAsync(id);
+            return session != null ? _mapper.Map<ChatSessionDto>(session) : null;
         }
 
-        public async Task<ChatSession?> GetSessionWithMessagesAsync(Guid id)
+        public async Task<ChatSessionDetailDto?> GetSessionWithMessagesAsync(Guid id)
         {
-            return await _unitOfWork.ChatSessions.GetSessionWithMessagesAsync(id);
+            var session = await _unitOfWork.ChatSessions.GetSessionWithMessagesAsync(id);
+            return session != null ? _mapper.Map<ChatSessionDetailDto>(session) : null;
         }
 
-        public async Task<IEnumerable<ChatSession>> GetSessionsByUserIdAsync(string userId)
+        public async Task<IEnumerable<ChatSessionDto>> GetSessionsByUserIdAsync(string userId)
         {
-            return await _unitOfWork.ChatSessions.GetSessionsByUserIdAsync(userId);
+            var sessions = await _unitOfWork.ChatSessions.GetSessionsByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<ChatSessionDto>>(sessions);
         }
 
-        public async Task<IEnumerable<ChatSession>> GetAllSessionsAsync()
+        public async Task<IEnumerable<ChatSessionDto>> GetAllSessionsAsync()
         {
-            return await _unitOfWork.ChatSessions.GetAllAsync();
+            var sessions = await _unitOfWork.ChatSessions.GetAllAsync();
+            return _mapper.Map<IEnumerable<ChatSessionDto>>(sessions);
         }
 
-        public async Task<IEnumerable<ChatSession>> GetSessionsByModelIdAsync(Guid modelId)
+        public async Task<IEnumerable<ChatSessionDto>> GetSessionsByModelIdAsync(Guid modelId)
         {
-            return await _unitOfWork.ChatSessions.GetSessionsByModelIdAsync(modelId);
+            var sessions = await _unitOfWork.ChatSessions.GetSessionsByModelIdAsync(modelId);
+            return _mapper.Map<IEnumerable<ChatSessionDto>>(sessions);
         }
 
-        public async Task<IEnumerable<ChatSession>> GetActiveSessionsAsync()
+        public async Task<IEnumerable<ChatSessionDto>> GetActiveSessionsAsync()
         {
-            return await _unitOfWork.ChatSessions.GetActiveSessions();
+            var sessions = await _unitOfWork.ChatSessions.GetActiveSessions();
+            return _mapper.Map<IEnumerable<ChatSessionDto>>(sessions);
         }
 
         public async Task EndSessionAsync(Guid id)

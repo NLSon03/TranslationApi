@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
-using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.API.Controllers
 {
@@ -23,14 +23,14 @@ namespace TranslationApi.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<ChatSession>>> GetAllSessions()
+        public async Task<ActionResult<IEnumerable<ChatSessionDto>>> GetAllSessions()
         {
             var sessions = await _sessionService.GetAllSessionsAsync();
             return Ok(sessions);
         }
 
         [HttpGet("my")]
-        public async Task<ActionResult<IEnumerable<ChatSession>>> GetCurrentUserSessions()
+        public async Task<ActionResult<IEnumerable<ChatSessionDto>>> GetCurrentUserSessions()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
@@ -39,14 +39,14 @@ namespace TranslationApi.API.Controllers
 
         [HttpGet("active")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<ChatSession>>> GetActiveSessions()
+        public async Task<ActionResult<IEnumerable<ChatSessionDto>>> GetActiveSessions()
         {
             var sessions = await _sessionService.GetActiveSessionsAsync();
             return Ok(sessions);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ChatSession>> GetSessionById(Guid id)
+        public async Task<ActionResult<ChatSessionDto>> GetSessionById(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(id);
@@ -54,14 +54,14 @@ namespace TranslationApi.API.Controllers
             if (session == null)
                 return NotFound();
                 
-            if (session.UserId != userId && !User.IsInRole("Admin"))
+            if (!await _sessionService.IsUserSessionOwnerAsync(id, userId) && !User.IsInRole("Admin"))
                 return Forbid();
                 
             return Ok(session);
         }
 
         [HttpGet("{id}/messages")]
-        public async Task<ActionResult<ChatSession>> GetSessionWithMessages(Guid id)
+        public async Task<ActionResult<ChatSessionDetailDto>> GetSessionWithMessages(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionWithMessagesAsync(id);
@@ -69,14 +69,14 @@ namespace TranslationApi.API.Controllers
             if (session == null)
                 return NotFound();
                 
-            if (session.UserId != userId && !User.IsInRole("Admin"))
+            if (!await _sessionService.IsUserSessionOwnerAsync(id, userId) && !User.IsInRole("Admin"))
                 return Forbid();
                 
             return Ok(session);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ChatSession>> CreateSession(Guid modelId)
+        public async Task<ActionResult<ChatSessionDto>> CreateSession(Guid modelId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
