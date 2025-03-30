@@ -1,62 +1,128 @@
 @using TranslationWeb.Models.Translation
 @inject ITranslationApiService TranslationService
+@inject IJSRuntime JSRuntime
 
-<div class="translation-form">
-    <h3>Dịch văn bản</h3>
-    
-    <div class="form-group">
-        <label for="sourceText">Văn bản nguồn:</label>
-        <textarea id="sourceText" class="form-control" @bind="request.SourceText" rows="5"></textarea>
-    </div>
-    
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="sourceLanguage">Ngôn ngữ nguồn:</label>
-            <select id="sourceLanguage" class="form-control" @bind="request.SourceLanguage">
-                <option value="auto">Tự động phát hiện</option>
-                @if (languages != null)
-                {
-                    @foreach (var language in languages)
-                    {
-                        <option value="@language.Code">@language.Name</option>
-                    }
-                }
-            </select>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="targetLanguage">Ngôn ngữ đích:</label>
-            <select id="targetLanguage" class="form-control" @bind="request.TargetLanguage">
-                @if (languages != null)
-                {
-                    @foreach (var language in languages)
-                    {
-                        <option value="@language.Code">@language.Name</option>
-                    }
-                }
-            </select>
-        </div>
-    </div>
-    
-    <button class="btn btn-primary" @onclick="TranslateText">Dịch</button>
-    
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger mt-3">
-            @errorMessage
-        </div>
-    }
-    
-    @if (translationResponse != null && !string.IsNullOrEmpty(translationResponse.TranslatedText))
-    {
-        <div class="translation-result mt-3">
-            <h4>Kết quả dịch:</h4>
-            <div class="card">
-                <div class="card-body">
-                    @translationResponse.TranslatedText
+<div class="translation-form container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Dịch văn bản</h3>
+            
+            <div class="form-group position-relative">
+                <label for="sourceText">Văn bản nguồn:</label>
+                <textarea 
+                    id="sourceText" 
+                    class="form-control" 
+                    @bind="request.SourceText" 
+                    @bind:event="oninput"
+                    @onkeyup="OnTextChange"
+                    rows="5"
+                    placeholder="Nhập văn bản cần dịch...">
+                </textarea>
+                <small class="text-muted position-absolute" style="bottom: 5px; right: 10px;">
+                    @(request.SourceText?.Length ?? 0) ký tự
+                </small>
+            </div>
+            
+            <div class="row mt-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="sourceLanguage">Ngôn ngữ nguồn:</label>
+                        <select id="sourceLanguage" class="form-control" @bind="request.SourceLanguage">
+                            <option value="auto">Tự động phát hiện</option>
+                            @if (languages != null)
+                            {
+                                @foreach (var language in languages)
+                                {
+                                    <option value="@language.Code">@language.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 text-center my-2">
+                    <button class="btn btn-outline-secondary" @onclick="SwapLanguages" title="Đổi ngôn ngữ">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="targetLanguage">Ngôn ngữ đích:</label>
+                        <select id="targetLanguage" class="form-control" @bind="request.TargetLanguage">
+                            @if (languages != null)
+                            {
+                                @foreach (var language in languages)
+                                {
+                                    <option value="@language.Code">@language.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
                 </div>
             </div>
+            
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <button class="btn btn-primary px-4" @onclick="TranslateText" disabled="@isTranslating">
+                    @if (isTranslating)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Đang dịch...</span>
+                    }
+                    else
+                    {
+                        <span>Dịch</span>
+                    }
+                </button>
+                <button class="btn btn-outline-secondary" @onclick="ResetForm">
+                    <i class="bi bi-arrow-counterclockwise"></i> Làm mới
+                </button>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">
+                    @errorMessage
+                </div>
+            }
+            
+            @if (translationResponse != null && !string.IsNullOrEmpty(translationResponse.TranslatedText))
+            {
+                <div class="translation-result mt-4 animate__animated animate__fadeIn">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">Kết quả dịch:</h4>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="CopyTranslation">
+                            <i class="fas fa-copy"></i> Sao chép
+                        </button>
+                    </div>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            @translationResponse.TranslatedText
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @if (translationHistory.Any())
+            {
+                <div class="mt-4">
+                    <h5>Lịch sử dịch gần đây:</h5>
+                    <div class="history-list">
+                        @foreach (var history in translationHistory.Take(3))
+                        {
+                            <div class="card mb-2">
+                                <div class="card-body py-2">
+                                    <small class="text-muted">@history.SourceLanguage → @history.TargetLanguage</small>
+                                    <p class="mb-1"><strong>@history.SourceText</strong></p>
+                                    <p class="mb-0">@history.TranslatedText</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
-    }
+    </div>
 </div>
 
 @code {
@@ -64,7 +130,10 @@
     private TranslationResponse? translationResponse;
     private string errorMessage = string.Empty;
     private IEnumerable<Language>? languages;
-    
+    private bool isTranslating = false;
+    private List<TranslationHistoryItem> translationHistory = new();
+    private System.Timers.Timer? debounceTimer;
+
     protected override async Task OnInitializedAsync()
     {
         languages = await TranslationService.GetLanguagesAsync();
@@ -73,8 +142,34 @@
             request.TargetLanguage = "vi"; // Default to Vietnamese
             request.SourceLanguage = "auto"; // Default to auto-detect
         }
+
+        // Khởi tạo debounce timer
+        debounceTimer = new System.Timers.Timer(500);
+        debounceTimer.Elapsed += async (sender, e) => await DebounceTranslate();
+        debounceTimer.AutoReset = false;
     }
-    
+
+    private void OnTextChange()
+    {
+        if (debounceTimer != null)
+        {
+            debounceTimer.Stop();
+            debounceTimer.Start();
+        }
+    }
+
+    private async Task DebounceTranslate()
+    {
+        if (!string.IsNullOrWhiteSpace(request.SourceText) && request.SourceText.Length > 2)
+        {
+            await InvokeAsync(async () =>
+            {
+                await TranslateText();
+                StateHasChanged();
+            });
+        }
+    }
+
     private async Task TranslateText()
     {
         if (string.IsNullOrWhiteSpace(request.SourceText))
@@ -82,15 +177,87 @@
             errorMessage = "Vui lòng nhập văn bản cần dịch";
             return;
         }
-        
+
         try
         {
+            isTranslating = true;
             errorMessage = string.Empty;
             translationResponse = await TranslationService.TranslateTextAsync(request);
+
+            if (translationResponse != null && !string.IsNullOrEmpty(translationResponse.TranslatedText))
+            {
+                // Thêm vào lịch sử
+                var historyItem = new TranslationHistoryItem
+                {
+                    SourceText = request.SourceText,
+                    TranslatedText = translationResponse.TranslatedText,
+                    SourceLanguage = GetLanguageName(request.SourceLanguage),
+                    TargetLanguage = GetLanguageName(request.TargetLanguage),
+                    Timestamp = DateTime.Now
+                };
+
+                translationHistory.Insert(0, historyItem);
+                if (translationHistory.Count > 10) // Giới hạn lịch sử
+                {
+                    translationHistory.RemoveAt(translationHistory.Count - 1);
+                }
+            }
         }
         catch (Exception ex)
         {
             errorMessage = $"Lỗi khi dịch: {ex.Message}";
         }
+        finally
+        {
+            isTranslating = false;
+        }
     }
-} 
+
+    private string GetLanguageName(string languageCode)
+    {
+        return languages?.FirstOrDefault(l => l.Code == languageCode)?.Name ?? languageCode;
+    }
+
+    private void SwapLanguages()
+    {
+        if (request.SourceLanguage != "auto")
+        {
+            var temp = request.SourceLanguage;
+            request.SourceLanguage = request.TargetLanguage;
+            request.TargetLanguage = temp;
+        }
+    }
+
+    private async Task CopyTranslation()
+    {
+        if (translationResponse != null && !string.IsNullOrEmpty(translationResponse.TranslatedText))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", translationResponse.TranslatedText);
+        }
+    }
+
+    private void ResetForm()
+    {
+        request = new TranslationRequest
+        {
+            SourceLanguage = "auto",
+            TargetLanguage = "vi"
+        };
+        translationResponse = null;
+        errorMessage = string.Empty;
+    }
+
+    private class TranslationHistoryItem
+    {
+        public string SourceText { get; set; } = string.Empty;
+        public string TranslatedText { get; set; } = string.Empty;
+        public string SourceLanguage { get; set; } = string.Empty;
+        public string TargetLanguage { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+
+    public void Dispose()
+    {
+        debounceTimer?.Dispose();
+    }
+}

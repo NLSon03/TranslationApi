@@ -11,7 +11,6 @@ namespace TranslationWeb.Models.ChatMessage
         [Required(ErrorMessage = "Nội dung tin nhắn là bắt buộc")]
         public string Content { get; set; } = string.Empty;
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MessageType MessageType { get; set; } = MessageType.Text;
 
         public string FromLanguage { get; set; } = "auto";

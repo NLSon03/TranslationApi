@@ -14,10 +14,8 @@ namespace TranslationWeb.Models.ChatMessage
         public Guid SessionId { get; set; }
         public string Content { get; set; } = string.Empty;
         
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public SenderType SenderType { get; set; }
         
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MessageType MessageType { get; set; }
         
         public DateTime SentAt { get; set; }

@@ -234,6 +234,8 @@
     private bool _showCreateDialog;
     private Guid _selectedModelId;
     private string _errorMessage = string.Empty;
+    private System.Timers.Timer? _updateTimer;
+    private DateTime _lastMessageTime = DateTime.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -250,11 +252,48 @@
 
             await LoadSessions();
             await LoadAIModels();
+
+            // Khởi tạo timer để cập nhật tin nhắn mỗi 3 giây
+            _updateTimer = new System.Timers.Timer(3000);
+            _updateTimer.Elapsed += async (sender, e) => await CheckForNewMessages();
+            _updateTimer.AutoReset = true;
+            _updateTimer.Start();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in OnInitializedAsync: {ex.Message}");
             _errorMessage = "Đã xảy ra lỗi khi khởi tạo trang. Vui lòng thử lại.";
+        }
+    }
+
+    public void Dispose()
+    {
+        _updateTimer?.Stop();
+        _updateTimer?.Dispose();
+    }
+
+    private async Task CheckForNewMessages()
+    {
+        try
+        {
+            if (_currentSessionId == Guid.Empty || _currentSession == null)
+                return;
+
+            var updatedSession = await ChatSessionService.GetSessionByIdAsync(_currentSessionId);
+            if (updatedSession != null && 
+                (updatedSession.Messages.Count != _currentSession.Messages.Count ||
+                 updatedSession.Messages.Any(m => m.SentAt > _lastMessageTime)))
+            {
+                Console.WriteLine("New messages detected, updating session...");
+                _currentSession = updatedSession;
+                _lastMessageTime = updatedSession.Messages.Max(m => m.SentAt);
+                await InvokeAsync(StateHasChanged);
+                await ScrollToBottom();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error checking for new messages: {ex.Message}");
         }
     }
 
@@ -405,6 +444,14 @@
     {
         _currentSessionId = sessionId;
         _currentSession = await ChatSessionService.GetSessionByIdAsync(sessionId);
+        if (_currentSession?.Messages?.Any() == true)
+        {
+            _lastMessageTime = _currentSession.Messages.Max(m => m.SentAt);
+        }
+        else
+        {
+            _lastMessageTime = DateTime.MinValue;
+        }
         StateHasChanged();
         await ScrollToBottom();
     }
@@ -424,8 +471,20 @@
             
             if (response.Id != Guid.Empty)
             {
-                await SelectSession(_currentSessionId);
+                // Cập nhật session hiện tại
+                var updatedSession = await ChatSessionService.GetSessionByIdAsync(_currentSessionId);
+                if (updatedSession != null)
+                {
+                    _currentSession = updatedSession;
+                    _lastMessageTime = DateTime.Now;
+                    await InvokeAsync(StateHasChanged);
+                    await ScrollToBottom();
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending message: {ex.Message}");
         }
         finally
         {

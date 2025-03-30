@@ -29,11 +29,7 @@ builder.Services.AddScoped(sp =>
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-        WriteIndented = true,
-        Converters = 
-        {
-            new JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase)
-        }
+        WriteIndented = true
     };
     return options;
 });

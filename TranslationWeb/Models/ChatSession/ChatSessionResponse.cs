@@ -27,7 +27,6 @@ namespace TranslationWeb.Models.ChatSession
         public DateTime? EndedAt { get; set; }
 
         [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ChatSessionStatus Status { get; set; }
 
         [JsonIgnore]
