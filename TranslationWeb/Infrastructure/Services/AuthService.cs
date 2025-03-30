@@ -137,7 +137,7 @@ namespace TranslationWeb.Infrastructure.Services
                     // Cập nhật token mới nếu server trả về
                     await _tokenService.StoreToken(response);
                     await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
-                    
+
                     _logger.LogInformation("Lấy thông tin user hiện tại thành công: {Username}", response.UserName);
                     return response;
                 }

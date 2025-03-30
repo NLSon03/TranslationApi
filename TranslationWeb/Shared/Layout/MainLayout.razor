@@ -43,21 +43,10 @@
                                                 <i class="bi bi-chat me-2"></i> Chat với AI
                                             </NavLink>
                                         </li>
-                                        <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3 py-2" href="/sessions">
-                                                <i class="bi bi-clock-history me-2"></i> Lịch sử phiên chat
-                                            </NavLink>
-                                        </li>
                                     </ul>
                                 </li>
                             </Authorized>
                         </AuthorizeView>
-                        <li class="nav-item">
-                            <NavLink class="nav-link rounded-pill px-3" href="/feedback">
-                                <i class="bi bi-chat-left-text me-1"></i> Phản hồi
-                            </NavLink>
-                        </li>
-                        
                         <AuthorizeView Roles="Admin">
                             <Authorized>
                                 <li class="nav-item dropdown">
@@ -73,11 +62,6 @@
                                         <li>
                                             <NavLink class="dropdown-item rounded-3 px-3" href="/admin/users">
                                                 <i class="bi bi-people me-1"></i> Quản lý người dùng
-                                            </NavLink>
-                                        </li>
-                                        <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3" href="/stats">
-                                                <i class="bi bi-bar-chart me-1"></i> Thống kê
                                             </NavLink>
                                         </li>
                                     </ul>

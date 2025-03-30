@@ -1,4 +1,4 @@
-﻿﻿﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -263,16 +263,16 @@ namespace TranslationApi.Application.Services
             try
             {
                 using var doc = JsonDocument.Parse(responseBody);
-                
+
                 // Log response for debugging
                 _logger.LogDebug($"Full API Response: {responseBody}");
-                
+
                 // Validate response structure
                 if (!doc.RootElement.TryGetProperty("candidates", out var candidates))
                 {
                     throw new Exception("Response missing 'candidates' property");
                 }
-                
+
                 if (candidates.GetArrayLength() == 0)
                 {
                     throw new Exception("No translation candidates found");

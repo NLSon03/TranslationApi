@@ -4,10 +4,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
-using System.Text.Json.Serialization;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
-using TranslationWeb.Core.Services;
 using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Infrastructure.Services;
 using TranslationWeb.Models;
@@ -84,7 +82,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IAIModelService, AIModelService>();
-builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
 // Register Blazored Toast

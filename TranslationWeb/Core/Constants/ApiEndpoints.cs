@@ -12,7 +12,7 @@ namespace TranslationWeb.Core.Constants
             public static string Logout => $"{Base}/logout";
             public static string RefreshToken => $"{Base}/refresh-token";
             public static string CurrentUser => $"{Base}/current-user";
-            
+
             public static class Users
             {
                 private static string Base => $"{Auth.Base}/users";

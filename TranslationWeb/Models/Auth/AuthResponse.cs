@@ -44,10 +44,10 @@ namespace TranslationWeb.Models.Auth
         public DateTime LastActivityAt { get; set; }
 
         public bool IsAccessTokenExpired() => DateTime.Now >= ExpiresAt;
-        
+
         public bool IsRefreshTokenExpired() => DateTime.Now >= RefreshTokenExpiresAt;
-        
-        public bool ShouldRefreshToken() => 
+
+        public bool ShouldRefreshToken() =>
             DateTime.Now.AddMinutes(5) >= ExpiresAt && !IsRefreshTokenExpired();
     }
 }

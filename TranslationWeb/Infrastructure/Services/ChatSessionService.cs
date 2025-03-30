@@ -21,7 +21,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}?modelId={request.AIModelId}", new {});
+                var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}?modelId={request.AIModelId}", new { });
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -35,7 +35,7 @@ namespace TranslationWeb.Infrastructure.Services
                 Console.WriteLine($"Failed to create session. Status code: {response.StatusCode}");
                 var error = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Error content: {error}");
-                
+
                 return new ChatSessionResponse();
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 Console.WriteLine("Calling API to get user sessions...");
                 var response = await _httpClient.GetAsync($"{_baseUrl}/my");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
@@ -74,7 +74,7 @@ namespace TranslationWeb.Infrastructure.Services
                     try
                     {
                         var sessions = JsonSerializer.Deserialize<IEnumerable<ChatSessionResponse>>(
-                            jsonString, 
+                            jsonString,
                             _jsonOptions
                         );
 
@@ -82,12 +82,12 @@ namespace TranslationWeb.Infrastructure.Services
                         {
                             var sessionsList = sessions.ToList();
                             Console.WriteLine($"Successfully deserialized {sessionsList.Count} sessions");
-                            
+
                             foreach (var session in sessionsList)
                             {
                                 Console.WriteLine(session.ToString());
                             }
-                            
+
                             return sessionsList;
                         }
                         else
@@ -107,7 +107,7 @@ namespace TranslationWeb.Infrastructure.Services
                     var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"Error response content: {errorContent}");
                 }
-                
+
                 return new List<ChatSessionResponse>();
             }
             catch (Exception ex)
