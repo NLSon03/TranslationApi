@@ -1,6 +1,7 @@
 
 using TranslationWeb.Core.Constants;
 using TranslationWeb.Infrastructure.Interfaces;
+using TranslationWeb.Models;
 using TranslationWeb.Models.Auth;
 
 namespace TranslationWeb.Infrastructure.Services
@@ -57,13 +58,17 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang cập nhật thông tin người dùng: {UserId}", id);
-                await _httpClient.PutAsync<UpdateUserRequest, object>(ApiEndpoints.Auth.Users.Update(id), request);
+                var response = await _httpClient.PutAsync<UpdateUserRequest, ApiResponse>(ApiEndpoints.Auth.Users.Update(id), request);
+                if (response?.Success == false)
+                {
+                    throw new Exception(response.Message ?? "Không thể cập nhật thông tin người dùng");
+                }
                 _logger.LogInformation("Cập nhật thông tin người dùng thành công: {UserId}", id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi cập nhật thông tin người dùng: {UserId}", id);
-                throw new Exception("Không thể cập nhật thông tin người dùng", ex);
+                throw;
             }
         }
 
@@ -72,13 +77,17 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang đặt lại mật khẩu cho người dùng: {UserId}", id);
-                await _httpClient.PostAsync<ChangePasswordRequest, object>(ApiEndpoints.Auth.Users.ResetPassword(id), request);
+                var response = await _httpClient.PostAsync<ChangePasswordRequest, ApiResponse>(ApiEndpoints.Auth.Users.ResetPassword(id), request);
+                if (response?.Success == false)
+                {
+                    throw new Exception(response.Message ?? "Không thể đặt lại mật khẩu");
+                }
                 _logger.LogInformation("Đặt lại mật khẩu thành công cho người dùng: {UserId}", id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi đặt lại mật khẩu cho người dùng: {UserId}", id);
-                throw new Exception("Không thể đặt lại mật khẩu", ex);
+                throw;
             }
         }
 
@@ -87,13 +96,17 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang thay đổi trạng thái khóa cho người dùng: {UserId}, IsLocked: {IsLocked}", id, request.IsLocked);
-                await _httpClient.PostAsync<ToggleLockoutRequest, object>(ApiEndpoints.Auth.Users.ToggleLockout(id), request);
+                var response = await _httpClient.PostAsync<ToggleLockoutRequest, ApiResponse>(ApiEndpoints.Auth.Users.ToggleLockout(id), request);
+                if (response?.Success == false)
+                {
+                    throw new Exception(response.Message ?? "Không thể thay đổi trạng thái khóa tài khoản");
+                }
                 _logger.LogInformation("Thay đổi trạng thái khóa thành công cho người dùng: {UserId}", id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thay đổi trạng thái khóa cho người dùng: {UserId}", id);
-                throw new Exception("Không thể thay đổi trạng thái khóa tài khoản", ex);
+                throw;
             }
         }
     }

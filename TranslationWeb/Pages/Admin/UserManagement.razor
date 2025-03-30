@@ -276,11 +276,12 @@ else
                 ToastService.ShowSuccess("Cập nhật thông tin người dùng thành công");
                 _showEditDialog = false;
                 await LoadUsers();
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowError("Không thể cập nhật thông tin người dùng");
+            ToastService.ShowError(ex.Message);
         }
     }
 
@@ -293,11 +294,13 @@ else
                 await UserManagementService.ResetPasswordAsync(_selectedUser.Id, request);
                 ToastService.ShowSuccess("Đặt lại mật khẩu thành công");
                 _showResetPasswordDialog = false;
+                await LoadUsers();
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowError("Không thể đặt lại mật khẩu");
+            ToastService.ShowError(ex.Message);
         }
     }
 
@@ -308,10 +311,11 @@ else
             await UserManagementService.ToggleLockoutAsync(user.Id, new ToggleLockoutRequest { IsLocked = isLocked });
             ToastService.ShowSuccess($"Đã {(isLocked ? "khóa" : "mở khóa")} tài khoản thành công");
             await LoadUsers();
+            await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Không thể {(isLocked ? "khóa" : "mở khóa")} tài khoản");
+            ToastService.ShowError(ex.Message);
         }
     }
 

@@ -217,7 +217,7 @@ namespace TranslationApi.API.Controllers
             await _userManager.RemoveFromRolesAsync(user, currentRoles);
             await _userManager.AddToRolesAsync(user, updateDto.Roles);
 
-            return NoContent();
+            return Ok(new { success = true, message = "Cập nhật thông tin người dùng thành công" });
         }
 
         [Authorize(Roles = "Admin")]
@@ -238,7 +238,7 @@ namespace TranslationApi.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return NoContent();
+            return Ok(new { success = true, message = "Đặt lại mật khẩu thành công" });
         }
 
         [Authorize(Roles = "Admin")]
@@ -260,7 +260,8 @@ namespace TranslationApi.API.Controllers
                 await _userManager.SetLockoutEndDateAsync(user, null);
             }
 
-            return NoContent();
+            var action = lockoutDto.IsLocked ? "khóa" : "mở khóa";
+            return Ok(new { success = true, message = $"Đã {action} tài khoản thành công" });
         }
     }
 }
