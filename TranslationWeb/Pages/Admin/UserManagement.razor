@@ -1,3 +1,4 @@
+
 @page "/admin/users"
 @using TranslationWeb.Infrastructure.Interfaces
 @using TranslationWeb.Models.Auth
@@ -7,10 +8,39 @@
 
 <h3>Quản lý người dùng</h3>
 
-<div class="mb-3">
-    <button class="btn btn-primary" @onclick="RefreshUsers">
-        <i class="fas fa-sync-alt"></i> Làm mới
-    </button>
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Tìm kiếm..."
+                           @bind="@_searchTerm" @bind:event="oninput" @onkeyup="HandleSearch" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" @bind="_selectedRole">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" @bind="_selectedStatus">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="locked">Đã khóa</option>
+                </select>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary" @onclick="RefreshUsers">
+                    <i class="fas fa-sync-alt me-1"></i> Làm mới
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @if (_users == null)
@@ -23,60 +53,92 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Tên người dùng</th>
-                    <th>Email</th>
-                    <th>Vai trò</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in _users)
-                {
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
                     <tr>
-                        <td>@user.UserName</td>
-                        <td>@user.Email</td>
-                        <td>@string.Join(", ", user.Roles)</td>
-                        <td>
-                            @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now)
-                            {
-                                <span class="badge bg-danger">Đã khóa</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">Hoạt động</span>
-                            }
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(user)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-warning" @onclick="() => ShowResetPasswordDialog(user)">
-                                    <i class="fas fa-key"></i>
-                                </button>
+                        <th @onclick="@(() => SortBy("UserName"))">
+                            Tên người dùng
+                            <SortIcon Column="UserName" CurrentSort="@_sortColumn" IsAscending="@_sortAscending" />
+                        </th>
+                        <th @onclick="@(() => SortBy("Email"))">
+                            Email
+                            <SortIcon Column="Email" CurrentSort="@_sortColumn" IsAscending="@_sortAscending" />
+                        </th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 150px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in GetFilteredAndSortedUsers())
+                    {
+                        <tr>
+                            <td>@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td>@string.Join(", ", user.Roles)</td>
+                            <td>
                                 @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now)
                                 {
-                                    <button class="btn btn-sm btn-success" @onclick="() => ToggleUserLockout(user, false)">
-                                        <i class="fas fa-lock-open"></i>
-                                    </button>
+                                    <span class="badge bg-danger">Đã khóa</span>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-sm btn-danger" @onclick="() => ToggleUserLockout(user, true)">
-                                        <i class="fas fa-lock"></i>
-                                    </button>
+                                    <span class="badge bg-success">Hoạt động</span>
                                 }
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(user)"
+                                            title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" @onclick="() => ShowResetPasswordDialog(user)"
+                                            title="Đặt lại mật khẩu">
+                                        <i class="fas fa-key"></i>
+                                    </button>
+                                    @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now)
+                                    {
+                                        <button class="btn btn-sm btn-success" @onclick="() => ShowLockoutConfirmation(user, false)"
+                                                title="Mở khóa tài khoản">
+                                            <i class="fas fa-lock-open"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-danger" @onclick="() => ShowLockoutConfirmation(user, true)"
+                                                title="Khóa tài khoản">
+                                            <i class="fas fa-lock"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span>Hiển thị @(_users.Count) người dùng</span>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation" class="float-end">
+                        <ul class="pagination mb-0">
+                            @for (int i = 1; i <= TotalPages; i++)
+                            {
+                                var pageNumber = i;
+                                <li class="page-item @(pageNumber == _currentPage ? "active" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(pageNumber)">@i</button>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -94,11 +156,53 @@ else
                         OnCancel="() => _showResetPasswordDialog = false" />
 }
 
+@if (_showConfirmation)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận</h5>
+                    <button type="button" class="btn-close" @onclick="CancelConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    @_confirmationMessage
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelConfirmation">Hủy</button>
+                    <button type="button" class="btn @_confirmationButtonClass" @onclick="ConfirmAction">
+                        @_confirmationButtonText
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     private List<UserListResponse>? _users;
     private UserListResponse? _selectedUser;
     private bool _showEditDialog;
     private bool _showResetPasswordDialog;
+    private bool _showConfirmation;
+    private string _confirmationMessage = "";
+    private string _confirmationButtonText = "";
+    private string _confirmationButtonClass = "";
+    private Action? _confirmedAction;
+
+    // Filtering
+    private string _searchTerm = "";
+    private string _selectedRole = "";
+    private string _selectedStatus = "";
+
+    // Sorting
+    private string _sortColumn = "";
+    private bool _sortAscending = true;
+
+    // Pagination
+    private int _currentPage = 1;
+    private const int PageSize = 10;
 
     protected override async Task OnInitializedAsync()
     {
@@ -132,6 +236,34 @@ else
     {
         _selectedUser = user;
         _showResetPasswordDialog = true;
+    }
+
+    private void ShowLockoutConfirmation(UserListResponse user, bool isLocked)
+    {
+        _selectedUser = user;
+        _showConfirmation = true;
+        _confirmationMessage = isLocked
+            ? $"Bạn có chắc chắn muốn khóa tài khoản của người dùng {user.UserName}?"
+            : $"Bạn có chắc chắn muốn mở khóa tài khoản của người dùng {user.UserName}?";
+        _confirmationButtonText = isLocked ? "Khóa" : "Mở khóa";
+        _confirmationButtonClass = isLocked ? "btn-danger" : "btn-success";
+        _confirmedAction = () => ToggleUserLockout(user, isLocked);
+    }
+
+    private void CancelConfirmation()
+    {
+        _showConfirmation = false;
+        _confirmedAction = null;
+    }
+
+    private async Task ConfirmAction()
+    {
+        if (_confirmedAction != null)
+        {
+            await InvokeAsync(_confirmedAction);
+            _showConfirmation = false;
+            _confirmedAction = null;
+        }
     }
 
     private async Task SaveUser(UpdateUserRequest request)
@@ -181,5 +313,86 @@ else
         {
             ToastService.ShowError($"Không thể {(isLocked ? "khóa" : "mở khóa")} tài khoản");
         }
+    }
+
+    // Search handling
+    private async Task HandleSearch()
+    {
+        _currentPage = 1;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // Sorting
+    private void SortBy(string column)
+    {
+        if (_sortColumn == column)
+        {
+            _sortAscending = !_sortAscending;
+        }
+        else
+        {
+            _sortColumn = column;
+            _sortAscending = true;
+        }
+    }
+
+    // Filtering and sorting
+    private IEnumerable<UserListResponse> GetFilteredAndSortedUsers()
+    {
+        if (_users == null) return Array.Empty<UserListResponse>();
+
+        var filteredUsers = _users.AsEnumerable();
+
+        // Apply search
+        if (!string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            var searchTerm = _searchTerm.ToLower();
+            filteredUsers = filteredUsers.Where(u =>
+                u.UserName.ToLower().Contains(searchTerm) ||
+                u.Email.ToLower().Contains(searchTerm));
+        }
+
+        // Apply role filter
+        if (!string.IsNullOrEmpty(_selectedRole))
+        {
+            filteredUsers = filteredUsers.Where(u => u.Roles.Contains(_selectedRole));
+        }
+
+        // Apply status filter
+        if (!string.IsNullOrEmpty(_selectedStatus))
+        {
+            filteredUsers = filteredUsers.Where(u =>
+            {
+                var isLocked = u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTimeOffset.Now;
+                return _selectedStatus == "locked" ? isLocked : !isLocked;
+            });
+        }
+
+        // Apply sorting
+        if (!string.IsNullOrEmpty(_sortColumn))
+        {
+            filteredUsers = _sortColumn switch
+            {
+                "UserName" => _sortAscending
+                    ? filteredUsers.OrderBy(u => u.UserName)
+                    : filteredUsers.OrderByDescending(u => u.UserName),
+                "Email" => _sortAscending
+                    ? filteredUsers.OrderBy(u => u.Email)
+                    : filteredUsers.OrderByDescending(u => u.Email),
+                _ => filteredUsers
+            };
+        }
+
+        // Apply pagination
+        return filteredUsers
+            .Skip((_currentPage - 1) * PageSize)
+            .Take(PageSize);
+    }
+
+    private int TotalPages => _users == null ? 1 : (int)Math.Ceiling(_users.Count / (double)PageSize);
+
+    private void ChangePage(int page)
+    {
+        _currentPage = page;
     }
 }
