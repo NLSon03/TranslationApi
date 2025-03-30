@@ -4,24 +4,33 @@ namespace TranslationWeb.Core.Constants
     {
         public static string BaseUrl { get; } = "http://localhost:5292";
 
-        public static class Translation
-        {
-            public static string Base => $"{BaseUrl}/api/Translation";
-            public static string Languages => $"{Base}/languages";
-            public static string Translate => Base;
-        }
-
         public static class Auth
         {
             public static string Base => $"{BaseUrl}/api/Auth";
             public static string Login => $"{Base}/login";
             public static string Register => $"{Base}/register";
+            public static string Logout => $"{Base}/logout";
+            public static string RefreshToken => $"{Base}/refresh-token";
             public static string CurrentUser => $"{Base}/current-user";
-            public static string GetUsers => $"{Base}/users";
-            public static string GetUser => $"{Base}/users";
-            public static string UpdateUser => $"{Base}/users";
-            public static string ResetPassword => $"{Base}/users";
-            public static string ToggleLockout => $"{Base}/users";
+            
+            public static class Users
+            {
+                private static string Base => $"{Auth.Base}/users";
+                public static string GetAll => Base;
+                public static string GetById(string userId) => $"{Base}/{userId}";
+                public static string Update(string userId) => $"{Base}/{userId}";
+                public static string ResetPassword(string userId) => $"{Base}/{userId}/reset-password";
+                public static string ToggleLockout(string userId) => $"{Base}/{userId}/toggle-lockout";
+                public static string ChangePassword(string userId) => $"{Base}/{userId}/change-password";
+                public static string UpdateProfile(string userId) => $"{Base}/{userId}/profile";
+            }
+        }
+
+        public static class Translation
+        {
+            public static string Base => $"{BaseUrl}/api/Translation";
+            public static string Languages => $"{Base}/languages";
+            public static string Translate => Base;
         }
 
         public static class Feedback
@@ -59,6 +68,12 @@ namespace TranslationWeb.Core.Constants
             public static string ById(Guid id) => $"{Base}/{id}";
             public static string Send => Base;
             public static string AddFeedback => $"{Base}/feedback";
+        }
+
+        public static class System
+        {
+            private static string Base => $"{BaseUrl}/api";
+            public static string Health => $"{Base}/health";
         }
     }
 }

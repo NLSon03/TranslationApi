@@ -17,19 +17,20 @@
 
                     <div class="form-group mb-3">
                         <label for="email">Email:</label>
-                        <InputText id="email" @bind-Value="loginRequest.Email" class="form-control" />
+                        <InputText id="email" @bind-Value="loginRequest.Email" class="form-control" type="email" />
                         <ValidationMessage For="@(() => loginRequest.Email)" class="text-danger" />
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="password">Mật khẩu:</label>
-                        <InputText id="password" @bind-Value="loginRequest.Password" type="password" class="form-control" />
+                        <InputText id="password" @bind-Value="loginRequest.Password" type="password"
+                            class="form-control" />
                         <ValidationMessage For="@(() => loginRequest.Password)" class="text-danger" />
                     </div>
 
                     <div class="form-group d-flex justify-content-between align-items-center mb-3">
                         <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe" />
+                            <InputCheckbox class="form-check-input" id="rememberMe" @bind-Value="loginRequest.RememberMe" />
                             <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
                         </div>
                         <a href="auth/forgot-password">Quên mật khẩu?</a>
@@ -64,6 +65,12 @@
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
+    [Inject]
+    private ILogger<LoginForm> Logger { get; set; } = default!;
+
+    [Inject]
+    private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
     private async Task HandleLogin()
     {
         errorMessage = string.Empty;
@@ -71,18 +78,35 @@
 
         try
         {
+            Logger.LogInformation("Đang thực hiện đăng nhập...");
             var result = await AuthService.LoginAsync(loginRequest);
-            if (result.UserName != null)
+            
+            if (result.Success && !string.IsNullOrEmpty(result.Token))
             {
-                NavigationManager.NavigateTo("/");
+                Logger.LogInformation("Đăng nhập thành công, đang cập nhật trạng thái xác thực...");
+                
+                // Đợi AuthenticationState được cập nhật
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                if (authState.User.Identity?.IsAuthenticated == true)
+                {
+                    Logger.LogInformation("Trạng thái xác thực đã được cập nhật, chuyển hướng...");
+                    NavigationManager.NavigateTo("/", true);
+                }
+                else
+                {
+                    Logger.LogWarning("Trạng thái xác thực chưa được cập nhật sau khi đăng nhập");
+                    errorMessage = "Lỗi cập nhật trạng thái đăng nhập";
+                }
             }
             else
             {
+                Logger.LogWarning("Đăng nhập thất bại: {Message}", result.Message);
                 errorMessage = result.Message ?? "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
             }
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Lỗi trong quá trình đăng nhập");
             errorMessage = $"Lỗi: {ex.Message}";
         }
         finally
@@ -90,4 +114,4 @@
             isLoading = false;
         }
     }
-} 
+}

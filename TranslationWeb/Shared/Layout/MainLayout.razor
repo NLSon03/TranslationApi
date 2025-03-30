@@ -1,8 +1,13 @@
 ﻿@inherits LayoutComponentBase
 @using TranslationWeb.Features.Auth.Components
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILogger<MainLayout> Logger
+
+@implements IDisposable
 <div class="page">
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
@@ -111,6 +116,23 @@
 </div>
 
 @code {
-    // Removed JavaScript interop code
-    // Bootstrap functionality is now handled by native Blazor components
+    protected override void OnInitialized()
+    {
+        // Đăng ký lắng nghe sự thay đổi trạng thái xác thực
+        AuthStateProvider.AuthenticationStateChanged += AuthenticationStateChanged;
+        Logger.LogInformation("MainLayout đã đăng ký lắng nghe thay đổi trạng thái xác thực");
+    }
+
+    private void AuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        Logger.LogInformation("MainLayout nhận được thông báo thay đổi trạng thái xác thực");
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Hủy đăng ký khi component bị hủy
+        AuthStateProvider.AuthenticationStateChanged -= AuthenticationStateChanged;
+        Logger.LogInformation("MainLayout đã hủy đăng ký lắng nghe thay đổi trạng thái xác thực");
+    }
 }

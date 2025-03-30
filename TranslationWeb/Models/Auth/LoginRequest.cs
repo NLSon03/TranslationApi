@@ -5,13 +5,16 @@ namespace TranslationWeb.Models.Auth
 {
     public class LoginRequest
     {
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
         [JsonPropertyName("email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
+        [Required(ErrorMessage = "Mật khẩu không được để trống")]
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;
+
+        [JsonPropertyName("rememberMe")]
+        public bool RememberMe { get; set; }
     }
 }

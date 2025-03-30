@@ -15,13 +15,13 @@ namespace TranslationWeb.Infrastructure.Services
 
         public async Task<List<UserListResponse>> GetUsersAsync()
         {
-            var response = await _httpClient.GetAsync<List<UserListResponse>>(ApiEndpoints.Auth.GetUsers);
+            var response = await _httpClient.GetAsync<List<UserListResponse>>(ApiEndpoints.Auth.Users.GetAll);
             return response ?? new List<UserListResponse>();
         }
 
         public async Task<UserListResponse> GetUserAsync(string id)
         {
-            var response = await _httpClient.GetAsync<UserListResponse>($"{ApiEndpoints.Auth.GetUser}/{id}");
+            var response = await _httpClient.GetAsync<UserListResponse>($"{ApiEndpoints.Auth.Users.GetById}/{id}");
             if (response == null)
             {
                 throw new Exception("Không thể tải thông tin người dùng");
@@ -33,7 +33,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                await _httpClient.PutAsync<UpdateUserRequest, object>($"{ApiEndpoints.Auth.UpdateUser}/{id}", request);
+                await _httpClient.PutAsync<UpdateUserRequest, object>($"{ApiEndpoints.Auth.Users.Update}/{id}", request);
             }
             catch (HttpRequestException)
             {
@@ -45,7 +45,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                await _httpClient.PostAsync<ChangePasswordRequest, object>($"{ApiEndpoints.Auth.ResetPassword}/{id}", request);
+                await _httpClient.PostAsync<ChangePasswordRequest, object>($"{ApiEndpoints.Auth.Users.ResetPassword}/{id}", request);
             }
             catch (HttpRequestException)
             {
@@ -57,7 +57,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                await _httpClient.PostAsync<ToggleLockoutRequest, object>($"{ApiEndpoints.Auth.ToggleLockout}/{id}", request);
+                await _httpClient.PostAsync<ToggleLockoutRequest, object>($"{ApiEndpoints.Auth.Users.ToggleLockout}/{id}", request);
             }
             catch (HttpRequestException)
             {

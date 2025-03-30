@@ -16,8 +16,14 @@ namespace TranslationWeb.Models.Auth
         [JsonPropertyName("token")]
         public string Token { get; set; } = string.Empty;
 
-        [JsonPropertyName("expiresAt")]
+        [JsonPropertyName("refreshToken")]
+        public string RefreshToken { get; set; } = string.Empty;
+
+        [JsonPropertyName("expiration")]
         public DateTime ExpiresAt { get; set; }
+
+        [JsonPropertyName("refreshTokenExpiration")]
+        public DateTime RefreshTokenExpiresAt { get; set; }
 
         [JsonPropertyName("success")]
         public bool Success { get; set; }
@@ -30,5 +36,18 @@ namespace TranslationWeb.Models.Auth
 
         [JsonIgnore]
         public bool IsAdmin => Roles.Contains("Admin");
+
+        [JsonPropertyName("rememberMe")]
+        public bool RememberMe { get; set; }
+
+        [JsonPropertyName("lastActivityAt")]
+        public DateTime LastActivityAt { get; set; }
+
+        public bool IsAccessTokenExpired() => DateTime.Now >= ExpiresAt;
+        
+        public bool IsRefreshTokenExpired() => DateTime.Now >= RefreshTokenExpiresAt;
+        
+        public bool ShouldRefreshToken() => 
+            DateTime.Now.AddMinutes(5) >= ExpiresAt && !IsRefreshTokenExpired();
     }
 }

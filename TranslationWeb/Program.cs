@@ -72,6 +72,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<CustomAuthenticationStateProvider>());
 
 // Register other services
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ITranslationApiService, TranslationApiService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
