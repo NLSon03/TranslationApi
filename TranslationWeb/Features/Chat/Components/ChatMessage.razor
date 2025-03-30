@@ -1,0 +1,32 @@
+
+@using TranslationWeb.Models.ChatMessage
+
+<div class="message @(IsUserMessage ? "message-user" : "message-ai")">
+    <div class="message-content">
+        @if (IsLoading)
+        {
+            <div class="loading-dots">AI đang trả lời</div>
+        }
+        else
+        {
+            @Message.Content
+        }
+    </div>
+    <div class="message-time">
+        @Message.SentAt.ToString("HH:mm")
+        @if (Message.ResponseTime.HasValue)
+        {
+            <span class="ms-2 text-muted">(@(Message.ResponseTime.Value)ms)</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ChatMessageResponse Message { get; set; } = new();
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private bool IsUserMessage => Message.SenderType.ToLower() == "user";
+}

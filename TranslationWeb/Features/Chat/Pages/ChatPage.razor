@@ -1,0 +1,209 @@
+
+@page "/chat"
+@using System.Security.Claims
+@using TranslationWeb.Models.ChatSession
+@using TranslationWeb.Models.ChatMessage
+@using TranslationWeb.Infrastructure.Interfaces
+@using TranslationWeb.Features.Chat.Components
+@inject IChatSessionService ChatSessionService
+@inject IChatMessageService ChatMessageService
+@inject IAuthService AuthService
+@inject IJSRuntime JS
+
+<div class="chat-container">
+    <div class="row h-100 g-0">
+        <!-- Danh sách phiên chat -->
+        <div class="col-md-3 session-list">
+            <div class="d-flex flex-column h-100">
+                <div class="p-3 border-bottom">
+                    <button class="btn btn-primary w-100" @onclick="CreateNewSession">
+                        <i class="bi bi-plus-circle me-2"></i>Tạo phiên chat mới
+                    </button>
+                </div>
+                <div class="overflow-auto flex-grow-1">
+                    @if (_sessions != null)
+                    {
+                        @foreach (var session in _sessions)
+                        {
+                            <div class="session-item p-3 border-bottom @(session.Id == _currentSessionId ? "active" : "")"
+                                 @onclick="() => SelectSession(session.Id)">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">@session.AIModelName</div>
+                                        <div class="small text-muted">
+                                            @session.StartedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </div>
+                                    @if (session.Status == "Active")
+                                    {
+                                        <span class="badge bg-success rounded-pill">Đang hoạt động</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Cửa sổ chat -->
+        <div class="col-md-9">
+            <div class="d-flex flex-column h-100">
+                @if (_currentSessionId != Guid.Empty)
+                {
+                    <!-- Tiêu đề phiên chat -->
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <i class="bi bi-chat-dots me-2"></i>
+                                    Chat với @(_currentSession?.AIModelName ?? "AI")
+                                </h5>
+                                @if (_currentSession?.Status == "Active")
+                                {
+                                    <small class="text-muted">Đang hoạt động</small>
+                                }
+                            </div>
+                            @if (_currentSession?.Status != "Ended")
+                            {
+                                <button class="btn btn-outline-danger" @onclick="EndCurrentSession">
+                                    <i class="bi bi-x-circle me-2"></i>Kết thúc
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Khu vực tin nhắn -->
+                    <div class="message-container flex-grow-1" id="messageContainer">
+                        @foreach (var message in _currentSession?.Messages ?? new List<ChatMessageResponse>())
+                        {
+                            <ChatMessage Message="message" />
+                        }
+                        @if (_isLoading)
+                        {
+                            var message = new ChatMessageResponse { SenderType = "AI", Content = "" };
+                            <ChatMessage Message="@message" IsLoading="true" />
+                        }
+                    </div>
+
+                    <!-- Khu vực nhập tin nhắn -->
+                    @if (_currentSession?.Status != "Ended")
+                    {
+                        <ChatInput OnSend="HandleMessageSend" />
+                    }
+                    else
+                    {
+                        <div class="p-3 bg-light text-center">
+                            <span class="text-muted">Phiên chat đã kết thúc</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <div class="text-center">
+                            <i class="bi bi-chat-dots display-1 text-muted mb-3"></i>
+                            <h5>Chọn một phiên chat hoặc tạo phiên mới</h5>
+                            <p class="text-muted">
+                                Bắt đầu cuộc trò chuyện với AI để được hỗ trợ dịch thuật
+                            </p>
+                            <button class="btn btn-primary" @onclick="CreateNewSession">
+                                <i class="bi bi-plus-circle me-2"></i>Tạo phiên chat mới
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ChatSessionResponse>? _sessions;
+    private Guid _currentSessionId;
+    private ChatSessionResponse? _currentSession;
+    private string? _userId;
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthService.GetCurrentUserAsync();
+        _userId = authState.UserId;
+        
+        if (!string.IsNullOrEmpty(_userId))
+        {
+            await LoadSessions();
+        }
+    }
+
+    private async Task LoadSessions()
+    {
+        if (!string.IsNullOrEmpty(_userId))
+        {
+            _sessions = (await ChatSessionService.GetUserSessionsAsync(_userId)).ToList();
+        }
+    }
+
+    private async Task CreateNewSession()
+    {
+        var request = new CreateSessionRequest
+        {
+            AIModelId = Guid.Parse("00000000-0000-0000-0000-000000000000") // Thay bằng ID model mặc định
+        };
+
+        var newSession = await ChatSessionService.CreateSessionAsync(request);
+        if (newSession.Id != Guid.Empty)
+        {
+            await LoadSessions();
+            await SelectSession(newSession.Id);
+        }
+    }
+
+    private async Task SelectSession(Guid sessionId)
+    {
+        _currentSessionId = sessionId;
+        _currentSession = await ChatSessionService.GetSessionByIdAsync(sessionId);
+        StateHasChanged();
+        await ScrollToBottom();
+    }
+
+    private async Task HandleMessageSend(SendMessageRequest request)
+    {
+        if (_currentSessionId == Guid.Empty)
+            return;
+
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            request.SessionId = _currentSessionId;
+            var response = await ChatMessageService.SendMessageAsync(request);
+            
+            if (response.Id != Guid.Empty)
+            {
+                await SelectSession(_currentSessionId);
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EndCurrentSession()
+    {
+        if (_currentSessionId != Guid.Empty)
+        {
+            await ChatSessionService.EndSessionAsync(_currentSessionId);
+            await SelectSession(_currentSessionId);
+            await LoadSessions();
+        }
+    }
+
+    private async Task ScrollToBottom()
+    {
+        await JS.InvokeVoidAsync("scrollToBottom", "messageContainer");
+    }
+}

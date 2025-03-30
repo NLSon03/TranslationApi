@@ -1,0 +1,137 @@
+
+/* Chat container styles */
+.chat-container {
+    height: calc(100vh - 100px); /* Adjust based on your layout */
+}
+
+/* Session list styles */
+.session-list {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+.session-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.session-item:hover {
+    background-color: #e9ecef;
+}
+
+.session-item.active {
+    background-color: #e9ecef;
+}
+
+/* Message styles */
+.message-container {
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.message {
+    max-width: 80%;
+    margin-bottom: 1rem;
+    clear: both;
+}
+
+.message-user {
+    float: right;
+}
+
+.message-ai {
+    float: left;
+}
+
+.message-content {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+}
+
+.message-user .message-content {
+    background-color: #007bff;
+    color: white;
+    border-top-right-radius: 0.25rem;
+}
+
+.message-ai .message-content {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-top-left-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Input area styles */
+.chat-input {
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+    background-color: #fff;
+}
+
+.chat-input textarea {
+    resize: none;
+    border-radius: 1.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.chat-input button {
+    border-radius: 1.5rem;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading indicator */
+.loading-dots {
+    display: inline-block;
+}
+
+.loading-dots::after {
+    content: '...';
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 56px);
+    }
+
+    .message {
+        max-width: 90%;
+    }
+}
