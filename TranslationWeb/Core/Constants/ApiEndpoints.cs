@@ -17,6 +17,11 @@ namespace TranslationWeb.Core.Constants
             public static string Login => $"{Base}/login";
             public static string Register => $"{Base}/register";
             public static string CurrentUser => $"{Base}/current-user";
+            public static string GetUsers => $"{Base}/users";
+            public static string GetUser => $"{Base}/users";
+            public static string UpdateUser => $"{Base}/users";
+            public static string ResetPassword => $"{Base}/users";
+            public static string ToggleLockout => $"{Base}/users";
         }
 
         public static class Feedback

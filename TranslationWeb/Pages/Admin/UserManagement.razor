@@ -1,0 +1,185 @@
+@page "/admin/users"
+@using TranslationWeb.Infrastructure.Interfaces
+@using TranslationWeb.Models.Auth
+@attribute [Authorize(Roles = "Admin")]
+@inject IUserManagementService UserManagementService
+@inject IToastService ToastService
+
+<h3>Quản lý người dùng</h3>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="RefreshUsers">
+        <i class="fas fa-sync-alt"></i> Làm mới
+    </button>
+</div>
+
+@if (_users == null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tên người dùng</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in _users)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.Email</td>
+                        <td>@string.Join(", ", user.Roles)</td>
+                        <td>
+                            @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now)
+                            {
+                                <span class="badge bg-danger">Đã khóa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-primary" @onclick="() => ShowEditDialog(user)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" @onclick="() => ShowResetPasswordDialog(user)">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                @if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.Now)
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="() => ToggleUserLockout(user, false)">
+                                        <i class="fas fa-lock-open"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ToggleUserLockout(user, true)">
+                                        <i class="fas fa-lock"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (_showEditDialog)
+{
+    <EditUserDialog User="_selectedUser"
+                    OnSave="SaveUser"
+                    OnCancel="() => _showEditDialog = false" />
+}
+
+@if (_showResetPasswordDialog)
+{
+    <ResetPasswordDialog UserId="_selectedUser.Id"
+                        OnSave="ResetPassword"
+                        OnCancel="() => _showResetPasswordDialog = false" />
+}
+
+@code {
+    private List<UserListResponse>? _users;
+    private UserListResponse? _selectedUser;
+    private bool _showEditDialog;
+    private bool _showResetPasswordDialog;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            _users = await UserManagementService.GetUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Không thể tải danh sách người dùng");
+        }
+    }
+
+    private async Task RefreshUsers()
+    {
+        await LoadUsers();
+    }
+
+    private void ShowEditDialog(UserListResponse user)
+    {
+        _selectedUser = user;
+        _showEditDialog = true;
+    }
+
+    private void ShowResetPasswordDialog(UserListResponse user)
+    {
+        _selectedUser = user;
+        _showResetPasswordDialog = true;
+    }
+
+    private async Task SaveUser(UpdateUserRequest request)
+    {
+        try
+        {
+            if (_selectedUser != null)
+            {
+                await UserManagementService.UpdateUserAsync(_selectedUser.Id, request);
+                ToastService.ShowSuccess("Cập nhật thông tin người dùng thành công");
+                _showEditDialog = false;
+                await LoadUsers();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Không thể cập nhật thông tin người dùng");
+        }
+    }
+
+    private async Task ResetPassword(ChangePasswordRequest request)
+    {
+        try
+        {
+            if (_selectedUser != null)
+            {
+                await UserManagementService.ResetPasswordAsync(_selectedUser.Id, request);
+                ToastService.ShowSuccess("Đặt lại mật khẩu thành công");
+                _showResetPasswordDialog = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Không thể đặt lại mật khẩu");
+        }
+    }
+
+    private async Task ToggleUserLockout(UserListResponse user, bool isLocked)
+    {
+        try
+        {
+            await UserManagementService.ToggleLockoutAsync(user.Id, new ToggleLockoutRequest { IsLocked = isLocked });
+            ToastService.ShowSuccess($"Đã {(isLocked ? "khóa" : "mở khóa")} tài khoản thành công");
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Không thể {(isLocked ? "khóa" : "mở khóa")} tài khoản");
+        }
+    }
+}

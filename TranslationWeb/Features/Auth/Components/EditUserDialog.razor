@@ -1,0 +1,84 @@
+@using TranslationWeb.Models.Auth
+
+<div class="modal fade show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa người dùng</h5>
+                <button type="button" class="btn-close" @onclick="OnCancel"></button>
+            </div>
+            <EditForm Model="@_model" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Tên người dùng</label>
+                        <InputText id="userName" class="form-control" @bind-Value="_model.UserName" />
+                        <ValidationMessage For="@(() => _model.UserName)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <InputText id="email" class="form-control" @bind-Value="_model.Email" />
+                        <ValidationMessage For="@(() => _model.Email)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò</label>
+                        @foreach (var role in _availableRoles)
+                        {
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" 
+                                             @bind-Value="@_selectedRoles[role]"
+                                             id="@($"role_{role}")" />
+                                <label class="form-check-label" for="@($"role_{role}")">
+                                    @role
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="OnCancel">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>
+
+@code {
+    [Parameter] public UserListResponse? User { get; set; }
+    [Parameter] public EventCallback<UpdateUserRequest> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private UpdateUserRequest _model = new() { UserName = "", Email =""};
+    private Dictionary<string, bool> _selectedRoles = new();
+    private readonly List<string> _availableRoles = new() { "Admin", "User" };
+
+    protected override void OnParametersSet()
+    {
+        if (User != null)
+        {
+            _model = new UpdateUserRequest
+            {
+                UserName = User.UserName,
+                Email = User.Email,
+                Roles = User.Roles
+            };
+
+            _selectedRoles = _availableRoles.ToDictionary(
+                role => role,
+                role => User.Roles.Contains(role)
+            );
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        _model.Roles = _selectedRoles
+            .Where(kvp => kvp.Value)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        await OnSave.InvokeAsync(_model);
+    }
+}

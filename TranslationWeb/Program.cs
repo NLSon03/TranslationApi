@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
+using Blazored.Toast;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Core.Services;
@@ -77,6 +78,10 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IAIModelService, AIModelService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+
+// Register Blazored Toast
+builder.Services.AddBlazoredToast();
 
 // Build and configure the application
 var host = builder.Build();
