@@ -1,4 +1,3 @@
-
 @using TranslationWeb.Models.ChatMessage
 
 <div class="message @(IsUserMessage ? "message-user" : "message-ai")">
@@ -12,14 +11,77 @@
             @Message.Content
         }
     </div>
-    <div class="message-time">
-        @Message.SentAt.ToString("HH:mm")
-        @if (Message.ResponseTime.HasValue)
+    <div class="message-footer d-flex justify-content-between align-items-center">
+        <div class="message-time">
+            @Message.SentAt.ToString("HH:mm")
+            @if (Message.ResponseTime.HasValue)
+            {
+                <span class="ms-2 text-muted">(@(Message.ResponseTime.Value)ms)</span>
+            }
+        </div>
+        @if (!IsUserMessage && !IsLoading)
         {
-            <span class="ms-2 text-muted">(@(Message.ResponseTime.Value)ms)</span>
+            <div class="message-actions">
+                @if (!Message.HasFeedback)
+                {
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill"
+                        @onclick="() => ShowFeedbackDialog(Message.Id)">
+                        <i class="bi bi-emoji-smile me-1"></i> Đánh giá
+                    </button>
+                }
+                else
+                {
+                    <span class="text-success">
+                        <i class="bi bi-check-circle-fill"></i> Đã đánh giá
+                    </span>
+                }
+            </div>
         }
     </div>
 </div>
+
+@if (showFeedbackDialog)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đánh giá câu trả lời</h5>
+                    <button type="button" class="btn-close" @onclick="CloseFeedbackDialog"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá của bạn</label>
+                        <div class="btn-group w-100">
+                            Severity Code Description Project File Line Suppression State Details
+                            Error (active) CS1525 Invalid expression term ')' TranslationWeb
+                            D:\ProjectCaNhan\TranslationApi\TranslationWeb\Features\Chat\Components\ChatMessage.razor 60
+
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bình luận (không bắt buộc)</label>
+                        <textarea class="form-control" rows="3" @bind="feedbackComment"
+                            placeholder="Nhập ý kiến của bạn về câu trả lời này..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseFeedbackDialog">Đóng</button>
+                    <button type="button" class="btn btn-primary" @onclick="SubmitFeedback"
+                        disabled="@(!selectedRating?.Any() ?? true)">
+                        Gửi đánh giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@using TranslationWeb.Infrastructure.Interfaces
+@using TranslationWeb.Models.Feedback
+@inject IFeedbackService FeedbackService
+@inject ILogger<ChatMessage> Logger
 
 @code {
     [Parameter]
@@ -28,5 +90,53 @@
     [Parameter]
     public bool IsLoading { get; set; }
 
+    [Parameter]
+    public EventCallback<Guid> OnFeedbackSubmitted { get; set; }
+
     private bool IsUserMessage => Message.SenderType == SenderType.User;
+    private bool showFeedbackDialog;
+    private string? selectedRating;
+    private string feedbackComment = string.Empty;
+
+    private void ShowFeedbackDialog(Guid messageId)
+    {
+        showFeedbackDialog = true;
+        selectedRating = null;
+        feedbackComment = string.Empty;
+    }
+
+    private void CloseFeedbackDialog()
+    {
+        showFeedbackDialog = false;
+        selectedRating = null;
+        feedbackComment = string.Empty;
+    }
+
+    private async Task SubmitFeedback()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(selectedRating))
+            {
+                return;
+            }
+
+            var request = new CreateFeedbackRequest
+            {
+                MessageId = Message.Id,
+                Rating = selectedRating,
+                Comment = feedbackComment
+            };
+
+            await FeedbackService.CreateFeedbackAsync(request);
+            await OnFeedbackSubmitted.InvokeAsync(Message.Id);
+
+            CloseFeedbackDialog();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error submitting feedback for message {MessageId}", Message.Id);
+            // Có thể thêm thông báo lỗi cho người dùng ở đây
+        }
+    }
 }

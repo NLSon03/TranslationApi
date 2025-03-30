@@ -9,8 +9,8 @@
 
 @implements IDisposable
 <div class="page">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light border-bottom">
             <div class="container">
                 <NavLink class="navbar-brand" href="/">
                     <i class="bi bi-translate me-2"></i> AI Translation
@@ -19,8 +19,8 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between align-items-center">
+                    <ul class="navbar-nav flex-grow-1 gap-2">
                         <li class="nav-item">
                             <NavLink class="nav-link rounded-pill px-3" href="/" Match="NavLinkMatch.All">
                                 <i class="bi bi-house-door me-1"></i> Trang chủ
@@ -37,15 +37,15 @@
                                     <a class="nav-link dropdown-toggle rounded-pill px-3" href="#" id="chatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="bi bi-chat-dots me-1"></i> Chat
                                     </a>
-                                    <ul class="dropdown-menu rounded-4 shadow-sm border-0" aria-labelledby="chatDropdown">
-                                        <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3" href="/chat">
-                                                <i class="bi bi-chat me-1"></i> Chat với AI
+                                    <ul class="dropdown-menu rounded-4 shadow-sm border-0 p-2" aria-labelledby="chatDropdown">
+                                        <li class="mb-1">
+                                            <NavLink class="dropdown-item rounded-3 px-3 py-2" href="/chat">
+                                                <i class="bi bi-chat me-2"></i> Chat với AI
                                             </NavLink>
                                         </li>
                                         <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3" href="/sessions">
-                                                <i class="bi bi-clock-history me-1"></i> Lịch sử phiên chat
+                                            <NavLink class="dropdown-item rounded-3 px-3 py-2" href="/sessions">
+                                                <i class="bi bi-clock-history me-2"></i> Lịch sử phiên chat
                                             </NavLink>
                                         </li>
                                     </ul>
@@ -93,22 +93,30 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3 pt-3">
-            @Body
+    <div class="container py-4">
+        <main role="main" class="bg-white rounded-4 shadow-sm">
+            <div class="p-4">
+                @Body
+            </div>
         </main>
     </div>
 
-    <footer class="border-top footer bg-light text-secondary mt-auto">
+    <footer class="footer text-secondary mt-auto">
         <div class="container">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center py-3">
-                <div class="mb-2 mb-md-0">
-                    &copy; @DateTime.Now.Year - AI Translation
+            <div class="row py-4">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <span class="fw-light">&copy; @DateTime.Now.Year - AI Translation</span>
                 </div>
-                <div>
-                    <a href="/privacy" class="text-secondary me-3"><i class="bi bi-shield-check me-1"></i>Chính sách bảo mật</a>
-                    <a href="/terms" class="text-secondary me-3"><i class="bi bi-file-text me-1"></i>Điều khoản sử dụng</a>
-                    <a href="/contact" class="text-secondary"><i class="bi bi-envelope me-1"></i>Liên hệ</a>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="/privacy" class="text-secondary text-decoration-none me-3">
+                        <i class="bi bi-shield-check me-1"></i>Chính sách bảo mật
+                    </a>
+                    <a href="/terms" class="text-secondary text-decoration-none me-3">
+                        <i class="bi bi-file-text me-1"></i>Điều khoản sử dụng
+                    </a>
+                    <a href="/contact" class="text-secondary text-decoration-none">
+                        <i class="bi bi-envelope me-1"></i>Liên hệ
+                    </a>
                 </div>
             </div>
         </div>
