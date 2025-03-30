@@ -1,3 +1,4 @@
-public enum SenderType{
-    User,AI
+public enum SenderType
+{
+    User, AI
 }

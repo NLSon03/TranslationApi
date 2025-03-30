@@ -96,4 +96,4 @@ namespace TranslationApi.Application.Services
             return session?.UserId == userId;
         }
     }
-} 
+}

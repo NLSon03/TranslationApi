@@ -33,7 +33,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<TranslationRequest,TranslationResponse>(
+                var response = await _httpService.PostAsync<TranslationRequest, TranslationResponse>(
                     ApiEndpoints.Translation.Translate,
                     request);
                 return response ?? new TranslationResponse

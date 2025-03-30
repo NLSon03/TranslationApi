@@ -10,13 +10,13 @@ namespace TranslationApi.Application.Mappings
         public ChatSessionMappingProfile()
         {
             CreateMap<ChatSession, ChatSessionDto>()
-                .ForMember(dest => dest.AIModelName, 
+                .ForMember(dest => dest.AIModelName,
                     opt => opt.MapFrom(src => src.AIModel.Name));
 
             CreateMap<ChatSession, ChatSessionDetailDto>()
-                .ForMember(dest => dest.AIModelName, 
+                .ForMember(dest => dest.AIModelName,
                     opt => opt.MapFrom(src => src.AIModel.Name))
-                .ForMember(dest => dest.Messages, 
+                .ForMember(dest => dest.Messages,
                     opt => opt.MapFrom(src => src.Messages));
 
             CreateMap<ChatMessage, ChatMessageDto>();

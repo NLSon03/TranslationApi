@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TranslationApi.Application.Interfaces;
 using TranslationApi.Application.Contracts;
+using TranslationApi.Application.Interfaces;
 
 namespace TranslationApi.API.Controllers
 {

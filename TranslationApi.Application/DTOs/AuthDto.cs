@@ -36,4 +36,4 @@ namespace TranslationApi.Application.DTOs
         public DateTime Expiration { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
     }
-} 
+}

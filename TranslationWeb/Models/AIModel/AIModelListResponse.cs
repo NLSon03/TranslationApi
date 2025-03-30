@@ -1,6 +1,3 @@
-
-using System.Text.Json.Serialization;
-
 namespace TranslationWeb.Models.AIModel
 {
     public class AIModelListResponse : AIModelApiResponse<IEnumerable<AIModelResponse>>

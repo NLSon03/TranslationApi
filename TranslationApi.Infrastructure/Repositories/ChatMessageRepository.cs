@@ -1,8 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
 using TranslationApi.Domain.Interfaces;

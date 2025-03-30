@@ -7,4 +7,4 @@ namespace TranslationWeb.Infrastructure.Interfaces
         Task<IEnumerable<Language>> GetLanguagesAsync();
         Task<TranslationResponse> TranslateTextAsync(TranslationRequest request);
     }
-} 
+}

@@ -1,9 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Interfaces;
 using TranslationApi.Infrastructure.Data;
 
@@ -83,4 +79,4 @@ namespace TranslationApi.Infrastructure.Repositories
             return await _context.SaveChangesAsync();
         }
     }
-} 
+}

@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Application.Interfaces
@@ -8,4 +7,4 @@ namespace TranslationApi.Application.Interfaces
         string CreateToken(ApplicationUser user, List<string> roles);
         DateTime GetExpirationDate();
     }
-} 
+}

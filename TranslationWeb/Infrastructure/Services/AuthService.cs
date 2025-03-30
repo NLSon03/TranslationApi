@@ -26,7 +26,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<LoginRequest,AuthResponse>(
+                var response = await _httpService.PostAsync<LoginRequest, AuthResponse>(
                     ApiEndpoints.Auth.Login,
                     loginRequest
                     );
@@ -55,7 +55,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<RegisterRequest,AuthResponse>(
+                var response = await _httpService.PostAsync<RegisterRequest, AuthResponse>(
                     ApiEndpoints.Auth.Register,
                     registerRequest
                     );
@@ -100,7 +100,7 @@ namespace TranslationWeb.Infrastructure.Services
                     await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(response);
                     return response;
                 }
-                
+
                 // Nếu không lấy được thông tin mới, xóa session cũ
                 await ((CustomAuthenticationStateProvider)_authStateProvider).UpdateAuthenticationState(null);
                 return new AuthResponse { Success = false, Message = "Không thể lấy thông tin người dùng" };

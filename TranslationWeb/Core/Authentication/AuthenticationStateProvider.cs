@@ -42,10 +42,10 @@ namespace TranslationWeb.Core.Authentication
                 {
                     // Lưu session mới
                     await _localStorage.SetItemAsync("user_session", userSession);
-                    
+
                     // Tạo claims principal mới
                     claimsPrincipal = CreateClaimsPrincipal(userSession);
-                    
+
                     // Kiểm tra xem claims principal có được tạo đúng không
                     if (claimsPrincipal.Identity?.IsAuthenticated != true)
                     {
@@ -118,4 +118,4 @@ namespace TranslationWeb.Core.Authentication
             }
         }
     }
-} 
+}

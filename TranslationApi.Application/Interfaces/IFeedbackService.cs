@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
 
@@ -18,4 +15,4 @@ namespace TranslationApi.Application.Interfaces
         Task UpdateFeedbackAsync(Guid id, FeedbackRating rating, string comment);
         Task DeleteFeedbackAsync(Guid id);
     }
-} 
+}

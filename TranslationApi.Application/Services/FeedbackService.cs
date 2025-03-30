@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
@@ -74,7 +71,7 @@ namespace TranslationApi.Application.Services
             {
                 feedback.Rating = rating;
                 feedback.Comment = comment;
-                
+
                 await _unitOfWork.Feedbacks.UpdateAsync(feedback);
                 await _unitOfWork.CompleteAsync();
             }
@@ -90,4 +87,4 @@ namespace TranslationApi.Application.Services
             }
         }
     }
-} 
+}

@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using TranslationWeb.Core.Constants;
 using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Models.AIModel;
@@ -24,12 +23,12 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 _logger.LogInformation("Đang gọi API để lấy danh sách AI models");
                 var response = await _httpService.GetAsync<AIModelApiResponse<IEnumerable<AIModelResponse>>>(ApiEndpoints.AIModel.Base);
-                
+
                 if (response == null)
                 {
                     _logger.LogWarning("API trả về response null");
-                    return new AIModelListResponse 
-                    { 
+                    return new AIModelListResponse
+                    {
                         Success = false,
                         Message = "Không nhận được phản hồi từ server",
                         Data = new List<AIModelResponse>()
@@ -44,20 +43,20 @@ namespace TranslationWeb.Infrastructure.Services
                 };
 
                 _logger.LogInformation("Đã nhận được {count} models từ API", result.Models.Count());
-                
+
                 if (!result.Success)
                 {
                     _logger.LogWarning("API trả về thất bại với message: {message}", result.Message);
                 }
-                
+
                 return result;
             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "Lỗi kết nối khi gọi API get all models");
-                return new AIModelListResponse 
-                { 
-                    Success = false, 
+                return new AIModelListResponse
+                {
+                    Success = false,
                     Message = "Không thể kết nối đến server. Vui lòng thử lại sau.",
                     Data = new List<AIModelResponse>()
                 };
@@ -65,9 +64,9 @@ namespace TranslationWeb.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi không xác định khi lấy danh sách AI models");
-                return new AIModelListResponse 
-                { 
-                    Success = false, 
+                return new AIModelListResponse
+                {
+                    Success = false,
                     Message = "Đã xảy ra lỗi khi lấy danh sách models. Vui lòng thử lại sau.",
                     Data = new List<AIModelResponse>()
                 };

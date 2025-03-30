@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
 
@@ -14,4 +11,4 @@ namespace TranslationApi.Domain.Interfaces
         Task<double> GetAverageResponseTimeAsync(Guid sessionId);
         Task<ChatMessage?> GetLastMessageInSessionAsync(Guid sessionId);
     }
-} 
+}

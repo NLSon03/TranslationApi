@@ -1,6 +1,6 @@
+using TranslationWeb.Core.Constants;
 using TranslationWeb.Infrastructure.Interfaces;
 using TranslationWeb.Models.Auth;
-using TranslationWeb.Core.Constants;
 
 namespace TranslationWeb.Infrastructure.Services
 {

@@ -1,8 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
 using TranslationApi.Domain.Interfaces;
@@ -53,7 +49,7 @@ namespace TranslationApi.Infrastructure.Repositories
         public async Task<Dictionary<FeedbackRating, int>> GetRatingDistributionAsync(Guid sessionId)
         {
             var feedbacks = await GetFeedbacksBySessionIdAsync(sessionId);
-            
+
             var distribution = new Dictionary<FeedbackRating, int>();
             foreach (FeedbackRating rating in Enum.GetValues(typeof(FeedbackRating)))
             {
@@ -63,5 +59,4 @@ namespace TranslationApi.Infrastructure.Repositories
             return distribution;
         }
     }
-} 
- 
+}

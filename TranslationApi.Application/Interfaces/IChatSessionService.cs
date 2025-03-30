@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Application.DTOs;
-using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Application.Interfaces
 {
@@ -19,4 +15,4 @@ namespace TranslationApi.Application.Interfaces
         Task DeleteSessionAsync(Guid id);
         Task<bool> IsUserSessionOwnerAsync(Guid sessionId, string userId);
     }
-} 
+}

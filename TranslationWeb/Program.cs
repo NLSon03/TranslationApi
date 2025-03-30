@@ -1,9 +1,9 @@
+using Blazored.Toast;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
-using Blazored.Toast;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Core.Services;

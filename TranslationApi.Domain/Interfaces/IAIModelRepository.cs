@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Domain.Interfaces
@@ -12,4 +9,4 @@ namespace TranslationApi.Domain.Interfaces
         Task DeactivateModelAsync(Guid id);
         Task<bool> ExistsAsync(string name, string version);
     }
-} 
+}

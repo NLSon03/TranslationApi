@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace TranslationApi.Domain.Interfaces
 {
@@ -11,22 +7,22 @@ namespace TranslationApi.Domain.Interfaces
         // Create
         Task<T> AddAsync(T entity);
         Task AddRangeAsync(IEnumerable<T> entities);
-        
+
         // Read
         Task<T?> GetByIdAsync(Guid id);
         Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
-        
+
         // Update
         Task UpdateAsync(T entity);
         Task UpdateRangeAsync(IEnumerable<T> entities);
-        
+
         // Delete
         Task RemoveAsync(T entity);
         Task RemoveRangeAsync(IEnumerable<T> entities);
-        
+
         // Save
         Task<int> SaveChangesAsync();
     }
-} 
+}

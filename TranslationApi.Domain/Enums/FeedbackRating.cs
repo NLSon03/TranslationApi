@@ -5,4 +5,4 @@ namespace TranslationApi.Domain.Enums
         Like,
         Dislike
     }
-} 
+}

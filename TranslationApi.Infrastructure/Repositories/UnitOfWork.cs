@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Interfaces;
 using TranslationApi.Infrastructure.Data;
 
@@ -50,4 +48,4 @@ namespace TranslationApi.Infrastructure.Repositories
             GC.SuppressFinalize(this);
         }
     }
-} 
+}

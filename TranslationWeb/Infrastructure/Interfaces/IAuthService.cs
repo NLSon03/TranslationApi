@@ -9,4 +9,4 @@ namespace TranslationWeb.Infrastructure.Interfaces
         Task<AuthResponse> GetCurrentUserAsync();
         Task LogoutAsync();
     }
-} 
+}

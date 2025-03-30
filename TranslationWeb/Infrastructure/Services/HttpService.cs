@@ -83,15 +83,15 @@ namespace TranslationWeb.Infrastructure.Services
                 {
                     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
                     await AddJwtHeader();
-                    
+
                     var response = await _httpClient.GetAsync(url, cts.Token);
-                    
+
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
                         await HandleUnauthorized();
                         continue;
                     }
-                    
+
                     response.EnsureSuccessStatusCode();
                     return await response.Content.ReadFromJsonAsync<T>(_jsonOptions);
                 }
@@ -118,7 +118,7 @@ namespace TranslationWeb.Infrastructure.Services
                     _logger.LogError(ex, "Unexpected error executing GET request to {Url}", url);
                     throw;
                 }
-                
+
                 // Wait before retry with exponential backoff
                 if (i < _maxRetries - 1)
                 {
@@ -126,7 +126,7 @@ namespace TranslationWeb.Infrastructure.Services
                     await Task.Delay(delay);
                 }
             }
-            
+
             throw new HttpRequestException($"Failed to execute GET request to {url} after {_maxRetries} attempts");
         }
 
@@ -337,7 +337,7 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 var authResult = await _localStorage.GetItemAsync<AuthResponse>("user_session");
-                
+
                 // Kiểm tra token có hiệu lực
                 if (authResult != null && !string.IsNullOrEmpty(authResult.Token))
                 {
@@ -348,7 +348,7 @@ namespace TranslationWeb.Infrastructure.Services
                         return;
                     }
 
-                    _logger.LogInformation("Đang thêm JWT Token vào header: {Token}", 
+                    _logger.LogInformation("Đang thêm JWT Token vào header: {Token}",
                         authResult.Token.Substring(0, Math.Min(10, authResult.Token.Length)) + "...");
 
                     // Xóa header authorization cũ nếu có
@@ -379,7 +379,7 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 // Xóa token khỏi local storage
                 await _localStorage.RemoveItemAsync("user_session");
-                
+
                 // Xóa Authorization header
                 if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
                 {
@@ -391,7 +391,7 @@ namespace TranslationWeb.Infrastructure.Services
 
                 // Lưu URL hiện tại để redirect sau khi đăng nhập lại
                 var returnUrl = Uri.EscapeDataString(_navigationManager.Uri);
-                
+
                 // Kiểm tra để tránh redirect loop
                 if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase))
                 {

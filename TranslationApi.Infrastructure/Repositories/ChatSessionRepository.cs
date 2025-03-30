@@ -1,7 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Interfaces;
 using TranslationApi.Infrastructure.Data;
@@ -55,4 +52,4 @@ namespace TranslationApi.Infrastructure.Repositories
             }
         }
     }
-} 
+}

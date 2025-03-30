@@ -1,5 +1,3 @@
-using System;
-
 namespace TranslationApi.Application.DTOs
 {
     public class AIModelListDto

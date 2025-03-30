@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Domain.Enums;
@@ -36,11 +33,11 @@ namespace TranslationApi.API.Controllers
             // Lấy các phản hồi cả Like và Dislike
             var likeFeedbacks = await _feedbackService.GetFeedbacksByRatingAsync(FeedbackRating.Like);
             var dislikeFeedbacks = await _feedbackService.GetFeedbacksByRatingAsync(FeedbackRating.Dislike);
-            
+
             var allFeedbacks = new List<Feedback>();
             allFeedbacks.AddRange(likeFeedbacks);
             allFeedbacks.AddRange(dislikeFeedbacks);
-            
+
             return Ok(allFeedbacks);
         }
 
@@ -132,17 +129,17 @@ namespace TranslationApi.API.Controllers
         public async Task<ActionResult<Feedback>> GetFeedback(Guid id)
         {
             var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
-            
+
             if (feedback == null)
                 return NotFound();
-                
+
             var message = await _messageService.GetMessageByIdAsync(feedback.MessageId);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(message.SessionId);
-            
+
             if (session.UserId != userId && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             return Ok(feedback);
         }
 
@@ -150,19 +147,19 @@ namespace TranslationApi.API.Controllers
         public async Task<IActionResult> UpdateFeedback(Guid id, [FromBody] UpdateFeedbackRequest request)
         {
             var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
-            
+
             if (feedback == null)
                 return NotFound();
-                
+
             var message = await _messageService.GetMessageByIdAsync(feedback.MessageId);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(message.SessionId);
-            
+
             if (session.UserId != userId && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             await _feedbackService.UpdateFeedbackAsync(id, request.Rating, request.Comment);
-            
+
             return NoContent();
         }
 
@@ -170,19 +167,19 @@ namespace TranslationApi.API.Controllers
         public async Task<IActionResult> DeleteFeedback(Guid id)
         {
             var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
-            
+
             if (feedback == null)
                 return NotFound();
-                
+
             var message = await _messageService.GetMessageByIdAsync(feedback.MessageId);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(message.SessionId);
-            
+
             if (session.UserId != userId && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             await _feedbackService.DeleteFeedbackAsync(id);
-            
+
             return NoContent();
         }
     }
@@ -199,4 +196,4 @@ namespace TranslationApi.API.Controllers
         public FeedbackRating Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
     }
-} 
+}

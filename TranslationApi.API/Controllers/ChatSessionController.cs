@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 
@@ -50,13 +47,13 @@ namespace TranslationApi.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(id);
-            
+
             if (session == null)
                 return NotFound();
-                
+
             if (!await _sessionService.IsUserSessionOwnerAsync(id, userId) && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             return Ok(session);
         }
 
@@ -65,13 +62,13 @@ namespace TranslationApi.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionWithMessagesAsync(id);
-            
+
             if (session == null)
                 return NotFound();
-                
+
             if (!await _sessionService.IsUserSessionOwnerAsync(id, userId) && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             return Ok(session);
         }
 
@@ -79,7 +76,7 @@ namespace TranslationApi.API.Controllers
         public async Task<ActionResult<ChatSessionDto>> CreateSession(Guid modelId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             try
             {
                 var session = await _sessionService.CreateSessionAsync(userId, modelId);
@@ -96,15 +93,15 @@ namespace TranslationApi.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(id);
-            
+
             if (session == null)
                 return NotFound();
-                
+
             if (session.UserId != userId && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             await _sessionService.EndSessionAsync(id);
-            
+
             return NoContent();
         }
 
@@ -113,16 +110,16 @@ namespace TranslationApi.API.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var session = await _sessionService.GetSessionByIdAsync(id);
-            
+
             if (session == null)
                 return NotFound();
-                
+
             if (session.UserId != userId && !User.IsInRole("Admin"))
                 return Forbid();
-                
+
             await _sessionService.DeleteSessionAsync(id);
-            
+
             return NoContent();
         }
     }
-} 
+}
