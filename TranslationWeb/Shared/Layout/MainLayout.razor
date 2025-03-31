@@ -2,6 +2,8 @@
 @using TranslationWeb.Features.Auth.Components
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Authorization
+@using Blazored.Toast
+@using Blazored.Toast.Services
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject AuthenticationStateProvider AuthStateProvider
@@ -106,6 +108,7 @@
         </div>
     </footer>
 </div>
+<BlazoredToasts />
 
 @code {
     protected override void OnInitialized()

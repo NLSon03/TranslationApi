@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TranslationApi.Domain.Entities;
 
@@ -31,7 +31,7 @@ namespace TranslationApi.Infrastructure.Data
                 .HasOne(cs => cs.AIModel)
                 .WithMany(m => m.ChatSessions)
                 .HasForeignKey(cs => cs.AIModelId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<ChatMessage>()
                 .HasOne(cm => cm.Session)

@@ -140,13 +140,13 @@ namespace TranslationWeb.Infrastructure.Services
                     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
                     await AddJwtHeader();
 
-                    var content = new StringContent(
+                    var requestContent = new StringContent(
                         JsonSerializer.Serialize(data, _jsonOptions),
                         Encoding.UTF8,
                         "application/json"
                     );
 
-                    var response = await _httpClient.PostAsync(url, content, cts.Token);
+                    var response = await _httpClient.PostAsync(url, requestContent, cts.Token);
 
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
@@ -154,8 +154,24 @@ namespace TranslationWeb.Infrastructure.Services
                         continue;
                     }
 
-                    response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("API response: Status: {StatusCode}, Content: {Content}",
+                        response.StatusCode, responseContent);
+
+                    try
+                    {
+                        var result = JsonSerializer.Deserialize<TResponse>(responseContent, _jsonOptions);
+                        if (result == null)
+                        {
+                            throw new JsonException("Deserialized result is null");
+                        }
+                        return result;
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize response");
+                        throw new HttpRequestException($"Failed to parse API response: {responseContent}", ex);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -189,13 +205,13 @@ namespace TranslationWeb.Infrastructure.Services
                     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
                     await AddJwtHeader();
 
-                    var content = new StringContent(
+                    var requestContent = new StringContent(
                         JsonSerializer.Serialize(data, _jsonOptions),
                         Encoding.UTF8,
                         "application/json"
                     );
 
-                    var response = await _httpClient.PutAsync(url, content, cts.Token);
+                    var response = await _httpClient.PutAsync(url, requestContent, cts.Token);
 
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
@@ -203,8 +219,24 @@ namespace TranslationWeb.Infrastructure.Services
                         continue;
                     }
 
-                    response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("API response: Status: {StatusCode}, Content: {Content}",
+                        response.StatusCode, responseContent);
+
+                    try
+                    {
+                        var result = JsonSerializer.Deserialize<TResponse>(responseContent, _jsonOptions);
+                        if (result == null)
+                        {
+                            throw new JsonException("Deserialized result is null");
+                        }
+                        return result;
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize response");
+                        throw new HttpRequestException($"Failed to parse API response: {responseContent}", ex);
+                    }
                 }
                 catch (OperationCanceledException)
                 {

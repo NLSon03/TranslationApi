@@ -10,6 +10,6 @@ namespace TranslationWeb.Infrastructure.Interfaces
         Task<AIModelResponse> UpdateModelAsync(UpdateAIModelRequest request);
         Task<AIModelResponse> ActivateModelAsync(Guid id);
         Task<AIModelResponse> DeactivateModelAsync(Guid id);
-        Task<bool> DeleteModelAsync(Guid id);
+        Task<AIModelResponse> DeleteModelAsync(Guid id);
     }
 }

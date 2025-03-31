@@ -48,24 +48,63 @@ namespace TranslationApi.API.Controllers
         /// Gets all active AI models
         /// </summary>
         [HttpGet("active")]
-        public async Task<ActionResult<IEnumerable<AIModelListDto>>> GetActiveModels()
+        public async Task<ActionResult<object>> GetActiveModels()
         {
-            var models = await _modelService.GetActiveModelDtosAsync();
-            return Ok(models);
+            try
+            {
+                var models = await _modelService.GetActiveModelDtosAsync();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy danh sách models hoạt động thành công",
+                    data = models
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi lấy danh sách models hoạt động: " + ex.Message,
+                    data = new List<AIModelListDto>()
+                });
+            }
         }
 
         /// <summary>
         /// Gets an AI model by ID
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<AIModelDetailDto>> GetModelById(Guid id)
+        public async Task<ActionResult<object>> GetModelById(Guid id)
         {
-            var model = await _modelService.GetModelDtoByIdAsync(id);
+            try
+            {
+                var model = await _modelService.GetModelDtoByIdAsync(id);
 
-            if (model == null)
-                return NotFound();
+                if (model == null)
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy model",
+                        data = (object)null
+                    });
 
-            return Ok(model);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Lấy thông tin model thành công",
+                    data = model
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi lấy thông tin model: " + ex.Message,
+                    data = (object)null
+                });
+            }
         }
 
         /// <summary>
@@ -87,48 +126,114 @@ namespace TranslationApi.API.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateModel(Guid id, AIModelUpdateDto updateDto)
+        public async Task<ActionResult<object>> UpdateModel(Guid id, AIModelUpdateDto updateDto)
         {
-            var success = await _modelService.UpdateModelAsync(id, updateDto);
+            try
+            {
+                var success = await _modelService.UpdateModelAsync(id, updateDto);
 
-            if (!success)
-                return NotFound();
+                if (!success)
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy model cần cập nhật",
+                        data = (object)null
+                    });
 
-            return NoContent();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Cập nhật model thành công",
+                    data = (object)null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi cập nhật model: " + ex.Message,
+                    data = (object)null
+                });
+            }
         }
 
         /// <summary>
         /// Activates an AI model
         /// </summary>
-        [HttpPatch("{id}/activate")]
+        [HttpPost("{id}/activate")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ActivateModel(Guid id)
+        public async Task<ActionResult<object>> ActivateModel(Guid id)
         {
-            var model = await _modelService.GetModelDtoByIdAsync(id);
+            try
+            {
+                var model = await _modelService.GetModelDtoByIdAsync(id);
 
-            if (model == null)
-                return NotFound();
+                if (model == null)
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy model cần kích hoạt",
+                        data = (object)null
+                    });
 
-            await _modelService.ActivateModelAsync(id);
+                await _modelService.ActivateModelAsync(id);
 
-            return NoContent();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Kích hoạt model thành công",
+                    data = (object)null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi kích hoạt model: " + ex.Message,
+                    data = (object)null
+                });
+            }
         }
 
         /// <summary>
         /// Deactivates an AI model
         /// </summary>
-        [HttpPatch("{id}/deactivate")]
+        [HttpPost("{id}/deactivate")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeactivateModel(Guid id)
+        public async Task<ActionResult<object>> DeactivateModel(Guid id)
         {
-            var model = await _modelService.GetModelDtoByIdAsync(id);
+            try
+            {
+                var model = await _modelService.GetModelDtoByIdAsync(id);
 
-            if (model == null)
-                return NotFound();
+                if (model == null)
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy model cần vô hiệu hóa",
+                        data = (object)null
+                    });
 
-            await _modelService.DeactivateModelAsync(id);
+                await _modelService.DeactivateModelAsync(id);
 
-            return NoContent();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Vô hiệu hóa model thành công",
+                    data = (object)null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi vô hiệu hóa model: " + ex.Message,
+                    data = (object)null
+                });
+            }
         }
 
         /// <summary>
@@ -136,14 +241,36 @@ namespace TranslationApi.API.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteModel(Guid id)
+        public async Task<ActionResult<object>> DeleteModel(Guid id)
         {
-            var result = await _modelService.DeleteModelAsync(id);
+            try
+            {
+                var result = await _modelService.DeleteModelAsync(id);
 
-            if (!result)
-                return NotFound();
+                if (!result)
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy model cần xóa",
+                        data = (object)null
+                    });
 
-            return NoContent();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Xóa model thành công",
+                    data = (object)null
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Lỗi khi xóa model: " + ex.Message,
+                    data = (object)null
+                });
+            }
         }
     }
 }
