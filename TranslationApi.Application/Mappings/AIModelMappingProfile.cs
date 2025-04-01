@@ -1,3 +1,4 @@
+
 using AutoMapper;
 using TranslationApi.Application.DTOs;
 using TranslationApi.Domain.Entities;
@@ -8,17 +9,16 @@ namespace TranslationApi.Application.Mappings
     {
         public AIModelMappingProfile()
         {
-            // List DTO mapping
             CreateMap<AIModel, AIModelListDto>();
-
-            // Detail DTO mapping (inherits from List DTO)
             CreateMap<AIModel, AIModelDetailDto>();
+            
+            CreateMap<AIModelCreateDto, AIModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ChatSessions, opt => opt.Ignore());
 
-            // Create DTO mapping
-            CreateMap<AIModelCreateDto, AIModel>();
-
-            // Update DTO mapping
-            CreateMap<AIModelUpdateDto, AIModel>();
+            CreateMap<AIModelUpdateDto, AIModel>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.ChatSessions, opt => opt.Ignore());
         }
     }
 }

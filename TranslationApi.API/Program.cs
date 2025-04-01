@@ -5,8 +5,7 @@ using Microsoft.OpenApi.Models;
 using System.Net.Http.Headers;
 using System.Text;
 using TranslationApi.API.Configurations;
-using TranslationApi.Application.Interfaces;
-using TranslationApi.Application.Services;
+using TranslationApi.Application;
 using TranslationApi.Domain.Entities;
 using TranslationApi.Infrastructure;
 using TranslationApi.Infrastructure.Data;
@@ -84,21 +83,7 @@ builder.Services.AddCustomRateLimiting(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Cấu hình Gemini Service
-builder.Services.AddHttpClient<GeminiTranslationService>(client =>
-{
-    var apiUrl = builder.Configuration["GeminiApi:ApiUrl"];
-    if (string.IsNullOrEmpty(apiUrl))
-    {
-        throw new ArgumentNullException(nameof(apiUrl), "API URL cannot be null or empty.");
-    }
-
-    client.BaseAddress = new Uri(apiUrl);
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    client.DefaultRequestHeaders.Add("x-goog-api-key", builder.Configuration["GeminiApi:ApiKey"]);
-});
-
-builder.Services.AddScoped<ITranslationService, GeminiTranslationService>();
+// Configure services
 
 // Cấu hình Swagger với hỗ trợ JWT
 builder.Services.AddSwaggerGenConfigured();
