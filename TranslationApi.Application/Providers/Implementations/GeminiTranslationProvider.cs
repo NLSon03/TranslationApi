@@ -95,10 +95,15 @@ namespace TranslationApi.Application.Providers.Implementations
 
                 foreach (var chunk in textChunks)
                 {
-                    string prompt = $"Translate the following text from {GetLanguageName(request.SourceLanguage)} to {GetLanguageName(request.TargetLanguage)}. " +
-                                  $"Provide only the most literal translation possible, avoiding any paraphrasing or invented content. " +
-                                  $"Text to translate: {chunk}";
+                    var textType = PromptTemplates.DetectTextType(chunk);
+                    string prompt = PromptTemplates.GetTranslationPrompt(
+                        GetLanguageName(request.SourceLanguage),
+                        GetLanguageName(request.TargetLanguage),
+                        chunk,
+                        textType
+                    );
 
+                    var promptConfig = PromptTemplates.GetPromptConfig(textType);
                     var requestBody = new
                     {
                         contents = new[]
@@ -110,6 +115,13 @@ namespace TranslationApi.Application.Providers.Implementations
                                     new { text = prompt }
                                 }
                             }
+                        },
+                        generationConfig = new
+                        {
+                            temperature = promptConfig["temperature"],
+                            topP = promptConfig["topP"],
+                            maxOutputTokens = promptConfig["maxTokens"],
+                            stopSequences = promptConfig["stopSequences"]
                         }
                     };
 

@@ -1,0 +1,143 @@
+
+/* Skeleton Loading */
+.skeleton-loading {
+    padding: 15px;
+}
+
+.skeleton-line {
+    height: 20px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.skeleton-line.w-75 { width: 75%; }
+.skeleton-line.w-50 { width: 50%; }
+.skeleton-line.w-25 { width: 25%; }
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth Transitions */
+.translation-form {
+    --transition-duration: 0.3s;
+}
+
+.translation-form .form-control {
+    transition: border-color var(--transition-duration) ease-in-out,
+                box-shadow var(--transition-duration) ease-in-out;
+}
+
+.translation-form .btn {
+    transition: all var(--transition-duration) ease-in-out;
+}
+
+.translation-result {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Button States */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: button-loading 0.6s linear infinite;
+}
+
+@keyframes button-loading {
+    to { transform: rotate(360deg); }
+}
+
+/* History Cards Animation */
+.history-list .card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.history-list .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Copy Button Animation */
+.copy-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.copy-button::after {
+    content: "Đã sao chép!";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #28a745;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.copy-button.copied::after {
+    transform: translateY(0);
+}
+
+/* Language Switch Animation */
+.language-switch {
+    transition: transform 0.3s ease;
+}
+
+.language-switch:active {
+    transform: rotate(180deg);
+}
+
+/* Error Message Animation */
+.alert-danger {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Focus States */
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: none;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
