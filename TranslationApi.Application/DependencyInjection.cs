@@ -21,6 +21,7 @@ namespace TranslationApi.Application
             services.AddScoped<IChatMessageService, ChatMessageService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<IAIModelService, AIModelService>();
+            services.AddScoped<ITokenService, TokenService>();
 
             // Register Factory
             services.AddScoped<IAIProviderFactory, AIProviderFactory>();

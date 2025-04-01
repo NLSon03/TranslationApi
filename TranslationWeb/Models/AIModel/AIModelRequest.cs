@@ -12,6 +12,14 @@ namespace TranslationWeb.Models.AIModel
         [StringLength(20, ErrorMessage = "Phiên bản không được vượt quá 20 ký tự")]
         public string Version { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Loại model là bắt buộc")]
+        [StringLength(20, ErrorMessage = "Loại model không được vượt quá 20 ký tự")]
+        public string ModelType { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Provider là bắt buộc")]
+        [StringLength(20, ErrorMessage = "Provider không được vượt quá 20 ký tự")]
+        public string Provider { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Cấu hình là bắt buộc")]
         public string Config { get; set; } = string.Empty;
 
@@ -29,6 +37,14 @@ namespace TranslationWeb.Models.AIModel
         [Required(ErrorMessage = "Phiên bản là bắt buộc")]
         [StringLength(20, ErrorMessage = "Phiên bản không được vượt quá 20 ký tự")]
         public string Version { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Loại model là bắt buộc")]
+        [StringLength(20, ErrorMessage = "Loại model không được vượt quá 20 ký tự")]
+        public string ModelType { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Provider là bắt buộc")]
+        [StringLength(20, ErrorMessage = "Provider không được vượt quá 20 ký tự")]
+        public string Provider { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Cấu hình là bắt buộc")]
         public string Config { get; set; } = string.Empty;

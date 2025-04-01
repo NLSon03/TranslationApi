@@ -7,6 +7,8 @@ namespace TranslationWeb.Models.AIModel
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Version { get; set; } = string.Empty;
+        public string ModelType { get; set; } = string.Empty;
+        public string Provider { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public string Config { get; set; } = string.Empty;
         [JsonPropertyName("success")]

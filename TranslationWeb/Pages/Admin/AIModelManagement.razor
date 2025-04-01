@@ -98,10 +98,12 @@
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col" style="width: 30%">Tên Model</th>
-                                <th scope="col" style="width: 20%">Phiên bản</th>
-                                <th scope="col" style="width: 20%">Trạng thái</th>
-                                <th scope="col" style="width: 30%">Thao tác</th>
+                                <th scope="col" style="width: 25%">Tên Model</th>
+                                <th scope="col" style="width: 15%">Phiên bản</th>
+                                <th scope="col" style="width: 15%">Loại</th>
+                                <th scope="col" style="width: 15%">Provider</th>
+                                <th scope="col" style="width: 15%">Trạng thái</th>
+                                <th scope="col" style="width: 15%">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,6 +121,12 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-info">@model.Version</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@model.ModelType</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@model.Provider</span>
                                     </td>
                                     <td>
                                         @if (model.IsActive)
@@ -214,6 +222,30 @@
                                     <InputText @bind-Value="_modelForm.Version" class="form-control" id="modelVersion" placeholder="Phiên bản" />
                                     <label for="modelVersion">Phiên bản</label>
                                     <ValidationMessage For="@(() => _modelForm.Version)" class="text-danger" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputSelect @bind-Value="_modelForm.ModelType" class="form-select" id="modelType">
+                                        <option value="">Chọn loại model</option>
+                                        <option value="TRANSLATION">Translation</option>
+                                        <option value="CHAT">Chat</option>
+                                    </InputSelect>
+                                    <label for="modelType">Loại Model</label>
+                                    <ValidationMessage For="@(() => _modelForm.ModelType)" class="text-danger" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <InputSelect @bind-Value="_modelForm.Provider" class="form-select" id="provider">
+                                        <option value="">Chọn provider</option>
+                                        <option value="GEMINI">Gemini</option>
+                                        <option value="OPENAI">OpenAI</option>
+                                    </InputSelect>
+                                    <label for="provider">Provider</label>
+                                    <ValidationMessage For="@(() => _modelForm.Provider)" class="text-danger" />
                                 </div>
                             </div>
                         </div>
@@ -332,6 +364,8 @@
             {
                 Name = detailModel.Name,
                 Version = detailModel.Version,
+                ModelType = detailModel.ModelType,
+                Provider = detailModel.Provider,
                 Config = detailModel.Config,
                 IsActive = detailModel.IsActive
             };
