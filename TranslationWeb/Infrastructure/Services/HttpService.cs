@@ -38,36 +38,10 @@ namespace TranslationWeb.Infrastructure.Services
         private DateTime _lastConnectionCheck = DateTime.MinValue;
         private bool _isServerAvailable = true;
 
-        private async Task<bool> CheckServerConnection()
+        private Task<bool> CheckServerConnection()
         {
-            try
-            {
-                // 如果在最近30秒内已经检查过，直接返回上次的结果
-                if (DateTime.Now - _lastConnectionCheck < TimeSpan.FromSeconds(30))
-                {
-                    return _isServerAvailable;
-                }
-
-                await _connectionCheckLock.WaitAsync();
-                try
-                {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    var response = await _httpClient.GetAsync("api/health", cts.Token);
-                    _isServerAvailable = response.IsSuccessStatusCode;
-                    _lastConnectionCheck = DateTime.Now;
-                    return _isServerAvailable;
-                }
-                finally
-                {
-                    _connectionCheckLock.Release();
-                }
-            }
-            catch
-            {
-                _isServerAvailable = false;
-                _lastConnectionCheck = DateTime.Now;
-                return false;
-            }
+            // Luôn trả về true để bỏ qua việc kiểm tra health check
+            return Task.FromResult(true);
         }
 
         public async Task<T?> GetAsync<T>(string url)

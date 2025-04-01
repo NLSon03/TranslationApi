@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net.Http.Headers;
 using System.Text;
+using TranslationApi.API.Configurations;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Application.Services;
 using TranslationApi.Domain.Entities;
@@ -11,16 +12,15 @@ using TranslationApi.Infrastructure;
 using TranslationApi.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-// Đặt URL cụ thể
+// Configuration
 builder.WebHost.UseUrls("http://localhost:5292");
 
-// Đăng ký Infrastructure và Application services
+// Services
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
-// Đăng ký Identity với đầy đủ tính năng
+// Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     // Cấu hình các yêu cầu mật khẩu
@@ -42,44 +42,44 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders()
 .AddSignInManager<SignInManager<ApplicationUser>>();
 
-// Cấu hình JWT
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-builder.Services.AddAutoMapper(typeof(TranslationApi.Application.Mappings.AIModelMappingProfile).Assembly);
+//Đăng ký cấu hình JWT
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+builder.Services.AddOptions<JwtSettings>()
+    .Bind(builder.Configuration.GetSection(JwtSettings.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+// 3. Cấu hình JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
+    var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
-        ClockSkew = TimeSpan.Zero // Bỏ khoảng thời gian gia hạn mặc định 5 phút
+#pragma warning disable CS8602 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+#pragma warning disable CS8602 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        ClockSkew = TimeSpan.Zero
     };
 });
 
-// Cấu hình CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
-});
 
+// Other services
+builder.Services.AddAutoMapper(typeof(TranslationApi.Application.Mappings.AIModelMappingProfile).Assembly);
+// Cấu hình CORS
+builder.Services.AddCustomCors(builder.Configuration);
+builder.Services.AddCustomRateLimiting(builder.Configuration);
 // Add health checks
-builder.Services.AddHealthChecks();
+//builder.Services.AddHealthChecks();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -101,42 +101,7 @@ builder.Services.AddHttpClient<GeminiTranslationService>(client =>
 builder.Services.AddScoped<ITranslationService, GeminiTranslationService>();
 
 // Cấu hình Swagger với hỗ trợ JWT
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v1",
-        Title = "Translation API",
-        Description = "API for translating text using Gemini API",
-        Contact = new OpenApiContact { Name = "Translation App Team" },
-        License = new OpenApiLicense { Name = "Use under License" }
-    });
-
-    // Thêm cấu hình JWT cho Swagger
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGenConfigured();
 
 var app = builder.Build();
 
@@ -162,16 +127,21 @@ if (app.Environment.IsDevelopment())
     app.Logger.LogInformation("Swagger URL: {url}", "http://localhost:5292/swagger");
 }
 
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCustomSecurityHeaders();
+app.UseRequestLogging();
+app.ConfigureExceptionHandler();
+
+app.UseHttpsRedirection();
+app.UseRateLimiter();
+
+// Áp dụng CORS middleware
+app.UseCors("MyAllowSpecificOrigins");
 
 // Đặt UseAuthentication trước UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Map health check endpoint
-app.MapHealthChecks("/api/health").RequireCors(MyAllowSpecificOrigins);
 
 // Log startup message
 var urls = app.Urls.Select(url => $"- {url}").ToList();
