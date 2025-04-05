@@ -16,25 +16,25 @@ namespace TranslationApi.Application.Services
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<IEnumerable<AIModelListDto>> GetAllModelDtosAsync()
+        public async Task<IEnumerable<AIModelDto>> GetAllModelDtosAsync()
         {
             var models = await _unitOfWork.AIModels.GetAllAsync();
-            return _mapper.Map<IEnumerable<AIModelListDto>>(models);
+            return _mapper.Map<IEnumerable<AIModelDto>>(models);
         }
 
-        public async Task<IEnumerable<AIModelListDto>> GetActiveModelDtosAsync()
+        public async Task<IEnumerable<AIModelDto>> GetActiveModelDtosAsync()
         {
             var models = await _unitOfWork.AIModels.GetActiveModelsAsync();
-            return _mapper.Map<IEnumerable<AIModelListDto>>(models);
+            return _mapper.Map<IEnumerable<AIModelDto>>(models);
         }
 
-        public async Task<AIModelDetailDto?> GetModelDtoByIdAsync(Guid id)
+        public async Task<AIModelDto?> GetModelDtoByIdAsync(Guid id)
         {
             var model = await _unitOfWork.AIModels.GetByIdAsync(id);
-            return model != null ? _mapper.Map<AIModelDetailDto>(model) : null;
+            return model != null ? _mapper.Map<AIModelDto>(model) : null;
         }
 
-        public async Task<AIModelDetailDto> CreateModelAsync(AIModelCreateDto createDto)
+        public async Task<AIModelDto> CreateModelAsync(AIModelDto createDto)
         {
             var model = _mapper.Map<AIModel>(createDto);
             model.ChatSessions = new List<ChatSession>();
@@ -42,10 +42,10 @@ namespace TranslationApi.Application.Services
             await _unitOfWork.AIModels.AddAsync(model);
             await _unitOfWork.CompleteAsync();
 
-            return _mapper.Map<AIModelDetailDto>(model);
+            return _mapper.Map<AIModelDto>(model);
         }
 
-        public async Task<bool> UpdateModelAsync(Guid id, AIModelUpdateDto updateDto)
+        public async Task<bool> UpdateModelAsync(Guid id, AIModelDto updateDto)
         {
             var existingModel = await _unitOfWork.AIModels.GetByIdAsync(id);
             if (existingModel == null)
@@ -102,5 +102,7 @@ namespace TranslationApi.Application.Services
         {
             return await _unitOfWork.AIModels.GetByNameAndVersionAsync(name, version);
         }
+
+
     }
 }

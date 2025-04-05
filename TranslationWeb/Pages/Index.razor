@@ -1,104 +1,172 @@
 @page "/"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <PageTitle>Trang chủ - AI Translation</PageTitle>
 
-<div class="hero bg-white text-dark text-center p-5 rounded-4 mb-5 shadow">
-    <h1 class="display-4 fw-bold">AI Translation</h1>
-    <p class="lead fs-4">Nền tảng dịch thuật và chat với AI tiên tiến</p>
-    <hr class="my-4">
-    <p class="fs-5">Sử dụng công nghệ AI để dịch chính xác và tự nhiên giữa các ngôn ngữ, hoặc tương tác trực tiếp với các mô hình AI</p>
-    <div class="d-flex gap-3 justify-content-center mt-4">
-        <a class="btn btn-dark btn-lg rounded-pill" href="/translation" role="button">
-            <i class="bi bi-translate me-2"></i>Dịch thuật ngay
-        </a>
-        <AuthorizeView>
-            <Authorized>
-                <a class="btn btn-secondary btn-lg rounded-pill" href="/chat" role="button">
-                    <i class="bi bi-chat me-2"></i>Chat với AI
-                </a>
-            </Authorized>
-            <NotAuthorized>
-                <a class="btn btn-outline-dark btn-lg rounded-pill" href="auth/login" role="button">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
-                </a>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
-</div>
-
-<h2 class="text-center mb-4 text-secondary">Dịch vụ của chúng tôi</h2>
-
-<div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-    <div class="col">
-        <div class="card h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body text-center p-4">
-                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
-                    <i class="bi bi-translate text-dark fs-1"></i>
-                </div>
-                <h5 class="card-title fw-bold">Dịch thuật đa ngôn ngữ</h5>
-                <p class="card-text">Hỗ trợ dịch thuật giữa nhiều ngôn ngữ khác nhau với độ chính xác cao và tự nhiên nhờ công nghệ AI.</p>
-                <a href="/translation" class="btn btn-outline-dark mt-2 rounded-pill">Dịch thuật ngay</a>
+<!-- Hero Section -->
+<div class="ai-hero">
+    <div class="ai-hero-bg"></div>
+    <div class="ai-hero-particles"></div>
+    <div class="ai-hero-content">
+        <div class="ai-hero-logo">
+            <i class="fas fa-brain"></i>
+            <div class="ai-hero-pulse"></div>
+        </div>
+        <h1 class="ai-title">AI Translation Platform</h1>
+        <p class="ai-subtitle">Dịch thuật thông minh <span>•</span> Chính xác <span>•</span> Nhanh chóng</p>
+        
+        <div class="ai-typed-container">
+            <div class="ai-typing-text">
+                <span>Hỗ trợ nhiều ngôn ngữ khác nhau</span>
+                <span>Khả năng dịch thuật chính xác</span>
+                <span>Tự động nhận diện ngôn ngữ</span>
+                <span>Chat AI thông minh</span>
+                <span>Lưu trữ lịch sử dịch thuật</span>
             </div>
         </div>
-    </div>
-    <div class="col">
-        <div class="card h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body text-center p-4">
-                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
-                    <i class="bi bi-chat-dots text-dark fs-1"></i>
-                </div>
-                <h5 class="card-title fw-bold">Chat với AI</h5>
-                <p class="card-text">Tương tác trực tiếp với các mô hình AI tiên tiến, hỏi đáp và nhận trợ giúp cho công việc của bạn.</p>
-                <AuthorizeView>
-                    <Authorized>
-                        <a href="/chat" class="btn btn-outline-dark mt-2 rounded-pill">Chat ngay</a>
-                    </Authorized>
-                    <NotAuthorized>
-                        <a href="auth/login" class="btn btn-outline-secondary mt-2 rounded-pill">Đăng nhập để chat</a>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body text-center p-4">
-                <div class="feature-icon bg-light p-3 rounded-circle mb-3 mx-auto" style="width: 80px; height: 80px;">
-                    <i class="bi bi-bar-chart text-dark fs-1"></i>
-                </div>
-                <h5 class="card-title fw-bold">Phản hồi và cải tiến</h5>
-                <p class="card-text">Theo dõi lịch sử dịch thuật và chat, cung cấp phản hồi để cải thiện chất lượng dịch vụ.</p>
-                <AuthorizeView>
-                    <Authorized>
-                        <a href="/sessions" class="btn btn-outline-dark mt-2 rounded-pill">Xem phiên chat</a>
-                    </Authorized>
-                    <NotAuthorized>
-                        <a href="/feedback" class="btn btn-outline-dark mt-2 rounded-pill">Gửi phản hồi</a>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </div>
+        
+        <div class="ai-hero-buttons">
+            <AuthorizeView>
+                <NotAuthorized>
+                    <a href="/login" class="ai-btn ai-btn-outline">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Đăng nhập
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+            <a href="/translation" class="ai-btn ai-btn-primary">
+                <i class="fas fa-language mr-2"></i> Dịch ngay
+            </a>
+            <a href="/chat" class="ai-btn ai-btn-secondary">
+                <i class="fas fa-comments mr-2"></i> Chat AI
+            </a>
         </div>
     </div>
 </div>
 
-<div class="row align-items-center mb-5">
-    <div class="col-md-6 mb-4 mb-md-0">
-        <h3 class="text-secondary">Về AI Translation</h3>
-        <p class="lead">Nền tảng dịch thuật và trí tuệ nhân tạo hàng đầu</p>
-        <p>Chúng tôi sử dụng công nghệ AI tiên tiến để cung cấp dịch vụ dịch thuật chính xác và tự nhiên. Ngoài ra, chúng tôi còn cung cấp khả năng tương tác trực tiếp với các mô hình AI thông qua giao diện chat thân thiện.</p>
-        <p>Với đội ngũ chuyên gia về ngôn ngữ và AI, chúng tôi cam kết mang đến trải nghiệm tốt nhất cho người dùng, đồng thời không ngừng cải thiện và phát triển dịch vụ.</p>
+<!-- Services Section -->
+<div class="ai-section">
+    <div class="ai-section-header">
+        <h2 class="ai-section-title">Dịch vụ của chúng tôi</h2>
+        <div class="ai-section-line"></div>
     </div>
-    <div class="col-md-6">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4">
-                <h4 class="card-title mb-3 text-secondary"><i class="bi bi-stars me-2"></i>Tính năng nổi bật</h4>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Dịch thuật chính xác với nhiều ngôn ngữ</li>
-                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Chat với các mô hình AI tiên tiến</li>
-                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Lưu trữ lịch sử phiên chat</li>
-                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Hệ thống phản hồi và đánh giá</li>
-                    <li class="list-group-item border-0 ps-0"><i class="bi bi-check-circle-fill text-secondary me-2"></i>Giao diện người dùng thân thiện, dễ sử dụng</li>
-                </ul>
+    
+    <div class="ai-services">
+        <div class="ai-service-card">
+            <div class="ai-service-icon" data-service="translate">
+                <i class="fas fa-language"></i>
             </div>
+            <h3 class="ai-service-title">Dịch đa ngôn ngữ</h3>
+            <p class="ai-service-desc">
+                Dịch các văn bản sang nhiều ngôn ngữ khác nhau với độ chính xác cao, 
+                phù hợp với ngữ cảnh, sử dụng các mô hình AI tiên tiến.
+            </p>
+            <a href="/translation" class="ai-service-link">
+                Dịch ngay <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="ai-service-card">
+            <div class="ai-service-icon" data-service="chat">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3 class="ai-service-title">Chat AI</h3>
+            <p class="ai-service-desc">
+                Trò chuyện với AI thông minh để giải đáp các thắc mắc về ngôn ngữ,
+                văn hóa, hoặc đơn giản là thảo luận các chủ đề đa dạng.
+            </p>
+            <a href="/chat" class="ai-service-link">
+                Chat ngay <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="ai-service-card">
+            <div class="ai-service-icon" data-service="feedback">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <h3 class="ai-service-title">Cải thiện liên tục</h3>
+            <p class="ai-service-desc">
+                Hệ thống học hỏi từ phản hồi của người dùng để không ngừng cải thiện
+                chất lượng dịch thuật và trải nghiệm người dùng.
+            </p>
+            <a href="/feedback" class="ai-service-link">
+                Góp ý <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </div>
-</div> 
+</div>
+
+<!-- About Section -->
+<div class="ai-about-section">
+    <div class="ai-about-wave">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+    </div>
+    
+    <div class="ai-about-content">
+        <div>
+            <h2 class="ai-about-title">AI Translation Platform</h2>
+            <p class="ai-about-subtitle">Nền tảng dịch thuật thế hệ mới</p>
+            <p class="ai-about-text">
+                AI Translation Platform là một nền tảng dịch thuật thông minh được phát triển với công nghệ
+                AI tiên tiến nhất, cung cấp các dịch vụ dịch thuật chính xác và nhanh chóng.
+            </p>
+            <p class="ai-about-text">
+                Chúng tôi tích hợp các mô hình ngôn ngữ tiên tiến để hiểu ngữ cảnh và đem lại
+                bản dịch tự nhiên như người bản địa, đồng thời cung cấp các tính năng chat AI để
+                hỗ trợ người dùng trong việc học và sử dụng ngôn ngữ.
+            </p>
+            <p class="ai-about-text">
+                Hệ thống không ngừng học hỏi và cải thiện qua phản hồi của người dùng, đảm bảo
+                chất lượng dịch thuật ngày càng tốt hơn theo thời gian.
+            </p>
+        </div>
+        
+        <div class="ai-features-card">
+            <h3 class="ai-features-title">Các tính năng nổi bật</h3>
+            <ul class="ai-features-list">
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Dịch thuật chính xác với công nghệ AI
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Chat AI thông minh hỗ trợ 24/7
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Lưu trữ lịch sử dịch thuật và trò chuyện
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Hệ thống phản hồi và cải thiện liên tục
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Giao diện thân thiện, dễ sử dụng
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Hỗ trợ nhiều ngôn ngữ phổ biến
+                </li>
+                <li class="ai-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    Bảo mật dữ liệu người dùng
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("import", "/js/homepage.js");
+        }
+    }
+} 

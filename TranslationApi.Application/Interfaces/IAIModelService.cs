@@ -6,11 +6,11 @@ namespace TranslationApi.Application.Interfaces
     public interface IAIModelService
     {
         // DTO based methods
-        Task<IEnumerable<AIModelListDto>> GetAllModelDtosAsync();
-        Task<IEnumerable<AIModelListDto>> GetActiveModelDtosAsync();
-        Task<AIModelDetailDto?> GetModelDtoByIdAsync(Guid id);
-        Task<AIModelDetailDto> CreateModelAsync(AIModelCreateDto createDto);
-        Task<bool> UpdateModelAsync(Guid id, AIModelUpdateDto updateDto);
+        Task<IEnumerable<AIModelDto>> GetAllModelDtosAsync();
+        Task<IEnumerable<AIModelDto>> GetActiveModelDtosAsync();
+        Task<AIModelDto> GetModelDtoByIdAsync(Guid id);
+        Task<AIModelDto> CreateModelAsync(AIModelDto createDto);
+        Task<bool> UpdateModelAsync(Guid id, AIModelDto updateDto);
 
         // Existing methods for internal use
         Task<bool> ModelExistsAsync(string name, string version);

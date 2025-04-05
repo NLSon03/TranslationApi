@@ -1,3 +1,93 @@
+/* Thêm biến CSS toàn cục */
+:root {
+    --ai-gradient-blue: linear-gradient(135deg, #4361ee, #4cc9f0);
+    --ai-gradient-pink: linear-gradient(135deg, #7209b7, #f72585);
+    --ai-dark-bg: #0a0a14;
+    --ai-card-bg: rgba(17, 25, 40, 0.9);
+    --ai-blue: #4cc9f0;
+    --ai-pink: #f72585;
+    --ai-purple: #7209b7;
+}
+
+/* Biểu hiệu ứng nền gradient cyberpunk */
+.ai-gradient-bg {
+    background: linear-gradient(125deg, var(--ai-dark-bg) 0%, #1a1a2e 100%);
+}
+
+/* Hiệu ứng làm mờ nền cho phần tử */
+.ai-blur-bg {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Tạo văn bản gradient */
+.ai-gradient-text {
+    background: var(--ai-gradient-blue);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-gradient-text-pink {
+    background: var(--ai-gradient-pink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Hiệu ứng viền sáng */
+.ai-glow-border {
+    position: relative;
+}
+
+.ai-glow-border::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: padding-box var(--ai-gradient-blue);
+    border-radius: inherit;
+    z-index: -1;
+    animation: glowBorder 3s ease infinite;
+}
+
+@keyframes glowBorder {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+/* CSS cho các đối tượng cyberpunk */
+.ai-cyberpunk-object {
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-cyberpunk-object::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: conic-gradient(
+        from 0deg at 50% 50%,
+        var(--ai-blue) 0deg,
+        transparent 60deg,
+        transparent 300deg,
+        var(--ai-pink) 360deg
+    );
+    opacity: 0.1;
+    animation: rotateConic 20s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes rotateConic {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 
 /* Blazor Error UI */
 #blazor-error-ui {
@@ -320,4 +410,81 @@
 
 .btn-outline-secondary:hover i {
     transform: rotate(180deg);
+}
+
+/* Toast Thông báo */
+.ai-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ai-toast {
+    min-width: 300px;
+    padding: 12px 20px;
+    background: rgba(15, 23, 42, 0.85);
+    border-left: 4px solid var(--ai-gradient-blue);
+    backdrop-filter: blur(8px);
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.ai-toast-visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.ai-toast-icon {
+    margin-right: 12px;
+    font-size: 18px;
+    color: var(--ai-gradient-blue);
+}
+
+.ai-toast-content {
+    flex: 1;
+    font-size: 14px;
+}
+
+.ai-toast-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 12px;
+    transition: color 0.2s;
+}
+
+.ai-toast-close:hover {
+    color: #fff;
+}
+
+.ai-toast-success {
+    border-left-color: #10b981;
+}
+.ai-toast-success .ai-toast-icon {
+    color: #10b981;
+}
+
+.ai-toast-error {
+    border-left-color: #ef4444;
+}
+.ai-toast-error .ai-toast-icon {
+    color: #ef4444;
+}
+
+.ai-toast-warning {
+    border-left-color: #f59e0b;
+}
+.ai-toast-warning .ai-toast-icon {
+    color: #f59e0b;
 }

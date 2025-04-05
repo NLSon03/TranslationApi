@@ -12,8 +12,8 @@ using TranslationApi.Infrastructure.Data;
 namespace TranslationApi.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250330215726_UpdateAIModelCascadeDelete")]
-    partial class UpdateAIModelCascadeDelete
+    [Migration("20250404134013_UpdatedModelNew")]
+    partial class UpdatedModelNew
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -164,7 +164,11 @@ namespace TranslationApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Config")
+                    b.Property<string>("ApiEndpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

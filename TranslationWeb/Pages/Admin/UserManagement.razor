@@ -1,10 +1,8 @@
-
 @page "/admin/users"
 @using TranslationWeb.Infrastructure.Interfaces
 @using TranslationWeb.Models.Auth
 @attribute [Authorize(Roles = "Admin")]
 @inject IUserManagementService UserManagementService
-@inject IToastService ToastService
 
 <h3>Quản lý người dùng</h3>
 
@@ -217,7 +215,7 @@ else
         }
         catch (Exception ex)
         {
-            ToastService.ShowError("Không thể tải danh sách người dùng");
+            // ToastService.ShowError("Không thể tải danh sách người dùng");
         }
     }
 
@@ -273,7 +271,7 @@ else
             if (_selectedUser != null)
             {
                 await UserManagementService.UpdateUserAsync(_selectedUser.Id, request);
-                ToastService.ShowSuccess("Cập nhật thông tin người dùng thành công");
+                // ToastService.ShowSuccess("Cập nhật thông tin người dùng thành công");
                 _showEditDialog = false;
                 await LoadUsers();
                 await InvokeAsync(StateHasChanged);
@@ -281,7 +279,7 @@ else
         }
         catch (Exception ex)
         {
-            ToastService.ShowError(ex.Message);
+            // ToastService.ShowError(ex.Message);
         }
     }
 
@@ -292,7 +290,7 @@ else
             if (_selectedUser != null)
             {
                 await UserManagementService.ResetPasswordAsync(_selectedUser.Id, request);
-                ToastService.ShowSuccess("Đặt lại mật khẩu thành công");
+                // ToastService.ShowSuccess("Đặt lại mật khẩu thành công");
                 _showResetPasswordDialog = false;
                 await LoadUsers();
                 await InvokeAsync(StateHasChanged);
@@ -300,7 +298,7 @@ else
         }
         catch (Exception ex)
         {
-            ToastService.ShowError(ex.Message);
+            // ToastService.ShowError(ex.Message);
         }
     }
 
@@ -309,13 +307,13 @@ else
         try
         {
             await UserManagementService.ToggleLockoutAsync(user.Id, new ToggleLockoutRequest { IsLocked = isLocked });
-            ToastService.ShowSuccess($"Đã {(isLocked ? "khóa" : "mở khóa")} tài khoản thành công");
+            // ToastService.ShowSuccess($"Đã {(isLocked ? "khóa" : "mở khóa")} tài khoản thành công");
             await LoadUsers();
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
-            ToastService.ShowError(ex.Message);
+            // ToastService.ShowError(ex.Message);
         }
     }
 

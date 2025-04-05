@@ -1,5 +1,6 @@
 using TranslationWeb.Core.Constants;
 using TranslationWeb.Infrastructure.Interfaces;
+using TranslationWeb.Models;
 using TranslationWeb.Models.AIModel;
 
 namespace TranslationWeb.Infrastructure.Services
@@ -22,7 +23,7 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang gọi API để lấy danh sách AI models");
-                var response = await _httpService.GetAsync<AIModelApiResponse<IEnumerable<AIModelResponse>>>(ApiEndpoints.AIModel.Base);
+                var response = await _httpService.GetAsync<AIModelListResponse>(ApiEndpoints.AIModel.Base);
 
                 if (response == null)
                 {
@@ -88,7 +89,7 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 _logger.LogInformation("Đang gọi API để lấy chi tiết AI model: {ModelId}", id);
                 
-                var response = await _httpService.GetAsync<AIModelApiResponse<AIModelResponse>>(
+                var response = await _httpService.GetAsync<ApiResponse<AIModelResponse>>(
                     ApiEndpoints.AIModel.ById(id)
                 );
 
@@ -121,13 +122,13 @@ namespace TranslationWeb.Infrastructure.Services
             }
         }
 
-        public async Task<AIModelResponse> CreateModelAsync(CreateAIModelRequest request)
+        public async Task<AIModelResponse> CreateModelAsync(AIModelRequest request)
         {
             try
             {
                 _logger.LogInformation("Đang gọi API để tạo AI model mới: {ModelName}", request.Name);
                 
-                var response = await _httpService.PostAsync<CreateAIModelRequest, AIModelResponse>(
+                var response = await _httpService.PostAsync<AIModelRequest, AIModelResponse>(
                     ApiEndpoints.AIModel.Base,
                     request
                 );
@@ -156,7 +157,7 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 _logger.LogInformation("Đang gọi API để cập nhật AI model: {ModelId}", request.Id);
                 
-                var response = await _httpService.PutAsync<UpdateAIModelRequest, AIModelResponse>(
+                var response = await _httpService.PutAsync<AIModelRequest, AIModelResponse>(
                     ApiEndpoints.AIModel.ById(request.Id),
                     request
                 );
@@ -183,7 +184,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<object, AIModelApiResponse<object>>(
+                var response = await _httpService.PostAsync<object, ApiResponse<object>>(
                     ApiEndpoints.AIModel.Activate(id),
                     new { }
                 );
@@ -218,7 +219,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.PostAsync<object, AIModelApiResponse<object>>(
+                var response = await _httpService.PostAsync<object, ApiResponse<object>>(
                     ApiEndpoints.AIModel.Deactivate(id),
                     new { }
                 );
@@ -253,7 +254,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var response = await _httpService.DeleteAsync<AIModelApiResponse<object>>(ApiEndpoints.AIModel.ById(id));
+                var response = await _httpService.DeleteAsync<ApiResponse<object>>(ApiEndpoints.AIModel.ById(id));
                 
                 if (response == null)
                 {

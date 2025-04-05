@@ -161,7 +161,11 @@ namespace TranslationApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Config")
+                    b.Property<string>("ApiEndpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

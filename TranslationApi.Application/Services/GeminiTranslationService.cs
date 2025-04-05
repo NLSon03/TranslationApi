@@ -61,9 +61,45 @@ namespace TranslationApi.Application.Services
         public async Task<TranslationResponse> TranslateTextAsync(TranslationRequest request)
         {
             _logger.LogInformation($"Translating text from {request.SourceLanguage} to {request.TargetLanguage}");
+            
+            // Kiểm tra dữ liệu đầu vào
+            if (string.IsNullOrWhiteSpace(request.SourceText))
+            {
+                return new TranslationResponse
+                {
+                    Success = false,
+                    ErrorMessage = "Văn bản nguồn không được để trống",
+                    SourceLanguage = request.SourceLanguage,
+                    TargetLanguage = request.TargetLanguage
+                };
+            }
+            
+            // Kiểm tra ngôn ngữ nguồn và đích không giống nhau
+            if (request.SourceLanguage != "auto" && request.SourceLanguage == request.TargetLanguage)
+            {
+                // Nếu ngôn ngữ nguồn và đích giống nhau, trả về luôn văn bản gốc
+                return new TranslationResponse
+                {
+                    TranslatedText = request.SourceText,
+                    SourceLanguage = request.SourceLanguage,
+                    TargetLanguage = request.TargetLanguage,
+                    Success = true
+                };
+            }
+            
             try
             {
-                return await TranslateWithGeminiAsync(request);
+                var result = await TranslateWithGeminiAsync(request);
+                
+                // Lưu thông tin về ngôn ngữ nguồn được phát hiện (nếu có)
+                if (request.SourceLanguage == "auto" && result.SourceLanguage == "auto")
+                {
+                    // Cập nhật để phản ánh ngôn ngữ thực tế được phát hiện
+                    var detectedLanguage = await DetectLanguageAsync(request.SourceText);
+                    result.SourceLanguage = detectedLanguage;
+                }
+                
+                return result;
             }
             catch (Exception ex)
             {
@@ -81,14 +117,27 @@ namespace TranslationApi.Application.Services
         {
             try
             {
-                var textChunks = SplitLongText(request.SourceText);
+                // Tự động phát hiện ngôn ngữ nếu được yêu cầu
+                var sourceLanguage = request.SourceLanguage;
+                if (sourceLanguage == "auto")
+                {
+                    sourceLanguage = await DetectLanguageAsync(request.SourceText);
+                    _logger.LogInformation($"Detected source language: {sourceLanguage}");
+                }
 
+                var textChunks = SplitLongText(request.SourceText);
                 var translatedChunks = new List<string>();
 
                 foreach (var chunk in textChunks)
                 {
-                    string prompt = $"Translate the following text from {GetLanguageName(request.SourceLanguage)} to {GetLanguageName(request.TargetLanguage)}. " +
-                                    $"Provide only the most literal translation possible, avoiding any paraphrasing or invented content. " +
+                    string prompt = $"Translate the following text from {GetLanguageName(sourceLanguage)} to {GetLanguageName(request.TargetLanguage)}. " +
+                                    $"Follow these guidelines: " + 
+                                    $"1. Provide a natural and accurate translation that preserves the tone, formality, and nuances of the original text. " +
+                                    $"2. Maintain all formatting, paragraph breaks, and bullet points from the original. " +
+                                    $"3. Preserve proper names, brands, and technical terms unless their translation is well-established. " +
+                                    $"4. For text in {GetLanguageName(request.TargetLanguage)}, make sure it sounds natural to native speakers. " +
+                                    $"5. Keep emojis and special characters unchanged. " +
+                                    $"6. Return ONLY the translated text without explanations or notes. " +
                                     $"Text to translate: {chunk}";
 
                     var requestBody = new
@@ -127,7 +176,7 @@ namespace TranslationApi.Application.Services
                 return new TranslationResponse
                 {
                     TranslatedText = string.Join(" ", translatedChunks),
-                    SourceLanguage = request.SourceLanguage,
+                    SourceLanguage = sourceLanguage,
                     TargetLanguage = request.TargetLanguage,
                     Success = true
                 };
@@ -339,6 +388,94 @@ namespace TranslationApi.Application.Services
             }
 
             throw new Exception("Unexpected error in retry logic");
+        }
+
+        private async Task<string> DetectLanguageAsync(string text)
+        {
+            try
+            {
+                string prompt = $"Analyze the following text and respond with ONLY THE ISO 639-1 language code (e.g., 'en' for English, 'vi' for Vietnamese, etc.) of the language in which the text is written. No explanation, just the code.\n\nText: {text.Substring(0, Math.Min(500, text.Length))}";
+
+                var requestBody = new
+                {
+                    contents = new[]
+                    {
+                        new
+                        {
+                            parts = new[]
+                            {
+                                new
+                                {
+                                    text = prompt
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var content = new StringContent(
+                    Serialize(requestBody),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                string apiUrl = $"{_geminiApiUrl}?key={_geminiApiKey}";
+
+                var response = await _httpClient.PostAsync(apiUrl, content);
+                response.EnsureSuccessStatusCode();
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var detectedLanguage = ExtractDetectedLanguage(responseBody);
+
+                // Xác thực mã ngôn ngữ được trả về
+                if (!_supportedLanguages.Any(l => l.Code.Equals(detectedLanguage, StringComparison.OrdinalIgnoreCase)))
+                {
+                    _logger.LogWarning($"Detected language '{detectedLanguage}' not in supported languages list. Defaulting to 'en'");
+                    return "en";
+                }
+
+                return detectedLanguage;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error detecting language. Defaulting to English.");
+                return "en";
+            }
+        }
+
+        private string ExtractDetectedLanguage(string responseBody)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(responseBody);
+
+                if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || 
+                    candidates.GetArrayLength() == 0 || 
+                    !candidates[0].TryGetProperty("content", out var content) || 
+                    !content.TryGetProperty("parts", out var parts) || 
+                    parts.GetArrayLength() == 0)
+                {
+                    _logger.LogWarning("Invalid response format for language detection");
+                    return "en";
+                }
+
+                var languageCode = parts[0].GetProperty("text").GetString()?.Trim().ToLower();
+                
+                // Làm sạch mã ngôn ngữ (có thể có dấu ngoặc, dấu chấm, v.v.)
+                if (!string.IsNullOrEmpty(languageCode))
+                {
+                    // Lấy chỉ 2 ký tự đầu tiên nếu có nhiều hơn 2 ký tự
+                    var cleanedCode = new string(languageCode.Where(char.IsLetterOrDigit).Take(2).ToArray());
+                    return string.IsNullOrEmpty(cleanedCode) ? "en" : cleanedCode;
+                }
+
+                return "en";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error extracting detected language");
+                return "en";
+            }
         }
 
     }

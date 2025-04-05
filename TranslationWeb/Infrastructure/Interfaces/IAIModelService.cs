@@ -6,7 +6,7 @@ namespace TranslationWeb.Infrastructure.Interfaces
     {
         Task<AIModelListResponse> GetAllModelsAsync();
         Task<AIModelResponse> GetModelByIdAsync(Guid id);
-        Task<AIModelResponse> CreateModelAsync(CreateAIModelRequest request);
+        Task<AIModelResponse> CreateModelAsync(AIModelRequest request);
         Task<AIModelResponse> UpdateModelAsync(UpdateAIModelRequest request);
         Task<AIModelResponse> ActivateModelAsync(Guid id);
         Task<AIModelResponse> DeactivateModelAsync(Guid id);

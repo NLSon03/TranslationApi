@@ -2,20 +2,28 @@
 @using TranslationWeb.Features.Auth.Components
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Authorization
-@using Blazored.Toast
-@using Blazored.Toast.Services
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject AuthenticationStateProvider AuthStateProvider
 @inject ILogger<MainLayout> Logger
 
 @implements IDisposable
+
 <div class="page">
     <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-light border-bottom">
+        <nav class="navbar navbar-expand-lg ai-navbar">
             <div class="container">
-                <NavLink class="navbar-brand" href="/">
-                    <i class="bi bi-translate me-2"></i> AI Translation
+                <NavLink class="navbar-brand ai-brand" href="/">
+                    <div class="brand-container">
+                        <div class="brand-icon">
+                            <i class="bi bi-translate"></i>
+                            <div class="ai-pulse"></div>
+                        </div>
+                        <div class="brand-text">
+                            <span class="brand-name">AI Translation</span>
+                            <span class="brand-tagline">Powered by Gemini</span>
+                        </div>
+                    </div>
                 </NavLink>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -24,24 +32,24 @@
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between align-items-center">
                     <ul class="navbar-nav flex-grow-1 gap-2">
                         <li class="nav-item">
-                            <NavLink class="nav-link rounded-pill px-3" href="/" Match="NavLinkMatch.All">
-                                <i class="bi bi-house-door me-1"></i> Trang chủ
+                            <NavLink class="nav-link ai-nav-link" href="/" Match="NavLinkMatch.All">
+                                <i class="bi bi-house-door nav-icon"></i> <span>Trang chủ</span>
                             </NavLink>
                         </li>
                         <li class="nav-item">
-                            <NavLink class="nav-link rounded-pill px-3" href="/translation">
-                                <i class="bi bi-translate me-1"></i> Dịch thuật
+                            <NavLink class="nav-link ai-nav-link" href="/translation">
+                                <i class="bi bi-translate nav-icon"></i> <span>Dịch thuật</span>
                             </NavLink>
                         </li>
                         <AuthorizeView>
                             <Authorized>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle rounded-pill px-3" href="#" id="chatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-chat-dots me-1"></i> Chat
+                                    <a class="nav-link dropdown-toggle ai-nav-link" href="#" id="chatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-chat-dots nav-icon"></i> <span>Chat</span>
                                     </a>
-                                    <ul class="dropdown-menu rounded-4 shadow-sm border-0 p-2" aria-labelledby="chatDropdown">
+                                    <ul class="dropdown-menu ai-dropdown" aria-labelledby="chatDropdown">
                                         <li class="mb-1">
-                                            <NavLink class="dropdown-item rounded-3 px-3 py-2" href="/chat">
+                                            <NavLink class="dropdown-item ai-dropdown-item" href="/chat">
                                                 <i class="bi bi-chat me-2"></i> Chat với AI
                                             </NavLink>
                                         </li>
@@ -52,17 +60,17 @@
                         <AuthorizeView Roles="Admin">
                             <Authorized>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle rounded-pill px-3" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-gear me-1"></i> Quản trị
+                                    <a class="nav-link dropdown-toggle ai-nav-link" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-gear nav-icon"></i> <span>Quản trị</span>
                                     </a>
-                                    <ul class="dropdown-menu rounded-4 shadow-sm border-0" aria-labelledby="adminDropdown">
+                                    <ul class="dropdown-menu ai-dropdown" aria-labelledby="adminDropdown">
                                         <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3" href="/admin/ai-models">
+                                            <NavLink class="dropdown-item ai-dropdown-item" href="/admin/ai-models">
                                                 <i class="bi bi-cpu me-1"></i> Quản lý Model AI
                                             </NavLink>
                                         </li>
                                         <li>
-                                            <NavLink class="dropdown-item rounded-3 px-3" href="/admin/users">
+                                            <NavLink class="dropdown-item ai-dropdown-item" href="/admin/users">
                                                 <i class="bi bi-people me-1"></i> Quản lý người dùng
                                             </NavLink>
                                         </li>
@@ -81,34 +89,64 @@
 
     <div class="container py-4">
         <main role="main" class="bg-white rounded-4 shadow-sm">
-            <div class="p-4">
+            <div class="p-4 main-content">
+                <div class="ai-particles"></div>
                 @Body
             </div>
         </main>
     </div>
 
-    <footer class="footer text-secondary mt-auto">
-        <div class="container">
-            <div class="row py-4">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <span class="fw-light">&copy; @DateTime.Now.Year - AI Translation</span>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="/privacy" class="text-secondary text-decoration-none me-3">
-                        <i class="bi bi-shield-check me-1"></i>Chính sách bảo mật
-                    </a>
-                    <a href="/terms" class="text-secondary text-decoration-none me-3">
-                        <i class="bi bi-file-text me-1"></i>Điều khoản sử dụng
-                    </a>
-                    <a href="/contact" class="text-secondary text-decoration-none">
-                        <i class="bi bi-envelope me-1"></i>Liên hệ
-                    </a>
+    <footer class="ai-footer mt-auto">
+        <div class="ai-footer-wave">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+            </svg>
+        </div>
+        <div class="ai-footer-content">
+            <div class="container">
+                <div class="row py-4">
+                    <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                        <div class="footer-brand mb-3">
+                            <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                                <div class="footer-brand-icon me-2">
+                                    <i class="bi bi-translate"></i>
+                                </div>
+                                <span class="footer-brand-name">AI Translation</span>
+                            </div>
+                            <div class="footer-tagline mt-1">Dịch thuật thông minh, nhanh chóng</div>
+                        </div>
+                        <div class="footer-copyright">
+                            <span>&copy; @DateTime.Now.Year</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <h5 class="footer-heading">Công nghệ</h5>
+                        <div class="footer-tech-badges">
+                            <span class="tech-badge"><i class="bi bi-code-slash"></i> Blazor</span>
+                            <span class="tech-badge"><i class="bi bi-robot"></i> Gemini AI</span>
+                            <span class="tech-badge"><i class="bi bi-translate"></i> Neural MT</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center text-md-end">
+                        <h5 class="footer-heading">Thông tin</h5>
+                        <div class="footer-links">
+                            <a href="/privacy" class="footer-link">
+                                <i class="bi bi-shield-check"></i> Chính sách bảo mật
+                            </a>
+                            <a href="/terms" class="footer-link">
+                                <i class="bi bi-file-text"></i> Điều khoản sử dụng
+                            </a>
+                            <a href="/contact" class="footer-link">
+                                <i class="bi bi-envelope"></i> Liên hệ
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 </div>
-<BlazoredToasts />
+<!-- <BlazoredToasts /> -->
 
 @code {
     protected override void OnInitialized()

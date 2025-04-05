@@ -12,10 +12,12 @@ namespace TranslationApi.Infrastructure.Repositories
         private IFeedbackRepository _feedbackRepository;
         private bool _disposed = false;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         public IAIModelRepository AIModels => _aiModelRepository ??= new AIModelRepository(_context);
 

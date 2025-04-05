@@ -39,7 +39,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi lấy danh sách models: " + ex.Message,
-                    data = new List<AIModelListDto>()
+                    data = new List<AIModelDto>()
                 });
             }
         }
@@ -66,7 +66,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi lấy danh sách models hoạt động: " + ex.Message,
-                    data = new List<AIModelListDto>()
+                    data = new List<AIModelDto>()
                 });
             }
         }
@@ -86,7 +86,7 @@ namespace TranslationApi.API.Controllers
                     {
                         success = false,
                         message = "Không tìm thấy model",
-                        data = (object)null
+                        data = null as object
                     });
 
                 return Ok(new
@@ -102,7 +102,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi lấy thông tin model: " + ex.Message,
-                    data = (object)null
+                    data = null as object
                 });
             }
         }
@@ -112,7 +112,7 @@ namespace TranslationApi.API.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<AIModelDetailDto>> CreateModel(AIModelCreateDto createDto)
+        public async Task<ActionResult<AIModelDto>> CreateModel(AIModelDto createDto)
         {
             if (await _modelService.ModelExistsAsync(createDto.Name, createDto.Version))
                 return Conflict("Một model với tên và phiên bản này đã tồn tại");
@@ -126,7 +126,7 @@ namespace TranslationApi.API.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<object>> UpdateModel(Guid id, AIModelUpdateDto updateDto)
+        public async Task<ActionResult<object>> UpdateModel(Guid id, AIModelDto updateDto)
         {
             try
             {
@@ -137,14 +137,14 @@ namespace TranslationApi.API.Controllers
                     {
                         success = false,
                         message = "Không tìm thấy model cần cập nhật",
-                        data = (object)null
+                        data = null as object
                     });
 
                 return Ok(new
                 {
                     success = true,
                     message = "Cập nhật model thành công",
-                    data = (object)null
+                    data = null as object
                 });
             }
             catch (Exception ex)
@@ -153,7 +153,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi cập nhật model: " + ex.Message,
-                    data = (object)null
+                    data = null as object
                 });
             }
         }
@@ -174,7 +174,7 @@ namespace TranslationApi.API.Controllers
                     {
                         success = false,
                         message = "Không tìm thấy model cần kích hoạt",
-                        data = (object)null
+                        data = null as object
                     });
 
                 await _modelService.ActivateModelAsync(id);
@@ -183,7 +183,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = true,
                     message = "Kích hoạt model thành công",
-                    data = (object)null
+                    data = null as object
                 });
             }
             catch (Exception ex)
@@ -192,7 +192,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi kích hoạt model: " + ex.Message,
-                    data = (object)null
+                    data = null as object
                 });
             }
         }
@@ -213,7 +213,7 @@ namespace TranslationApi.API.Controllers
                     {
                         success = false,
                         message = "Không tìm thấy model cần vô hiệu hóa",
-                        data = (object)null
+                        data = null as object
                     });
 
                 await _modelService.DeactivateModelAsync(id);
@@ -222,7 +222,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = true,
                     message = "Vô hiệu hóa model thành công",
-                    data = (object)null
+                    data = null as object
                 });
             }
             catch (Exception ex)
@@ -231,7 +231,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi vô hiệu hóa model: " + ex.Message,
-                    data = (object)null
+                    data = null as object
                 });
             }
         }
@@ -252,14 +252,14 @@ namespace TranslationApi.API.Controllers
                     {
                         success = false,
                         message = "Không tìm thấy model cần xóa",
-                        data = (object)null
+                        data = null as object
                     });
 
                 return Ok(new
                 {
                     success = true,
                     message = "Xóa model thành công",
-                    data = (object)null
+                    data = null as object
                 });
             }
             catch (Exception ex)
@@ -268,7 +268,7 @@ namespace TranslationApi.API.Controllers
                 {
                     success = false,
                     message = "Lỗi khi xóa model: " + ex.Message,
-                    data = (object)null
+                    data = null as object
                 });
             }
         }

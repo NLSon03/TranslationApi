@@ -83,7 +83,18 @@
             }
             else
             {
-                errorMessage = result.Message ?? "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.";
+                if (result.Message?.Contains("Email đã tồn tại") == true)
+                {
+                    errorMessage = "Email này đã được sử dụng. Vui lòng chọn email khác.";
+                }
+                else if (result.Message?.ToLower().Contains("password") == true)
+                {
+                    errorMessage = "Mật khẩu không đáp ứng yêu cầu. Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường và số.";
+                }
+                else
+                {
+                    errorMessage = result.Message ?? "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.";
+                }
             }
         }
         catch (Exception ex)

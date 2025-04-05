@@ -9,16 +9,16 @@ namespace TranslationApi.Application.Mappings
         public AIModelMappingProfile()
         {
             // List DTO mapping
-            CreateMap<AIModel, AIModelListDto>();
+            CreateMap<AIModel, AIModelDto>();
 
             // Detail DTO mapping (inherits from List DTO)
-            CreateMap<AIModel, AIModelDetailDto>();
+            CreateMap<AIModel, AIModelDto>();
 
             // Create DTO mapping
-            CreateMap<AIModelCreateDto, AIModel>();
+            CreateMap<AIModelDto, AIModel>();
 
             // Update DTO mapping
-            CreateMap<AIModelUpdateDto, AIModel>();
+            CreateMap<AIModelDto, AIModel>();
         }
     }
 }

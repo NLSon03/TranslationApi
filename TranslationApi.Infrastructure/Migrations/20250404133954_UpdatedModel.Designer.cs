@@ -12,8 +12,8 @@ using TranslationApi.Infrastructure.Data;
 namespace TranslationApi.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250328120715_init")]
-    partial class init
+    [Migration("20250404133954_UpdatedModel")]
+    partial class UpdatedModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -164,7 +164,11 @@ namespace TranslationApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Config")
+                    b.Property<string>("ApiEndpoint")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -183,7 +187,7 @@ namespace TranslationApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AIModel");
+                    b.ToTable("AIModel", (string)null);
                 });
 
             modelBuilder.Entity("TranslationApi.Domain.Entities.ApplicationUser", b =>
@@ -280,7 +284,7 @@ namespace TranslationApi.Infrastructure.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("ChatMessage");
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("TranslationApi.Domain.Entities.ChatSession", b =>
@@ -312,7 +316,7 @@ namespace TranslationApi.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatSession");
+                    b.ToTable("ChatSessions");
                 });
 
             modelBuilder.Entity("TranslationApi.Domain.Entities.Feedback", b =>
@@ -339,7 +343,7 @@ namespace TranslationApi.Infrastructure.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("Feedback");
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

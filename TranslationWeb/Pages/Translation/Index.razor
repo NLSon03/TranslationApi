@@ -1,14 +1,39 @@
 ﻿@page "/translation"
 @inject NavigationManager Navigation
-@inject ITranslationApiService TranslationService
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+@inject ITranslationApiService TranslationApiService
+@inject IJSRuntime JS
 
-<PageTitle>Dịch văn bản</PageTitle>
+<PageTitle>Dịch văn bản - AI Translation Platform</PageTitle>
 
-<TranslationStateProvider>
-    <TranslationForm />
-</TranslationStateProvider>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<div class="ai-translation-page-container" id="translationContainer" data-particles data-particles-count="30">
+    <div class="ai-translation-header ai-fade-in">
+        <h1 class="ai-translation-title ai-gradient-text">Dịch Văn Bản AI</h1>
+        <p class="ai-translation-subtitle">Hệ thống dịch thuật đa ngôn ngữ được hỗ trợ bởi công nghệ AI tiên tiến</p>
+    </div>
+
+    <TranslationStateProvider>
+        <TranslationForm />
+    </TranslationStateProvider>
+</div>
 
 @code {
- 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Remove these lines
+                // await JS.InvokeVoidAsync("createParticlesBackground", "translationContainer", 30);
+                // await JS.InvokeVoidAsync("initTypeWriter");
+                // await JS.InvokeVoidAsync("initNeonHoverEffects");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi JavaScript: {ex.Message}");
+            }
+        }
+    }
 }

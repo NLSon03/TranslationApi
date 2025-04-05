@@ -11,7 +11,8 @@ namespace TranslationApi.Domain.Entities
         public required string Version { get; set; }
         public bool IsActive { get; set; } = true;
         [Required]
-        public required string Config { get; set; }
+        public required string ApiEndpoint { get; set; }
+        public required string ApiKey {  get; set; }
         public required ICollection<ChatSession> ChatSessions { get; set; } = new List<ChatSession>();
     }
 }

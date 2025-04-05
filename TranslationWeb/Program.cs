@@ -1,9 +1,9 @@
-using Blazored.Toast;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
+using System.Linq;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Infrastructure.Interfaces;
@@ -84,11 +84,29 @@ builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IAIModelService, AIModelService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
-// Register Blazored Toast
-builder.Services.AddBlazoredToast();
+// Commented out Blazored.Toast registration
+// builder.Services.AddBlazoredToast();
 
 // Build and configure the application
-var host = builder.Build();
+WebAssemblyHost host;
+try
+{
+    host = builder.Build();
+}
+catch (AggregateException ex)
+{
+    // Hiển thị chi tiết về các dịch vụ không thể khởi tạo
+    Console.Error.WriteLine("Lỗi nghiêm trọng khi xây dựng ứng dụng:");
+    
+    foreach (var innerEx in ex.InnerExceptions)
+    {
+        Console.Error.WriteLine($"- {innerEx.Message}");
+        Console.Error.WriteLine($"  {innerEx.StackTrace}");
+    }
+    
+    // Hiển thị thông báo lỗi gốc
+    throw new Exception("Ứng dụng không thể khởi động vì một số dịch vụ không thể được khởi tạo. Xem chi tiết trong console.", ex);
+}
 
 // Configure global error handling
 var jsRuntime = host.Services.GetRequiredService<IJSRuntime>();

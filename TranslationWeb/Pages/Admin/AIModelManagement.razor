@@ -4,7 +4,6 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject IAIModelService AIModelService
 @inject IJSRuntime JSRuntime
-@inject IToastService ToastService
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -219,11 +218,17 @@
                         </div>
 
                         <div class="form-floating mb-3">
-                            <InputTextArea @bind-Value="_modelForm.Config" class="form-control" style="height: 150px" 
-                                         id="modelConfig" placeholder="Config (JSON)" />
-                            <label for="modelConfig">Config (JSON)</label>
-                            <ValidationMessage For="@(() => _modelForm.Config)" class="text-danger" />
-                            <small class="text-muted">Nhập cấu hình model dưới dạng JSON</small>
+                            <InputText @bind-Value="_modelForm.ApiEndPoint" class="form-control" 
+                                         id="modelConfig" placeholder="API Endpoint" />
+                            <label for="modelApiEndpoint">API Endpoint</label>
+                            <ValidationMessage For="@(() => _modelForm.ApiEndPoint)" class="text-danger" />
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <InputText @bind-Value="_modelForm.ApiKey" class="form-control"
+                                       id="modelApiKey" placeholder="API Key" />
+                            <label for="modelApiKey">API Key</label>
+                            <ValidationMessage For="@(() => _modelForm.ApiKey)" class="text-danger" />
                         </div>
 
                         <div class="form-check form-switch mb-3">
@@ -256,7 +261,7 @@
     private bool _showDialog;
     private List<AIModelResponse> _models = new();
     private AIModelResponse? _editingModel;
-    private CreateAIModelRequest _modelForm = new();
+    private AIModelRequest _modelForm = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -273,21 +278,21 @@
             _loading = true;
             _hasError = false;
             _errorMessage = string.Empty;
-            
+
             var response = await AIModelService.GetAllModelsAsync();
-            
+
             if (response == null)
             {
                 _hasError = true;
                 _errorMessage = "Không thể tải danh sách models";
-                return;
+                throw new Exception(_errorMessage);
             }
 
             if (!response.Success)
             {
                 _hasError = true;
                 _errorMessage = response.Message ?? "Lỗi khi tải danh sách models";
-                return;
+                throw new Exception(_errorMessage);
             }
 
             _models = response.Models.ToList();
@@ -297,6 +302,7 @@
             _hasError = true;
             _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
             Console.WriteLine($"Error in LoadModels: {ex}");
+            return;
         }
         finally
         {
@@ -308,7 +314,7 @@
     private void ShowCreateDialog()
     {
         _editingModel = null;
-        _modelForm = new CreateAIModelRequest();
+        _modelForm = new AIModelRequest();
         _showDialog = true;
     }
 
@@ -317,29 +323,43 @@
         try
         {
             _loading = true;
+            _hasError = false;
+            _errorMessage = string.Empty;
             StateHasChanged();
 
             // Lấy chi tiết model từ API
             var detailModel = await AIModelService.GetModelByIdAsync(model.Id);
-            if (detailModel == null || !detailModel.Success)
+            if (detailModel == null)
             {
-                ToastService.ShowError("Không thể tải thông tin chi tiết của model");
-                return;
+                _hasError = true;
+                _errorMessage =  "Không thể lấy thông tin model";
+                throw new Exception(_errorMessage);
+            }
+
+            if (!detailModel.Success)
+            {
+                _hasError = true;
+                _errorMessage = "Lỗi khi lấy thông tin model";
+                throw new Exception(_errorMessage);
             }
 
             _editingModel = detailModel;
-            _modelForm = new CreateAIModelRequest
+            _modelForm = new AIModelRequest
             {
                 Name = detailModel.Name,
                 Version = detailModel.Version,
-                Config = detailModel.Config,
+                ApiEndPoint = detailModel.ApiEndpoint,
+                ApiKey = detailModel.ApiKey,
                 IsActive = detailModel.IsActive
             };
             _showDialog = true;
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Đã xảy ra lỗi: {ex.Message}");
+            _hasError = true;
+            _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+            Console.WriteLine($"Error in LoadModel: {ex}");
+            return;
         }
         finally
         {
@@ -352,7 +372,7 @@
     {
         _showDialog = false;
         _editingModel = null;
-        _modelForm = new CreateAIModelRequest();
+        _modelForm = new AIModelRequest();
     }
 
     private async Task HandleValidSubmit()
@@ -360,6 +380,8 @@
         try
         {
             _loading = true;
+            _hasError = false;
+            _errorMessage = string.Empty;
             StateHasChanged();
 
             AIModelResponse response;
@@ -370,11 +392,12 @@
                 {
                     CloseDialog();
                     await LoadModels();
-                    ToastService.ShowSuccess("Thêm model mới thành công");
                 }
                 else
                 {
-                    ToastService.ShowError(response.Message ?? "Lỗi khi thêm model mới");
+                    _hasError = true;
+                    _errorMessage = response.Message?? "Lỗi khi thêm model";
+                    throw new Exception(_errorMessage);
                 }
             }
             else
@@ -384,7 +407,8 @@
                     Id = _editingModel.Id,
                     Name = _modelForm.Name,
                     Version = _modelForm.Version,
-                    Config = _modelForm.Config,
+                    ApiEndPoint =_modelForm.ApiEndPoint,
+                    ApiKey =_modelForm.ApiKey,
                     IsActive = _modelForm.IsActive
                 };
                 response = await AIModelService.UpdateModelAsync(updateRequest);
@@ -392,18 +416,22 @@
                 {
                     CloseDialog();
                     await LoadModels();
-                    ToastService.ShowSuccess("Cập nhật model thành công");
                 }
                 else
                 {
-                    ToastService.ShowError(response.Message ?? "Lỗi khi cập nhật model");
+                    _hasError = true;
+                    _errorMessage = response.Message ?? "Lỗi khi cập nhật model";
+                    throw new Exception(_errorMessage);
                 }
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Đã xảy ra lỗi: {ex.Message}");
+            _hasError = true;
+            _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+            Console.WriteLine($"Error in LoadModel: {ex}");
             CloseDialog();
+            return;
         }
         finally
         {
@@ -416,20 +444,33 @@
     {
         try
         {
+            _loading = true;
+            _hasError = false;
+            _errorMessage = string.Empty;
             var response = await AIModelService.ActivateModelAsync(id);
             if (response.Success)
             {
-                ToastService.ShowSuccess("Kích hoạt model thành công");
+                // ToastService.ShowSuccess("Kích hoạt model thành công");
                 await LoadModels();
             }
             else
             {
-                ToastService.ShowError(response.Message ?? "Lỗi khi kích hoạt model");
+                _hasError = true;
+                _errorMessage = response.Message ?? "Lỗi khi cập nhật model";
+                throw new Exception(_errorMessage);
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Đã xảy ra lỗi: {ex.Message}");
+            _hasError = true;
+            _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+            Console.WriteLine($"Error in LoadModel: {ex}");
+            return;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
         }
     }
 
@@ -437,20 +478,33 @@
     {
         try
         {
+            _loading = true;
+            _hasError = false;
+            _errorMessage = string.Empty;
             var response = await AIModelService.DeactivateModelAsync(id);
             if (response.Success)
             {
-                ToastService.ShowSuccess("Vô hiệu hóa model thành công");
+                // ToastService.ShowSuccess("Kích hoạt model thành công");
                 await LoadModels();
             }
             else
             {
-                ToastService.ShowError(response.Message ?? "Lỗi khi vô hiệu hóa model");
+                _hasError = true;
+                _errorMessage = response.Message ?? "Lỗi khi cập nhật model";
+                throw new Exception(_errorMessage);
             }
         }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Đã xảy ra lỗi: {ex.Message}");
+            _hasError = true;
+            _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+            Console.WriteLine($"Error in LoadModel: {ex}");
+            return;
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
         }
     }
 
@@ -460,20 +514,34 @@
         {
             try
             {
+                _loading = true;
+                _hasError = false;
+                _errorMessage = string.Empty;
                 var response = await AIModelService.DeleteModelAsync(id);
                 if (response.Success)
                 {
-                    ToastService.ShowSuccess("Xóa model thành công");
+                    // ToastService.ShowSuccess("Xóa model thành công");
                     await LoadModels();
                 }
                 else
                 {
-                    ToastService.ShowError(response.Message ?? "Lỗi khi xóa model");
+                    _hasError = true;
+                    _errorMessage = response.Message ?? "Lỗi khi xóa model";
+                    throw new Exception(_errorMessage);
+                    // ToastService.ShowError(response.Message ?? "Lỗi khi xóa model");
                 }
             }
             catch (Exception ex)
             {
-                ToastService.ShowError($"Đã xảy ra lỗi: {ex.Message}");
+                _hasError = true;
+                _errorMessage = "Đã xảy ra lỗi: " + ex.Message;
+                Console.WriteLine($"Error in LoadModel: {ex}");
+                return;
+            }
+            finally
+            {
+                _loading = false;
+                StateHasChanged();
             }
         }
     }

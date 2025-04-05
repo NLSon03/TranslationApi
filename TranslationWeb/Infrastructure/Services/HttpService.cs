@@ -42,7 +42,7 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                // 如果在最近30秒内已经检查过，直接返回上次的结果
+                // Nếu đã kiểm tra trong 30 giây gần đây, trả về kết quả trước đó
                 if (DateTime.Now - _lastConnectionCheck < TimeSpan.FromSeconds(30))
                 {
                     return _isServerAvailable;
@@ -105,7 +105,7 @@ namespace TranslationWeb.Infrastructure.Services
                     _logger.LogError(ex, "Error executing GET request to {Url}", url);
                     if (i == _maxRetries - 1)
                     {
-                        // 如果是最后一次重试，检查服务器连接
+                        // Kiểm tra kết nối server khi thất bại lần cuối cùng
                         if (!await CheckServerConnection())
                         {
                             throw new HttpRequestException("Server is not available", ex, System.Net.HttpStatusCode.ServiceUnavailable);
@@ -157,6 +157,29 @@ namespace TranslationWeb.Infrastructure.Services
                     var responseContent = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("API response: Status: {StatusCode}, Content: {Content}",
                         response.StatusCode, responseContent);
+
+                    // Kiểm tra mã trạng thái trước khi phân tích phản hồi
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning("API trả về lỗi: {StatusCode}, {Content}", 
+                            response.StatusCode, responseContent);
+                        
+                        // Nếu là API đăng nhập hoặc đăng ký, cố gắng đọc thông báo lỗi từ server
+                        if (url.Contains("/login") || url.Contains("/register"))
+                        {
+                            try
+                            {
+                                var errorResponse = JsonSerializer.Deserialize<TResponse>(responseContent, _jsonOptions);
+                                if (errorResponse != null)
+                                {
+                                    return errorResponse; // Trả về đối tượng lỗi để client có thể hiển thị
+                                }
+                            }
+                            catch { /* Bỏ qua lỗi phân tích JSON */ }
+                        }
+                        
+                        throw new HttpRequestException($"API error: {response.StatusCode}", null, response.StatusCode);
+                    }
 
                     try
                     {
@@ -349,8 +372,6 @@ namespace TranslationWeb.Infrastructure.Services
 
             throw new HttpRequestException($"Failed to execute DELETE request to {url} after {_maxRetries} attempts");
         }
-
-        // 保持原有的非泛型DeleteAsync方法以保持向后兼容性
         public async Task<bool> DeleteAsync(string url)
         {
             try
@@ -376,8 +397,19 @@ namespace TranslationWeb.Infrastructure.Services
                     if (authResult.ExpiresAt <= DateTime.Now)
                     {
                         _logger.LogWarning("Token đã hết hạn");
-                        await HandleUnauthorized();
-                        return;
+                        
+                        // Kiểm tra refresh token
+                        if (!string.IsNullOrEmpty(authResult.RefreshToken) && 
+                            authResult.RefreshTokenExpiresAt > DateTime.Now)
+                        {
+                            // TODO: Thực hiện refresh token logic ở đây
+                            _logger.LogInformation("Đang thử làm mới token...");
+                        }
+                        else
+                        {
+                            await HandleUnauthorized();
+                            return;
+                        }
                     }
 
                     _logger.LogInformation("Đang thêm JWT Token vào header: {Token}",
@@ -395,7 +427,12 @@ namespace TranslationWeb.Infrastructure.Services
                 else
                 {
                     _logger.LogWarning("Không tìm thấy token hoặc token rỗng");
-                    await HandleUnauthorized();
+                    // Chỉ xử lý unauthorized nếu không phải là endpoint xác thực
+                    if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase) &&
+                        !_navigationManager.Uri.Contains("/auth/register", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await HandleUnauthorized();
+                    }
                 }
             }
             catch (Exception ex)

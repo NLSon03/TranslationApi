@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace TranslationApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class UpdatedModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +19,8 @@ namespace TranslationApi.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Version = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Config = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ApiEndpoint = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -171,7 +173,7 @@ namespace TranslationApi.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChatSession",
+                name: "ChatSessions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -183,15 +185,15 @@ namespace TranslationApi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChatSession", x => x.Id);
+                    table.PrimaryKey("PK_ChatSessions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ChatSession_AIModel_AIModelId",
+                        name: "FK_ChatSessions_AIModel_AIModelId",
                         column: x => x.AIModelId,
                         principalTable: "AIModel",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ChatSession_AspNetUsers_UserId",
+                        name: "FK_ChatSessions_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -199,7 +201,7 @@ namespace TranslationApi.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChatMessage",
+                name: "ChatMessages",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -212,17 +214,17 @@ namespace TranslationApi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChatMessage", x => x.Id);
+                    table.PrimaryKey("PK_ChatMessages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ChatMessage_ChatSession_SessionId",
+                        name: "FK_ChatMessages_ChatSessions_SessionId",
                         column: x => x.SessionId,
-                        principalTable: "ChatSession",
+                        principalTable: "ChatSessions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Feedback",
+                name: "Feedbacks",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -233,11 +235,11 @@ namespace TranslationApi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Feedback", x => x.Id);
+                    table.PrimaryKey("PK_Feedbacks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Feedback_ChatMessage_MessageId",
+                        name: "FK_Feedbacks_ChatMessages_MessageId",
                         column: x => x.MessageId,
-                        principalTable: "ChatMessage",
+                        principalTable: "ChatMessages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -282,23 +284,23 @@ namespace TranslationApi.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatMessage_SessionId",
-                table: "ChatMessage",
+                name: "IX_ChatMessages_SessionId",
+                table: "ChatMessages",
                 column: "SessionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_AIModelId",
-                table: "ChatSession",
+                name: "IX_ChatSessions_AIModelId",
+                table: "ChatSessions",
                 column: "AIModelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatSession_UserId",
-                table: "ChatSession",
+                name: "IX_ChatSessions_UserId",
+                table: "ChatSessions",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Feedback_MessageId",
-                table: "Feedback",
+                name: "IX_Feedbacks_MessageId",
+                table: "Feedbacks",
                 column: "MessageId");
         }
 
@@ -321,16 +323,16 @@ namespace TranslationApi.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Feedback");
+                name: "Feedbacks");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ChatMessage");
+                name: "ChatMessages");
 
             migrationBuilder.DropTable(
-                name: "ChatSession");
+                name: "ChatSessions");
 
             migrationBuilder.DropTable(
                 name: "AIModel");

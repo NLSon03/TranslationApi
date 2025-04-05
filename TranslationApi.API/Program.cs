@@ -98,7 +98,7 @@ builder.Services.AddHttpClient<GeminiTranslationService>(client =>
     client.DefaultRequestHeaders.Add("x-goog-api-key", builder.Configuration["GeminiApi:ApiKey"]);
 });
 
-builder.Services.AddScoped<ITranslationService, GeminiTranslationService>();
+builder.Services.AddScoped<ITranslationService, TranslationService>();
 
 // Cấu hình Swagger với hỗ trợ JWT
 builder.Services.AddSwaggerGen(options =>

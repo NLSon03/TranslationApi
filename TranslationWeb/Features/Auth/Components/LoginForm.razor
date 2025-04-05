@@ -87,6 +87,14 @@
                 
                 // Đợi AuthenticationState được cập nhật
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                
+                // Thêm thêm thời gian chờ để đảm bảo trạng thái xác thực được cập nhật
+                if (authState.User.Identity?.IsAuthenticated != true)
+                {
+                    await Task.Delay(500); // Đợi thêm 500ms
+                    authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                }
+                
                 if (authState.User.Identity?.IsAuthenticated == true)
                 {
                     Logger.LogInformation("Trạng thái xác thực đã được cập nhật, chuyển hướng...");
@@ -95,7 +103,7 @@
                 else
                 {
                     Logger.LogWarning("Trạng thái xác thực chưa được cập nhật sau khi đăng nhập");
-                    errorMessage = "Lỗi cập nhật trạng thái đăng nhập";
+                    errorMessage = "Lỗi cập nhật trạng thái đăng nhập. Vui lòng thử lại sau.";
                 }
             }
             else

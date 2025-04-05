@@ -1,0 +1,62 @@
+.ai-translation-page-container {
+    background-color: var(--ai-dark-bg);
+    background-image: radial-gradient(
+        circle at 10% 20%,
+        rgba(100, 43, 115, 0.1) 0%,
+        rgba(4, 0, 74, 0.2) 90%
+    );
+    min-height: calc(100vh - 140px);
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-translation-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+}
+
+.ai-translation-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+}
+
+.ai-translation-title::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(to right, var(--ai-gradient-blue), var(--ai-gradient-pink));
+    border-radius: 2px;
+}
+
+.ai-translation-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    max-width: 700px;
+    margin: 1.5rem auto 0;
+    line-height: 1.6;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+    .ai-translation-page-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .ai-translation-title {
+        font-size: 2rem;
+    }
+    
+    .ai-translation-subtitle {
+        font-size: 1rem;
+    }
+} 

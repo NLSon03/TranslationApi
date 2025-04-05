@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +12,9 @@
     <link rel="stylesheet" href="css/chat.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="TranslationWeb.styles.css" rel="stylesheet" />
-    <link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -35,13 +36,47 @@
     </div>
 
     <!-- Bootstrap is required for dropdowns and other UI components -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.4/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Custom JavaScript -->
-    <script src="js/site.js"></script>
+    <script src="js/site.js" defer></script>
     
     <!-- Blazor WebAssembly -->
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/homepage.js"></script>
+    <script src="js/translation.js"></script>
+    <!-- Kiểm tra JavaScript functions -->
+    <script>
+        // Đảm bảo các hàm JavaScript được khởi tạo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Kiểm tra các hàm JavaScript:');
+            console.log('createParticlesBackground:', typeof window.createParticlesBackground);
+            console.log('initTypeWriter:', typeof window.initTypeWriter);
+            console.log('initNeonHoverEffects:', typeof window.initNeonHoverEffects);
+            
+            // Nếu không tìm thấy các hàm, tự khởi tạo
+            if (typeof window.createParticlesBackground !== 'function') {
+                console.log('Hàm createParticlesBackground chưa được khởi tạo, đang tạo function rỗng...');
+                window.createParticlesBackground = function(containerId, count) {
+                    console.log('createParticlesBackground được gọi với:', containerId, count);
+                };
+            }
+            
+            if (typeof window.initTypeWriter !== 'function') {
+                console.log('Hàm initTypeWriter chưa được khởi tạo, đang tạo function rỗng...');
+                window.initTypeWriter = function() {
+                    console.log('initTypeWriter được gọi');
+                };
+            }
+            
+            if (typeof window.initNeonHoverEffects !== 'function') {
+                console.log('Hàm initNeonHoverEffects chưa được khởi tạo, đang tạo function rỗng...');
+                window.initNeonHoverEffects = function() {
+                    console.log('initNeonHoverEffects được gọi');
+                };
+            }
+        });
+    </script>
 </body>
 
 </html>
