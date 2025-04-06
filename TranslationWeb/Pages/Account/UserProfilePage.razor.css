@@ -1,0 +1,286 @@
+/* === Profile Page Styles === */
+
+.ai-page-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.ai-page-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.ai-page-title i {
+    color: var(--ai-blue);
+}
+
+.ai-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.ai-profile-card {
+    background: rgba(17, 25, 40, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(76, 201, 240, 0.15);
+    padding: 1.5rem;
+    color: #c5c5dd;
+}
+
+.ai-profile-card h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(76, 201, 240, 0.1);
+    padding-bottom: 0.8rem;
+}
+
+/* Profile Info Card */
+.ai-profile-info-card .ai-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(76, 201, 240, 0.1);
+}
+
+.ai-profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--ai-blue);
+    object-fit: cover;
+}
+
+.ai-profile-name h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 0.2rem 0;
+}
+
+.ai-profile-name p {
+    font-size: 0.9rem;
+    color: #a0a0c0;
+    margin-bottom: 0.4rem;
+}
+
+.ai-profile-role {
+    background: var(--ai-gradient-blue);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.ai-edit-profile-btn {
+    margin-left: auto; /* Push button to the right */
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #c5c5dd;
+}
+
+.ai-edit-profile-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-color: var(--ai-blue);
+}
+
+.ai-profile-body .ai-info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.8rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.ai-profile-body .ai-info-grid i {
+    color: var(--ai-blue);
+    width: 18px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.ai-profile-bio {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #a0a0c0;
+    background: rgba(10, 10, 20, 0.3);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--ai-blue);
+}
+
+/* Settings Card */
+.ai-setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(76, 201, 240, 0.08);
+}
+
+.ai-setting-item:last-child {
+    border-bottom: none;
+}
+
+.ai-setting-item label:not(.ai-switch) {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.ai-btn-secondary {
+     background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #c5c5dd;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.ai-btn-secondary:hover:not(:disabled) {
+     background: rgba(255, 255, 255, 0.12);
+     color: #fff;
+     border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ai-btn-danger {
+     background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+     padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.ai-btn-danger:hover:not(:disabled) {
+     background: rgba(239, 68, 68, 0.25);
+     color: #fff;
+     border-color: rgba(239, 68, 68, 0.5);
+}
+
+.ai-delete-account label {
+    color: #ef4444;
+}
+
+/* Simple Switch Toggle */
+.ai-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.ai-switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ai-slider {
+  position: absolute;
+  cursor: not-allowed; /* Disabled for placeholder */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: .4s;
+}
+
+.ai-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #aaa;
+  transition: .4s;
+}
+
+input:checked + .ai-slider {
+  background-color: var(--ai-blue);
+}
+
+input:checked + .ai-slider:before {
+  transform: translateX(20px);
+  background-color: white;
+}
+
+.ai-slider.round {
+  border-radius: 34px;
+}
+
+.ai-slider.round:before {
+  border-radius: 50%;
+}
+
+/* Activity Card */
+.ai-activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+}
+
+.ai-activity-list li {
+    padding: 0.8rem 0;
+    border-bottom: 1px dashed rgba(76, 201, 240, 0.1);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.ai-activity-list li:last-child {
+    border-bottom: none;
+}
+
+.ai-activity-list i {
+    width: 18px;
+    text-align: center;
+}
+
+.text-blue { color: var(--ai-blue); }
+.text-pink { color: var(--ai-pink); }
+.text-green { color: #22c55e; } /* Example */
+
+.ai-activity-list .time {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #a0a0c0;
+}
+
+.float-right {
+    float: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ai-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-profile-info-card .ai-profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .ai-edit-profile-btn {
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+} 

@@ -1,0 +1,120 @@
+@page "/auth/register"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+<PageTitle>Đăng ký - AI Platform</PageTitle>
+
+<div class="ai-auth-page-container">
+    <div class="ai-auth-form-card">
+        <div class="ai-auth-header">
+            <i class="fas fa-user-plus ai-auth-icon"></i>
+            <h2>Tạo tài khoản mới</h2>
+            <p>Tham gia cộng đồng AI Platform</p>
+        </div>
+
+        <EditForm Model="@registerRequest" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+            <div class="alert alert-danger" style="display: @(errorMessage != string.Empty ? "block" : "none")">
+                @errorMessage
+            </div>
+            <div class="ai-form-group">
+                <label for="username"><i class="fas fa-user"></i> Tên đăng nhập</label>
+                <InputText id="username" class="ai-input" @bind-Value="registerRequest.UserName"
+                    placeholder="Chọn tên đăng nhập" />
+                <ValidationMessage For="@(() => registerRequest.UserName)" />
+            </div>
+
+            <div class="ai-form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                <InputText id="email" type="email" class="ai-input" @bind-Value="registerRequest.Email"
+                    placeholder="Nhập địa chỉ email" />
+                <ValidationMessage For="@(() => registerRequest.Email)" />
+            </div>
+
+            <div class="ai-form-group">
+                <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
+                <InputText id="password" type="password" class="ai-input" @bind-Value="registerRequest.Password"
+                    placeholder="Tạo mật khẩu mạnh" />
+                <ValidationMessage For="@(() => registerRequest.Password)" />
+            </div>
+
+            <div class="ai-form-group">
+                <label for="confirmPassword"><i class="fas fa-check-circle"></i> Xác nhận Mật khẩu</label>
+                <InputText id="confirmPassword" type="password" class="ai-input"
+                    @bind-Value="registerRequest.ConfirmPassword" placeholder="Nhập lại mật khẩu" />
+                <ValidationMessage For="@(() => registerRequest.ConfirmPassword)" />
+            </div>
+@* 
+             <div class="ai-form-options">
+                 <label class="ai-checkbox-label">
+                     <InputCheckbox /> Tôi đồng ý với <a href="/terms" class="ai-link">Điều khoản dịch vụ</a>
+                 </label>
+             </div> *@
+            <div class="form-group">
+                <button type="submit" class="ai-btn-v2 ai-submit-btn" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                        <span>Đang xử lý...</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-plus"></i>
+                        <span>Đăng ký</span>
+                    }
+                </button>
+            </div>
+
+
+            <ValidationSummary />
+        </EditForm>
+
+        <div class="ai-auth-footer">
+            Đã có tài khoản? <a href="/auth/login" class="ai-link">Đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterRequest registerRequest = new RegisterRequest();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+    private async void HandleRegister()
+    {
+        errorMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            var result = await AuthService.RegisterAsync(registerRequest);
+            if (result.Success)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                if (result.Message?.Contains("Email đã tồn tại") == true)
+                {
+                    errorMessage = "Email này đã được sử dụng. Vui lòng chọn email khác.";
+                }
+                else if (result.Message?.ToLower().Contains("password") == true)
+                {
+                    errorMessage = "Mật khẩu không đáp ứng yêu cầu. Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường và số.";
+                }
+                else
+                {
+                    errorMessage = result.Message ?? "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.";
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

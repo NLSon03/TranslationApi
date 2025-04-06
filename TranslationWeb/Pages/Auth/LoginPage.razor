@@ -1,0 +1,111 @@
+@page "/auth/login"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+<PageTitle>Đăng nhập - AI Platform</PageTitle>
+
+<div class="ai-auth-page-container">
+    <div class="ai-auth-form-card">
+        <div class="ai-auth-header">
+            <i class="fas fa-robot ai-auth-icon"></i>
+            <h2>Đăng nhập vào Hệ thống</h2>
+            <p>Sử dụng tài khoản AI Platform của bạn</p>
+        </div>
+
+        <EditForm Model="@loginRequest" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <div class="alert alert-danger d-flex align-items-center gap-3 @(errorMessage != string.Empty ? "d-block" : "d-none")" role="alert">
+                <span class="fs-4">⚠️</span>
+                <div>@errorMessage</div>
+            </div>
+            <div class="ai-form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email hoặc Tên đăng nhập</label>
+                <InputText id="email" class="ai-input" @bind-Value="loginRequest.Email" placeholder="Nhập email hoặc tên đăng nhập"  />
+@*                 <ValidationMessage For="@(() => loginRequest.Email)" />
+ *@            </div>
+
+            <div class="ai-form-group">
+                <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
+                <InputText id="password" type="password" class="ai-input" @bind-Value="loginRequest.Password" placeholder="Nhập mật khẩu"  />
+@*                  <ValidationMessage For="@(() => loginRequest.Password)" />
+ *@            </div>
+
+            <div class="ai-form-options">
+                 <label class="ai-checkbox-label">
+                     <InputCheckbox @bind-Value="loginRequest.RememberMe" /> Ghi nhớ đăng nhập
+                 </label>
+@*                  <a href="/auth/forgot-password" class="ai-link">Quên mật khẩu?</a>
+ *@            </div>
+
+            <div class="form-group">
+                <button type="submit" class="ai-btn-v2 ai-submit-btn" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                            <span class="spinner-border spinner-border-sm me-2 text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </span>
+                    }
+                    else
+                    {
+                            <span>Đăng nhập</span>
+                    }
+                </button>
+            </div>
+
+             <ValidationSummary />
+        </EditForm>
+
+        <div class="ai-auth-footer">
+            Chưa có tài khoản? <a href="/auth/register" class="ai-link">Đăng ký ngay</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginRequest loginRequest = new LoginRequest();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    private async void HandleLogin()
+    {
+        errorMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginRequest);
+            if(result.Success && !string.IsNullOrEmpty(result.Token))
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
+                if (authState.User.Identity?.IsAuthenticated != true)
+                {
+                    await Task.Delay(500);
+                    authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                }
+
+                if (authState.User.Identity?.IsAuthenticated == true)
+                {
+                    NavigationManager.NavigateTo("/", true);
+                }
+                else
+                {
+                    errorMessage = "Lỗi cập nhật trạng thái đăng nhập. Vui lòng thử lại sau.";
+                }
+            }
+            else
+            {
+                errorMessage = result.Message ?? "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
+            }
+        }
+        catch(Exception ex)
+        {
+            errorMessage = $"Lỗi: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+}

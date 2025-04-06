@@ -9,6 +9,13 @@
     --ai-purple: #7209b7;
 }
 
+/* Apply dark background to the entire body */
+body {
+    background-color: var(--ai-dark-bg, #0a0a14);
+    color: #e0e0e0; /* Set default text color for better contrast */
+    min-height: 100vh; /* Ensure body takes full height */
+}
+
 /* Biểu hiệu ứng nền gradient cyberpunk */
 .ai-gradient-bg {
     background: linear-gradient(125deg, var(--ai-dark-bg) 0%, #1a1a2e 100%);

@@ -1,0 +1,118 @@
+@page "/account/profile"
+@using System.Security.Claims
+@inject IAuthService AuthService
+
+<PageTitle>Hồ sơ của tôi - AI Platform</PageTitle>
+
+<div class="ai-page-container">
+    <h1 class="ai-page-title"><i class="fas fa-user-circle"></i> Hồ Sơ Người Dùng</h1>
+
+    <div class="ai-profile-grid">
+        <div class="ai-profile-card ai-profile-info-card">
+            <div class="ai-profile-header">
+                <img src="/images/default-avatar.png" alt="Avatar" class="ai-profile-avatar" />
+                <div class="ai-profile-name">
+                    <h3>@_user?.UserName</h3>
+                    <p>@_user?.Email</p>
+                    <span class="ai-profile-role">@{
+                            if(_user!=null && _user.Roles.Contains("Admin"))
+                            {
+                                <span>Quản trị viên</span>
+                            }
+                            else
+                            {
+                                <span>Người dùng</span>
+                            }
+                        }
+                    </span>
+                </div>
+                 <button class="ai-btn-v2 ai-edit-profile-btn" disabled>
+                     <i class="fas fa-pencil-alt"></i> Chỉnh sửa
+                 </button>
+            </div>
+            <div class="ai-profile-body">
+                <h4>Thông tin cơ bản</h4>
+                @* <div class="ai-info-grid">
+                    <div><i class="fas fa-calendar-alt"></i> Ngày tham gia:</div>
+                    <div>01/01/2024 (Placeholder)</div>
+                    <div><i class="fas fa-map-marker-alt"></i> Vị trí:</div>
+                    <div>Không cung cấp</div>
+                     <div><i class="fas fa-globe"></i> Ngôn ngữ:</div>
+                    <div>Tiếng Việt</div>
+                </div>
+                <h4>Giới thiệu</h4> *@
+                <p class="ai-profile-bio">
+                    Đang phát triển
+                </p>
+            </div>
+        </div>
+
+        <div class="ai-profile-card ai-profile-settings-card">
+            <h4>Cài đặt tài khoản</h4>
+            <div class="ai-setting-item">
+                <label for="changePassword">Đang phát triển</label>
+            </div>
+            @* <div class="ai-setting-item">
+                <label for="changePassword">Đổi mật khẩu</label>
+                <button id="changePassword" class="ai-btn-v2 ai-btn-secondary" disabled>Đổi mật khẩu</button>
+            </div>
+             <div class="ai-setting-item">
+                <label for="twoFactor">Xác thực hai yếu tố (2FA)</label>
+                <label class="ai-switch">
+                    <input type="checkbox" disabled>
+                    <span class="ai-slider round"></span>
+                </label>
+            </div>
+            <div class="ai-setting-item">
+                <label>Thông báo qua Email</label>
+                 <label class="ai-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="ai-slider round"></span>
+                </label>
+            </div>
+             <div class="ai-setting-item ai-delete-account">
+                 <label>Xóa tài khoản</label>
+                <button class="ai-btn-v2 ai-btn-danger" disabled><i class="fas fa-trash-alt"></i> Yêu cầu xóa</button>
+            </div> *@
+        </div>
+
+         <div class="ai-profile-card ai-profile-activity-card">
+             <h4>Hoạt động gần đây</h4>
+             @* <ul class="ai-activity-list">
+                 <li><i class="fas fa-language text-blue"></i> Đã dịch 5 đoạn văn bản <span class="time">- 1 giờ trước</span></li>
+                 <li><i class="fas fa-comment text-pink"></i> Đã tham gia cuộc trò chuyện mới <span class="time">- 3 giờ trước</span></li>
+                 <li><i class="fas fa-user-edit text-green"></i> Cập nhật thông tin giới thiệu <span class="time">- Hôm qua</span></li>
+                 <li><i class="fas fa-language text-blue"></i> Đã dịch 10 đoạn văn bản <span class="time">- 2 ngày trước</span></li>
+             </ul> *@
+@*              <a href="/account/activity" class="ai-link float-right">Xem tất cả hoạt động</a>
+ *@             <a class="ai-link float-right">Đang phát triển</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private AuthResponse? _user; 
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            _user = await AuthService.GetCurrentUserAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Lỗi: " + ex.Message);
+        }
+    }
+
+    private async Task RefreshUsers()
+    {
+        await LoadUsers();
+    }
+} 

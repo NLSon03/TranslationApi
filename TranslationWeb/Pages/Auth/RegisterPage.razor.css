@@ -1,0 +1,292 @@
+/* === Auth Page Styles (Copied from Login with ::deep fixes) === */
+.ai-auth-form-card {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-auth-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 20, 0.95) 0%,
+    rgba(30, 15, 40, 0.95) 100%
+  );
+  animation: gradientShift 15s ease infinite;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+/* Optional: Add animated particles for auth pages */
+.ai-auth-page-container::before {
+  /* Style similar to particles in site.js or use a library */
+}
+
+.ai-auth-form-card {
+  background: rgba(17, 25, 40, 0.9);
+  padding: 2.5rem 3rem;
+  border-radius: 16px;
+  border: 1px solid rgba(76, 201, 240, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  max-width: 450px;
+  width: 100%;
+  text-align: center;
+  color: #e0e0e0;
+}
+
+.ai-auth-header {
+  margin-bottom: 2rem;
+}
+
+.ai-auth-icon {
+  font-size: 3rem;
+  /* Color overridden below for Register page */
+  margin-bottom: 1rem;
+  display: block;
+  animation: floatIcon 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatIcon {
+  from {
+    transform: translateY(-5px);
+  }
+
+  to {
+    transform: translateY(5px);
+  }
+}
+
+.ai-auth-header h2 {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-auth-header p {
+  color: #a0a0c0;
+  font-size: 0.95rem;
+}
+
+/* Form Styles - Using ::deep for InputText */
+.ai-form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.ai-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #c5c5dd;
+  font-size: 0.9rem;
+}
+
+.ai-form-group label i {
+  margin-right: 0.5rem;
+  color: var(--ai-blue);
+  width: 16px; /* Align icons */
+  text-align: center;
+}
+
+/* Use ::deep to target the input element rendered by InputText */
+.ai-auth-form-card .ai-form-group ::deep .ai-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: rgba(10, 10, 20, 0.5);
+  border: 1px solid rgba(76, 201, 240, 0.3);
+  border-radius: 8px;
+  color: #f0f0f5;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  height: auto;
+  box-shadow: none;
+}
+
+.ai-auth-form-card .ai-form-group ::deep .ai-input:focus {
+  outline: none;
+  border-color: var(--ai-blue);
+  box-shadow: 0 0 8px rgba(76, 201, 240, 0.5);
+}
+
+.ai-auth-form-card .ai-form-group ::deep .ai-input::placeholder {
+  color: rgba(224, 224, 224, 0.4);
+}
+
+.ai-auth-form-card .ai-form-group ::deep .ai-input:disabled {
+  background: rgba(10, 10, 20, 0.3);
+  border-color: rgba(76, 201, 240, 0.2);
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.ai-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.ai-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0a0c0;
+  cursor: pointer;
+}
+
+.ai-link {
+  color: var(--ai-blue);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.ai-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Apply ::deep to base submit button style */
+.ai-auth-form-card ::deep .ai-submit-btn {
+  width: 100%;
+  margin-top: 1rem;
+  background: var(--ai-gradient-pink); /* Use pink gradient for emphasis */
+  box-shadow: 0 4px 15px rgba(247, 37, 133, 0.2);
+  display: inline-flex; 
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Apply ::deep to hover state */
+.ai-auth-form-card ::deep .ai-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f72585, #7209b7);
+  box-shadow: 0 6px 20px rgba(247, 37, 133, 0.3);
+  transform: none; 
+}
+
+/* Disabled state already has ::deep */
+.ai-auth-form-card ::deep .ai-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-auth-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(76, 201, 240, 0.1);
+  font-size: 0.9rem;
+  color: #a0a0c0;
+}
+
+.validation-message {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.validation-summary {
+  margin-top: 1rem;
+  color: #fca5a5;
+}
+
+/* Ensure empty layout has appropriate background if used */
+body.empty-layout {
+  background: linear-gradient(135deg, #0a0a14, #1e0f28);
+}
+
+.ai-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0a0c0;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Apply ::deep to the checkbox input */
+.ai-checkbox-label ::deep input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid var(--ai-blue);
+  border-radius: 4px;
+  background: transparent;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+/* Apply ::deep */
+.ai-checkbox-label ::deep input[type="checkbox"]:checked {
+  background: var(--ai-blue);
+}
+
+/* Apply ::deep */
+.ai-checkbox-label ::deep input[type="checkbox"]:checked::after {
+  content: "\f00c"; /* Biểu tượng dấu check từ Font Awesome */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8rem;
+}
+
+/* Apply ::deep */
+.ai-checkbox-label ::deep input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Specific override for Register page icon color */
+.ai-auth-icon {
+    color: var(--ai-pink); /* Use pink icon for register */
+} 

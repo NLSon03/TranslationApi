@@ -1,0 +1,109 @@
+@page "/chat" // Or remove @page if it's only used as a component
+
+@* Inject services if needed later *@
+
+<PageTitle>AI Chat - AI Platform</PageTitle>
+
+<div class="ai-chat-container">
+    
+    <div class="ai-chat-sidebar">
+         <div class="ai-sidebar-header">
+            <h3>Cuộc trò chuyện</h3>
+            <button class="ai-btn-v2 ai-new-chat-btn" disabled title="Bắt đầu cuộc trò chuyện mới">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <div class="ai-conversation-list">
+            <div class="ai-conversation-item active">
+                <i class="fas fa-robot"></i>
+                <div class="ai-convo-info">
+                    <span class="ai-convo-title">Trợ lý AI về Dịch thuật</span>
+                    <span class="ai-convo-preview">Tuyệt vời! Giao diện mới trông...</span>
+                </div>
+                 <span class="ai-convo-time">10:30 AM</span>
+            </div>
+             <div class="ai-conversation-item">
+                <i class="fas fa-user-tie"></i>
+                 <div class="ai-convo-info">
+                    <span class="ai-convo-title">Hỗ trợ kỹ thuật</span>
+                    <span class="ai-convo-preview">Bạn: Vấn đề đã được giải quyết...</span>
+                 </div>
+                 <span class="ai-convo-time">Hôm qua</span>
+            </div>
+             <div class="ai-conversation-item">
+                <i class="fas fa-comments"></i>
+                 <div class="ai-convo-info">
+                     <span class="ai-convo-title">Thảo luận chung</span>
+                     <span class="ai-convo-preview">Người khác: Tôi đồng ý với ý kiến đó...</span>
+                 </div>
+                 <span class="ai-convo-time">Thứ 2</span>
+            </div>
+             <div class="ai-conversation-item">
+                 <i class="fas fa-lightbulb"></i>
+                 <div class="ai-convo-info">
+                    <span class="ai-convo-title">Ý tưởng mới</span>
+                    <span class="ai-convo-preview">Bạn: Chúng ta có thể thử...</span>
+                </div>
+                 <span class="ai-convo-time">15/04</span>
+            </div>
+            <!-- Add more placeholder items -->
+        </div>
+    </div>
+
+    <div class="ai-chat-main">
+        <div class="ai-chat-header">
+            <h4>Trợ lý AI về Dịch thuật (Placeholder)</h4>
+            <div>
+                 <button class="ai-btn-v2 ai-icon-btn" title="Thông tin cuộc trò chuyện" disabled><i class="fas fa-info-circle"></i></button>
+                 <button class="ai-btn-v2 ai-icon-btn" title="Xóa cuộc trò chuyện" disabled><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="ai-message-list">
+            <!-- Placeholder Messages -->
+            <div class="ai-message ai-message-other">
+                 <img src="/images/ai-avatar.png" alt="AI" class="ai-msg-avatar"/>
+                <div class="ai-msg-content">
+                    <p>Chào bạn! Tôi có thể giúp gì về giao diện trang dịch thuật?</p>
+                    <span class="ai-msg-time">10:25 AM</span>
+                </div>
+            </div>
+            <div class="ai-message ai-message-user">
+                 <img src="/images/default-avatar.png" alt="User" class="ai-msg-avatar"/>
+                 <div class="ai-msg-content">
+                    <p>OK, tôi đã hoàn tất việc thiết kế lại.</p>
+                    <span class="ai-msg-time">10:28 AM</span>
+                 </div>
+            </div>
+             <div class="ai-message ai-message-other">
+                  <img src="/images/ai-avatar.png" alt="AI" class="ai-msg-avatar"/>
+                 <div class="ai-msg-content">
+                    <p>Tuyệt vời! Giao diện mới trông rất hiện đại và phù hợp với chủ đề AI. Các yếu tố được sắp xếp hợp lý, màu sắc hài hòa.</p>
+                    <span class="ai-msg-time">10:30 AM</span>
+                 </div>
+            </div>
+             <div class="ai-message ai-message-user">
+                 <img src="/images/default-avatar.png" alt="User" class="ai-msg-avatar"/>
+                 <div class="ai-msg-content">
+                     <p>Cảm ơn bạn!</p>
+                     <span class="ai-msg-time">10:31 AM</span>
+                 </div>
+            </div>
+             <!-- Add more messages -->
+        </div>
+
+        <div class="ai-chat-input-area">
+             <button class="ai-btn-v2 ai-icon-btn" title="Đính kèm tệp" disabled><i class="fas fa-paperclip"></i></button>
+            <InputTextArea class="ai-chat-input" placeholder="Nhập tin nhắn của bạn ở đây..." @bind-Value="newMessage" disabled/>
+            <button class="ai-btn-v2 ai-send-btn" disabled>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string newMessage = string.Empty;
+
+    // Placeholder methods if needed
+} 

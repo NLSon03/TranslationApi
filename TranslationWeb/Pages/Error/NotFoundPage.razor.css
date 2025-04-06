@@ -1,0 +1,86 @@
+/* === Error Page Styles === */
+
+.ai-error-page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background: linear-gradient(145deg, #1a1a2e, #0a0a14);
+    color: #e0e0e0;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.ai-error-content {
+    position: relative;
+    z-index: 1;
+}
+
+.ai-error-code {
+    font-size: clamp(6rem, 20vw, 12rem); /* Responsive font size */
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--ai-blue), var(--ai-pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    animation: pulseCode 3s ease-in-out infinite alternate;
+}
+
+@keyframes pulseCode {
+    from { opacity: 0.7; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.02); }
+}
+
+.ai-error-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.ai-error-message {
+    font-size: 1rem;
+    color: #a0a0c0;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
+    line-height: 1.6;
+}
+
+.ai-error-button {
+    background: var(--ai-gradient-blue);
+    color: #fff;
+    padding: 0.8rem 1.8rem;
+}
+
+.ai-error-button:hover {
+    background: linear-gradient(135deg, #4cc9f0, #4361ee);
+    box-shadow: 0 6px 20px rgba(76, 201, 240, 0.3);
+    transform: translateY(-2px);
+}
+
+.ai-error-graphic {
+    font-size: 8rem;
+    color: rgba(76, 201, 240, 0.1);
+    position: absolute;
+    bottom: -20px;
+    right: -30px;
+    transform: rotate(-15deg);
+    z-index: 0;
+    animation: floatGhost 6s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes floatGhost {
+    0% { transform: translate(0, 0) rotate(-15deg); }
+    50% { transform: translate(-10px, 15px) rotate(-10deg); }
+    100% { transform: translate(5px, -5px) rotate(-18deg); }
+}
+
+/* Ensure background for empty layout */
+body.empty-layout {
+     background: linear-gradient(145deg, #1a1a2e, #0a0a14);
+} 
