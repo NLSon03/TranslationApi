@@ -2,7 +2,7 @@ namespace TranslationWeb.Core.Constants
 {
     public static class ApiEndpoints
     {
-        public static string BaseUrl { get; } = "http://localhost:5292";
+        public static string BaseUrl { get; } = "https://localhost:5293";
 
         public static class Auth
         {

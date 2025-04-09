@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net.Http.Headers;
@@ -14,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Đặt URL cụ thể
-builder.WebHost.UseUrls("http://localhost:5292");
+//builder.WebHost.UseUrls("http://localhost:5292");
 
 // Đăng ký Infrastructure và Application services
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -64,6 +65,12 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
         ClockSkew = TimeSpan.Zero // Bỏ khoảng thời gian gia hạn mặc định 5 phút
     };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.SaveTokens = true;
 });
 
 // Cấu hình CORS
@@ -138,7 +145,40 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Configure Kestrel endpoints
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5292, listenOptions => 
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+    
+    serverOptions.ListenAnyIP(5293, listenOptions => 
+    {
+        listenOptions.UseHttps();
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+});
+
 var app = builder.Build();
+
+// Luôn bật HTTPS Redirection dù là môi trường nào
+app.UseHttpsRedirection();
+
+// Middleware để chặn hoàn toàn HTTP request trong Development
+if (app.Environment.IsDevelopment())
+{
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Scheme == "http")
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync("HTTP is not supported. Please use HTTPS.");
+            return;
+        }
+        await next();
+    });
+}
 
 // Middleware
 if (app.Environment.IsDevelopment())

@@ -35,7 +35,7 @@ builder.Services.AddScoped(sp =>
 // Configure HTTP client with retry policy and JSON options
 builder.Services.AddHttpClient("API", (sp, client) =>
 {
-    client.BaseAddress = new Uri("http://localhost:5292");
+    client.BaseAddress = new Uri("https://localhost:5293");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.Timeout = TimeSpan.FromSeconds(30);
 })

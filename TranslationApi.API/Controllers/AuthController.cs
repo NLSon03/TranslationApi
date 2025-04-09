@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
@@ -262,6 +263,61 @@ namespace TranslationApi.API.Controllers
 
             var action = lockoutDto.IsLocked ? "khóa" : "mở khóa";
             return Ok(new { success = true, message = $"Đã {action} tài khoản thành công" });
+        }
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Auth", null, Request.Scheme);
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+            return Challenge(properties, "Google");
+        }
+
+        [HttpGet("google-response")]
+        public async Task<ActionResult<AuthResponseDto>> GoogleResponse()
+        {
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return BadRequest(new { error = "Không thể đăng nhập bằng Google" });
+            }
+
+            // Kiểm tra email
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            // Nếu user chưa tồn tại, tạo mới
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+                    ChatSessions = new List<ChatSession>()
+                };
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                // Gán role User
+                await _userManager.AddToRoleAsync(user, "User");
+            }
+
+            // Tạo token JWT
+            var userRoles = await _userManager.GetRolesAsync(user);
+            return new AuthResponseDto
+            {
+                UserId = user.Id ?? "",
+                UserName = user.UserName ?? "",
+                Email = user.Email ?? "",
+                Token = _tokenService.CreateToken(user, userRoles.ToList()),
+                Expiration = _tokenService.GetExpirationDate(),
+                Roles = userRoles.ToList()
+            };
         }
     }
 }
