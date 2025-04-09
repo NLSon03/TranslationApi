@@ -21,21 +21,22 @@
             <div class="ai-form-group">
                 <label for="email"><i class="fas fa-envelope"></i> Email hoặc Tên đăng nhập</label>
                 <InputText id="email" class="ai-input" @bind-Value="loginRequest.Email" placeholder="Nhập email hoặc tên đăng nhập"  />
-@*                 <ValidationMessage For="@(() => loginRequest.Email)" />
- *@            </div>
+                <ValidationMessage For="@(() => loginRequest.Email)" />
+            </div>
 
             <div class="ai-form-group">
                 <label for="password"><i class="fas fa-lock"></i> Mật khẩu</label>
                 <InputText id="password" type="password" class="ai-input" @bind-Value="loginRequest.Password" placeholder="Nhập mật khẩu"  />
-@*                  <ValidationMessage For="@(() => loginRequest.Password)" />
- *@            </div>
+                 <ValidationMessage For="@(() => loginRequest.Password)" />
+            </div>
 
             <div class="ai-form-options">
                  <label class="ai-checkbox-label">
                      <InputCheckbox @bind-Value="loginRequest.RememberMe" /> Ghi nhớ đăng nhập
                  </label>
-@*                  <a href="/auth/forgot-password" class="ai-link">Quên mật khẩu?</a>
- *@            </div>
+                 <a href="/auth/forgot-password" class="ai-link">Quên mật khẩu?</a>
+            </div>
+
 
             <div class="form-group">
                 <button type="submit" class="ai-btn-v2 ai-submit-btn" disabled="@isLoading">
@@ -51,8 +52,20 @@
                     }
                 </button>
             </div>
+            <!-- Divider -->
+            <div class="ai-divider">
+                <span class="ai-divider-line"></span>
+                <span class="ai-divider-text">Hoặc</span>
+                <span class="ai-divider-line"></span>
+            </div>
 
-             <ValidationSummary />
+            <!-- Nút Google -->
+            <div class="ai-google-btn-container">
+                <button class="ai-google-btn" type="button">
+                    <i class="fab fa-google"></i>
+                    Đăng nhập với Google
+                </button>
+            </div>
         </EditForm>
 
         <div class="ai-auth-footer">

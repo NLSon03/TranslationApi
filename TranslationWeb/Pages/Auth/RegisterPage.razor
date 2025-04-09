@@ -50,6 +50,7 @@
                      <InputCheckbox /> Tôi đồng ý với <a href="/terms" class="ai-link">Điều khoản dịch vụ</a>
                  </label>
              </div> *@
+
             <div class="form-group">
                 <button type="submit" class="ai-btn-v2 ai-submit-btn" disabled="@isLoading">
                     @if (isLoading)
@@ -64,9 +65,19 @@
                     }
                 </button>
             </div>
-
-
-            <ValidationSummary />
+             <!-- Divider -->
+            <div class="ai-divider">
+                <span class="ai-divider-line"></span>
+                <span class="ai-divider-text">Hoặc</span>
+                <span class="ai-divider-line"></span>
+            </div>
+            <!-- Nút Google -->
+            <div class="ai-google-btn-container">
+                <button class="ai-google-btn" type="button">
+                    <i class="fab fa-google"></i>
+                    Đăng nhập với Google
+                </button>
+            </div>
         </EditForm>
 
         <div class="ai-auth-footer">
