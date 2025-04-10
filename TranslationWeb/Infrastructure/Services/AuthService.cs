@@ -176,6 +176,30 @@ namespace TranslationWeb.Infrastructure.Services
             _tokenService.UpdateLastActivity();
         }
 
+        public async Task GoogleLoginAsync(string callbackUrl = null)
+        {
+            try
+            {
+                _logger.LogInformation("Chuyển hướng đến đăng nhập Google");
+                
+                // Xác định URL callback nếu không được cung cấp
+                if (string.IsNullOrEmpty(callbackUrl))
+                {
+                    var baseUri = _httpService.GetBaseUrl().TrimEnd('/');
+                    callbackUrl = $"{baseUri}/auth/google-callback";
+                }
+                
+                // Chuyển hướng đến trang đăng nhập Google với URL callback
+                var googleLoginUrl = $"{ApiEndpoints.Auth.GoogleLogin}?returnUrl={Uri.EscapeDataString(callbackUrl)}";
+                await _httpService.NavigateToExternalUrl(googleLoginUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi chuyển hướng đến đăng nhập Google");
+                throw;
+            }
+        }
+
         public void Dispose()
         {
             _tokenService.OnSessionTimeout -= HandleSessionTimeout;

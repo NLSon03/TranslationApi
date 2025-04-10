@@ -73,7 +73,7 @@
             </div>
             <!-- Nút Google -->
             <div class="ai-google-btn-container">
-                <button class="ai-google-btn" type="button">
+                <button class="ai-google-btn" type="button" @onclick="HandleGoogleLogin">
                     <i class="fab fa-google"></i>
                     Đăng nhập với Google
                 </button>
@@ -118,6 +118,27 @@
                 }
             }
 
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async void HandleGoogleLogin()
+    {
+        errorMessage = string.Empty;
+        isLoading = true;
+
+        try
+        {
+            // Đường dẫn callback sau khi đăng nhập Google
+            var callbackUrl = $"{NavigationManager.BaseUri.TrimEnd('/')}/auth/google-callback";
+            await AuthService.GoogleLoginAsync(callbackUrl);
         }
         catch (Exception ex)
         {

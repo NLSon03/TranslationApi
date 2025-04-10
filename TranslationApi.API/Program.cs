@@ -43,6 +43,14 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders()
 .AddSignInManager<SignInManager<ApplicationUser>>();
 
+// Cấu hình Cookie cho xác thực
+builder.Services.ConfigureApplicationCookie(options => 
+{
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
+});
+
 // Cấu hình JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAutoMapper(typeof(TranslationApi.Application.Mappings.AIModelMappingProfile).Assembly);
@@ -70,6 +78,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.CallbackPath = "/signin-google";
     options.SaveTokens = true;
 });
 
@@ -81,7 +90,8 @@ builder.Services.AddCors(options =>
         {
             policy.AllowAnyOrigin()
                   .AllowAnyMethod()
-                  .AllowAnyHeader();
+                  .AllowAnyHeader()
+                  .SetIsOriginAllowed(origin => true); // Cho phép tất cả nguồn gốc
         });
 });
 

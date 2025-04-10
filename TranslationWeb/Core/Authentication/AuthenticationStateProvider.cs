@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using TranslationWeb.Infrastructure.Services;
 using TranslationWeb.Models.Auth;
 
@@ -69,7 +71,16 @@ namespace TranslationWeb.Core.Authentication
                     _logger.LogInformation("Đang cập nhật authentication state cho user: {Username}",
                         userSession.UserName);
 
-                    // Lưu session mới
+                    // Đảm bảo các thông tin cần thiết không bị null
+                    userSession.UserName ??= "User";
+                    userSession.Email ??= "unknown@example.com";
+                    userSession.Roles ??= new List<string> { "User" };
+
+                    // Lưu token riêng biệt để sử dụng trong HttpClient
+                    await _localStorage.SetItemAsync("authToken", userSession.Token);
+                    await _localStorage.SetItemAsync("authExpiration", userSession.ExpiresAt.ToString("o"));
+
+                    // Lưu session đầy đủ
                     await _localStorage.SetItemAsync("user_session", userSession);
 
                     // Tạo claims principal mới
@@ -78,15 +89,44 @@ namespace TranslationWeb.Core.Authentication
                     // Kiểm tra xem claims principal có được tạo đúng không
                     if (claimsPrincipal.Identity?.IsAuthenticated != true)
                     {
-                        _logger.LogWarning("Claims principal không hợp lệ, chuyển về anonymous");
-                        await _localStorage.RemoveItemAsync("user_session");
-                        claimsPrincipal = _anonymous;
+                        _logger.LogWarning("Claims principal không hợp lệ, thử tạo lại với thông tin cơ bản");
+
+                        // Trường hợp token có nhưng không có đủ thông tin user, tạo claims tối thiểu
+                        var tempClaims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Authentication, "true"),
+                            new Claim("AccessToken", userSession.Token)
+                        };
+
+                        if (!string.IsNullOrEmpty(userSession.UserId))
+                            tempClaims.Add(new Claim(ClaimTypes.NameIdentifier, userSession.UserId));
+
+                        if (!string.IsNullOrEmpty(userSession.Email))
+                            tempClaims.Add(new Claim(ClaimTypes.Email, userSession.Email));
+
+                        if (!string.IsNullOrEmpty(userSession.UserName))
+                            tempClaims.Add(new Claim(ClaimTypes.Name, userSession.UserName));
+
+                        var tempIdentity = new ClaimsIdentity(tempClaims, "JWT Authentication");
+                        claimsPrincipal = new ClaimsPrincipal(tempIdentity);
+
+                        // Kiểm tra lần cuối, nếu vẫn không được thì trả về anonymous
+                        if (claimsPrincipal.Identity?.IsAuthenticated != true)
+                        {
+                            _logger.LogError("Không thể tạo claims principal với thông tin cơ bản, đăng nhập thất bại");
+                            await _localStorage.RemoveItemAsync("user_session");
+                            await _localStorage.RemoveItemAsync("authToken");
+                            await _localStorage.RemoveItemAsync("authExpiration");
+                            claimsPrincipal = _anonymous;
+                        }
                     }
                 }
                 else
                 {
                     _logger.LogInformation("Xóa session và chuyển về anonymous state");
                     await _localStorage.RemoveItemAsync("user_session");
+                    await _localStorage.RemoveItemAsync("authToken");
+                    await _localStorage.RemoveItemAsync("authExpiration");
                     claimsPrincipal = _anonymous;
                 }
 
@@ -97,7 +137,7 @@ namespace TranslationWeb.Core.Authentication
                 NotifyAuthenticationStateChanged(Task.FromResult(authState));
 
                 // Đợi một chút để đảm bảo các component đã nhận được thông báo
-                await Task.Delay(100);
+                await Task.Delay(200);
             }
             catch (Exception ex)
             {
@@ -105,6 +145,8 @@ namespace TranslationWeb.Core.Authentication
 
                 // Trong trường hợp lỗi, đảm bảo user được logout
                 await _localStorage.RemoveItemAsync("user_session");
+                await _localStorage.RemoveItemAsync("authToken");
+                await _localStorage.RemoveItemAsync("authExpiration");
                 NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
             }
         }

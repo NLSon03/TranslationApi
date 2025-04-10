@@ -1,3 +1,5 @@
+using System;
+
 namespace TranslationWeb.Core.Constants
 {
     public static class ApiEndpoints
@@ -12,6 +14,8 @@ namespace TranslationWeb.Core.Constants
             public static string Logout => $"{Base}/logout";
             public static string RefreshToken => $"{Base}/refresh-token";
             public static string CurrentUser => $"{Base}/current-user";
+            public static string GoogleLogin => $"{Base}/google-login";
+            public static string GoogleResponse => $"{Base}/google-response";
 
             public static class Users
             {

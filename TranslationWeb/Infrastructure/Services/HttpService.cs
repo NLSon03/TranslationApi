@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Components;
+using System;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using TranslationWeb.Models.Auth;
 
 namespace TranslationWeb.Infrastructure.Services
@@ -161,9 +164,9 @@ namespace TranslationWeb.Infrastructure.Services
                     // Kiểm tra mã trạng thái trước khi phân tích phản hồi
                     if (!response.IsSuccessStatusCode)
                     {
-                        _logger.LogWarning("API trả về lỗi: {StatusCode}, {Content}", 
+                        _logger.LogWarning("API trả về lỗi: {StatusCode}, {Content}",
                             response.StatusCode, responseContent);
-                        
+
                         // Nếu là API đăng nhập hoặc đăng ký, cố gắng đọc thông báo lỗi từ server
                         if (url.Contains("/login") || url.Contains("/register"))
                         {
@@ -177,7 +180,7 @@ namespace TranslationWeb.Infrastructure.Services
                             }
                             catch { /* Bỏ qua lỗi phân tích JSON */ }
                         }
-                        
+
                         throw new HttpRequestException($"API error: {response.StatusCode}", null, response.StatusCode);
                     }
 
@@ -389,31 +392,21 @@ namespace TranslationWeb.Infrastructure.Services
         {
             try
             {
-                var authResult = await _localStorage.GetItemAsync<AuthResponse>("user_session");
+                // Lấy token trực tiếp từ localStorage thay vì phụ thuộc vào user_session
+                var token = await _localStorage.GetItemAsync<string>("authToken");
+                var expirationStr = await _localStorage.GetItemAsync<string>("authExpiration");
+                
+                var tokenExpired = false;
+                if (!string.IsNullOrEmpty(expirationStr) && DateTime.TryParse(expirationStr, out var expiration))
+                {
+                    tokenExpired = expiration <= DateTime.Now;
+                }
 
                 // Kiểm tra token có hiệu lực
-                if (authResult != null && !string.IsNullOrEmpty(authResult.Token))
+                if (!string.IsNullOrEmpty(token) && !tokenExpired)
                 {
-                    if (authResult.ExpiresAt <= DateTime.Now)
-                    {
-                        _logger.LogWarning("Token đã hết hạn");
-                        
-                        // Kiểm tra refresh token
-                        if (!string.IsNullOrEmpty(authResult.RefreshToken) && 
-                            authResult.RefreshTokenExpiresAt > DateTime.Now)
-                        {
-                            // TODO: Thực hiện refresh token logic ở đây
-                            _logger.LogInformation("Đang thử làm mới token...");
-                        }
-                        else
-                        {
-                            await HandleUnauthorized();
-                            return;
-                        }
-                    }
-
                     _logger.LogInformation("Đang thêm JWT Token vào header: {Token}",
-                        authResult.Token.Substring(0, Math.Min(10, authResult.Token.Length)) + "...");
+                        token.Substring(0, Math.Min(10, token.Length)) + "...");
 
                     // Xóa header authorization cũ nếu có
                     if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
@@ -422,16 +415,40 @@ namespace TranslationWeb.Infrastructure.Services
                     }
 
                     _httpClient.DefaultRequestHeaders.Authorization =
-                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResult.Token);
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                 }
                 else
                 {
-                    _logger.LogWarning("Không tìm thấy token hoặc token rỗng");
-                    // Chỉ xử lý unauthorized nếu không phải là endpoint xác thực
-                    if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase) &&
-                        !_navigationManager.Uri.Contains("/auth/register", StringComparison.OrdinalIgnoreCase))
+                    // Thử lấy từ user_session nếu cách trên thất bại (để tương thích ngược)
+                    var authResult = await _localStorage.GetItemAsync<AuthResponse>("user_session");
+                    if (authResult != null && !string.IsNullOrEmpty(authResult.Token) && !authResult.IsAccessTokenExpired())
                     {
-                        await HandleUnauthorized();
+                        _logger.LogInformation("Sử dụng token từ user_session: {Token}",
+                            authResult.Token.Substring(0, Math.Min(10, authResult.Token.Length)) + "...");
+                            
+                        // Lưu token để sử dụng trong tương lai
+                        await _localStorage.SetItemAsync("authToken", authResult.Token);
+                        await _localStorage.SetItemAsync("authExpiration", authResult.ExpiresAt.ToString("o"));
+
+                        // Xóa header authorization cũ nếu có
+                        if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
+                        {
+                            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                        }
+
+                        _httpClient.DefaultRequestHeaders.Authorization =
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResult.Token);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Không tìm thấy token hợp lệ");
+                        // Chỉ xử lý unauthorized nếu không phải là endpoint xác thực
+                        if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase) &&
+                            !_navigationManager.Uri.Contains("/auth/register", StringComparison.OrdinalIgnoreCase) &&
+                            !_navigationManager.Uri.Contains("/auth/google-callback", StringComparison.OrdinalIgnoreCase))
+                        {
+                            await HandleUnauthorized();
+                        }
                     }
                 }
             }
@@ -448,6 +465,8 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 // Xóa token khỏi local storage
                 await _localStorage.RemoveItemAsync("user_session");
+                await _localStorage.RemoveItemAsync("authToken");
+                await _localStorage.RemoveItemAsync("authExpiration");
 
                 // Xóa Authorization header
                 if (_httpClient.DefaultRequestHeaders.Contains("Authorization"))
@@ -462,7 +481,8 @@ namespace TranslationWeb.Infrastructure.Services
                 var returnUrl = Uri.EscapeDataString(_navigationManager.Uri);
 
                 // Kiểm tra để tránh redirect loop
-                if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase))
+                if (!_navigationManager.Uri.Contains("/auth/login", StringComparison.OrdinalIgnoreCase) &&
+                    !_navigationManager.Uri.Contains("/auth/google-callback", StringComparison.OrdinalIgnoreCase))
                 {
                     _navigationManager.NavigateTo($"/auth/login?returnUrl={returnUrl}", forceLoad: true);
                 }
@@ -471,6 +491,17 @@ namespace TranslationWeb.Infrastructure.Services
             {
                 _logger.LogError(ex, "Lỗi khi xử lý unauthorized");
             }
+        }
+
+        public string GetBaseUrl()
+        {
+            return _navigationManager.BaseUri;
+        }
+
+        public Task NavigateToExternalUrl(string url)
+        {
+            _navigationManager.NavigateTo(url, true);
+            return Task.CompletedTask;
         }
     }
 }

@@ -266,58 +266,139 @@ namespace TranslationApi.API.Controllers
         }
 
         [HttpGet("google-login")]
-        public IActionResult GoogleLogin()
+        public IActionResult GoogleLogin([FromQuery] string returnUrl = null)
         {
-            var redirectUrl = Url.Action("GoogleResponse", "Auth", null, Request.Scheme);
+            // Lưu lại URL chuyển hướng để sử dụng sau khi đăng nhập thành công
+            var clientReturnUrl = returnUrl ?? Url.Content("~/");
+            
+            // Tạo URL callback cho Google
+            var redirectUrl = Url.ActionLink("GoogleResponse", "Auth", new { redirect = clientReturnUrl });
+            Console.WriteLine($"Redirect URL: {redirectUrl}");
+            
             var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
             return Challenge(properties, "Google");
         }
 
         [HttpGet("google-response")]
-        public async Task<ActionResult<AuthResponseDto>> GoogleResponse()
+        public async Task<ActionResult<AuthResponseDto>> GoogleResponse([FromQuery] string redirect = null)
         {
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
+            try
             {
-                return BadRequest(new { error = "Không thể đăng nhập bằng Google" });
-            }
-
-            // Kiểm tra email
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email);
-
-            // Nếu user chưa tồn tại, tạo mới
-            if (user == null)
-            {
-                user = new ApplicationUser
+                var info = await _signInManager.GetExternalLoginInfoAsync();
+                if (info == null)
                 {
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true,
-                    ChatSessions = new List<ChatSession>()
-                };
-
-                var result = await _userManager.CreateAsync(user);
-                if (!result.Succeeded)
-                {
-                    return BadRequest(result.Errors);
+                    Console.WriteLine("Error: Không thể lấy thông tin đăng nhập từ Google");
+                    
+                    if (!string.IsNullOrEmpty(redirect))
+                    {
+                        return Redirect($"{redirect}?error=Không+thể+đăng+nhập+bằng+Google.+Thông+tin+đăng+nhập+không+hợp+lệ.");
+                    }
+                    
+                    return BadRequest(new { error = "Không thể đăng nhập bằng Google. Thông tin đăng nhập không hợp lệ." });
                 }
 
-                // Gán role User
-                await _userManager.AddToRoleAsync(user, "User");
-            }
+                // Kiểm tra email
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(email))
+                {
+                    Console.WriteLine("Error: Không tìm thấy email trong thông tin từ Google");
+                    
+                    if (!string.IsNullOrEmpty(redirect))
+                    {
+                        return Redirect($"{redirect}?error=Không+thể+đăng+nhập+bằng+Google.+Email+không+được+cung+cấp.");
+                    }
+                    
+                    return BadRequest(new { error = "Không thể đăng nhập bằng Google. Email không được cung cấp." });
+                }
 
-            // Tạo token JWT
-            var userRoles = await _userManager.GetRolesAsync(user);
-            return new AuthResponseDto
+                var user = await _userManager.FindByEmailAsync(email);
+
+                // Nếu user chưa tồn tại, tạo mới
+                if (user == null)
+                {
+                    var userName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
+                    
+                    user = new ApplicationUser
+                    {
+                        UserName = email,
+                        Email = email,
+                        EmailConfirmed = true,
+                        ChatSessions = new List<ChatSession>()
+                    };
+
+                    var result = await _userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                    {
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        Console.WriteLine($"Error creating user: {errors}");
+                        
+                        if (!string.IsNullOrEmpty(redirect))
+                        {
+                            return Redirect($"{redirect}?error=Không+thể+tạo+tài+khoản:+{Uri.EscapeDataString(errors)}");
+                        }
+                        
+                        return BadRequest(new { error = $"Không thể tạo tài khoản: {errors}" });
+                    }
+
+                    // Gán role User
+                    if (!await _roleManager.RoleExistsAsync("User"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("User"));
+                    }
+                    await _userManager.AddToRoleAsync(user, "User");
+                }
+
+                // Tạo token JWT
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var token = _tokenService.CreateToken(user, userRoles.ToList());
+                
+                // Nếu có URL chuyển hướng, thêm token vào URL và chuyển hướng
+                if (!string.IsNullOrEmpty(redirect))
+                {
+                    return Redirect($"{redirect}?token={token}");
+                }
+                
+                // Nếu không có URL chuyển hướng, trả về response bình thường
+                return new AuthResponseDto
+                {
+                    UserId = user.Id ?? "",
+                    UserName = user.UserName ?? "",
+                    Email = user.Email ?? "",
+                    Token = token,
+                    Expiration = _tokenService.GetExpirationDate(),
+                    Roles = userRoles.ToList()
+                };
+            }
+            catch (Exception ex)
             {
-                UserId = user.Id ?? "",
-                UserName = user.UserName ?? "",
-                Email = user.Email ?? "",
-                Token = _tokenService.CreateToken(user, userRoles.ToList()),
-                Expiration = _tokenService.GetExpirationDate(),
-                Roles = userRoles.ToList()
-            };
+                Console.WriteLine($"Lỗi trong quá trình xử lý đăng nhập Google: {ex.Message}");
+                
+                if (!string.IsNullOrEmpty(redirect))
+                {
+                    return Redirect($"{redirect}?error={Uri.EscapeDataString(ex.Message)}");
+                }
+                
+                return StatusCode(500, new { error = "Lỗi server khi xử lý đăng nhập Google" });
+            }
+        }
+
+        // Phương thức để xử lý callback từ Google thông qua signin-google
+        [Route("/signin-google")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public Task<IActionResult> GoogleCallback()
+        {
+            try
+            {
+                Console.WriteLine("Xử lý callback Google tại /signin-google");
+                
+                // Chuyển hướng đến api/Auth/google-response sau khi xác thực
+                return Task.FromResult<IActionResult>(Redirect("/api/Auth/google-response"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi xử lý Google callback: {ex.Message}");
+                return Task.FromResult<IActionResult>(BadRequest(new { error = "Lỗi khi xử lý Google callback" }));
+            }
         }
     }
 }

@@ -15,5 +15,7 @@ namespace TranslationWeb.Infrastructure.Interfaces
         Task LogoutAsync();
 
         void UpdateLastActivity();
+        
+        Task GoogleLoginAsync(string callbackUrl = null);
     }
 }
