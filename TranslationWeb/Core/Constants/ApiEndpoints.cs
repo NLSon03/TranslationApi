@@ -1,5 +1,3 @@
-using System;
-
 namespace TranslationWeb.Core.Constants
 {
     public static class ApiEndpoints

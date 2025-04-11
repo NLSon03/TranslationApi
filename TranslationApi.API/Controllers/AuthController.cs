@@ -270,11 +270,11 @@ namespace TranslationApi.API.Controllers
         {
             // Lưu lại URL chuyển hướng để sử dụng sau khi đăng nhập thành công
             var clientReturnUrl = returnUrl ?? Url.Content("~/");
-            
+
             // Tạo URL callback cho Google
             var redirectUrl = Url.ActionLink("GoogleResponse", "Auth", new { redirect = clientReturnUrl });
             Console.WriteLine($"Redirect URL: {redirectUrl}");
-            
+
             var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
             return Challenge(properties, "Google");
         }
@@ -288,12 +288,12 @@ namespace TranslationApi.API.Controllers
                 if (info == null)
                 {
                     Console.WriteLine("Error: Không thể lấy thông tin đăng nhập từ Google");
-                    
+
                     if (!string.IsNullOrEmpty(redirect))
                     {
                         return Redirect($"{redirect}?error=Không+thể+đăng+nhập+bằng+Google.+Thông+tin+đăng+nhập+không+hợp+lệ.");
                     }
-                    
+
                     return BadRequest(new { error = "Không thể đăng nhập bằng Google. Thông tin đăng nhập không hợp lệ." });
                 }
 
@@ -302,12 +302,12 @@ namespace TranslationApi.API.Controllers
                 if (string.IsNullOrEmpty(email))
                 {
                     Console.WriteLine("Error: Không tìm thấy email trong thông tin từ Google");
-                    
+
                     if (!string.IsNullOrEmpty(redirect))
                     {
                         return Redirect($"{redirect}?error=Không+thể+đăng+nhập+bằng+Google.+Email+không+được+cung+cấp.");
                     }
-                    
+
                     return BadRequest(new { error = "Không thể đăng nhập bằng Google. Email không được cung cấp." });
                 }
 
@@ -317,7 +317,7 @@ namespace TranslationApi.API.Controllers
                 if (user == null)
                 {
                     var userName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email;
-                    
+
                     user = new ApplicationUser
                     {
                         UserName = email,
@@ -331,12 +331,12 @@ namespace TranslationApi.API.Controllers
                     {
                         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                         Console.WriteLine($"Error creating user: {errors}");
-                        
+
                         if (!string.IsNullOrEmpty(redirect))
                         {
                             return Redirect($"{redirect}?error=Không+thể+tạo+tài+khoản:+{Uri.EscapeDataString(errors)}");
                         }
-                        
+
                         return BadRequest(new { error = $"Không thể tạo tài khoản: {errors}" });
                     }
 
@@ -351,13 +351,13 @@ namespace TranslationApi.API.Controllers
                 // Tạo token JWT
                 var userRoles = await _userManager.GetRolesAsync(user);
                 var token = _tokenService.CreateToken(user, userRoles.ToList());
-                
+
                 // Nếu có URL chuyển hướng, thêm token vào URL và chuyển hướng
                 if (!string.IsNullOrEmpty(redirect))
                 {
                     return Redirect($"{redirect}?token={token}");
                 }
-                
+
                 // Nếu không có URL chuyển hướng, trả về response bình thường
                 return new AuthResponseDto
                 {
@@ -372,12 +372,12 @@ namespace TranslationApi.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Lỗi trong quá trình xử lý đăng nhập Google: {ex.Message}");
-                
+
                 if (!string.IsNullOrEmpty(redirect))
                 {
                     return Redirect($"{redirect}?error={Uri.EscapeDataString(ex.Message)}");
                 }
-                
+
                 return StatusCode(500, new { error = "Lỗi server khi xử lý đăng nhập Google" });
             }
         }
@@ -390,7 +390,7 @@ namespace TranslationApi.API.Controllers
             try
             {
                 Console.WriteLine("Xử lý callback Google tại /signin-google");
-                
+
                 // Chuyển hướng đến api/Auth/google-response sau khi xác thực
                 return Task.FromResult<IActionResult>(Redirect("/api/Auth/google-response"));
             }

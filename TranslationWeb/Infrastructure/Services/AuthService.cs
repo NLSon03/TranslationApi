@@ -181,14 +181,14 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Chuyển hướng đến đăng nhập Google");
-                
+
                 // Xác định URL callback nếu không được cung cấp
                 if (string.IsNullOrEmpty(callbackUrl))
                 {
                     var baseUri = _httpService.GetBaseUrl().TrimEnd('/');
                     callbackUrl = $"{baseUri}/auth/google-callback";
                 }
-                
+
                 // Chuyển hướng đến trang đăng nhập Google với URL callback
                 var googleLoginUrl = $"{ApiEndpoints.Auth.GoogleLogin}?returnUrl={Uri.EscapeDataString(callbackUrl)}";
                 await _httpService.NavigateToExternalUrl(googleLoginUrl);

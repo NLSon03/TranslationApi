@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
@@ -44,7 +44,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddSignInManager<SignInManager<ApplicationUser>>();
 
 // Cấu hình Cookie cho xác thực
-builder.Services.ConfigureApplicationCookie(options => 
+builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
@@ -158,12 +158,12 @@ builder.Services.AddSwaggerGen(options =>
 // Configure Kestrel endpoints
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5292, listenOptions => 
+    serverOptions.ListenAnyIP(5292, listenOptions =>
     {
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
     });
-    
-    serverOptions.ListenAnyIP(5293, listenOptions => 
+
+    serverOptions.ListenAnyIP(5293, listenOptions =>
     {
         listenOptions.UseHttps();
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;

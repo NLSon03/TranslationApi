@@ -1,11 +1,9 @@
-
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 
-namespace TranslationApi.Infrastructure.Services
+namespace TranslationApi.Infrastructure.Application
 {
     public class UserProfileService : IUserProfileService
     {

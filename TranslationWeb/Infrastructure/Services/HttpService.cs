@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Components;
-using System;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using TranslationWeb.Models.Auth;
 
 namespace TranslationWeb.Infrastructure.Services
@@ -395,7 +392,7 @@ namespace TranslationWeb.Infrastructure.Services
                 // Lấy token trực tiếp từ localStorage thay vì phụ thuộc vào user_session
                 var token = await _localStorage.GetItemAsync<string>("authToken");
                 var expirationStr = await _localStorage.GetItemAsync<string>("authExpiration");
-                
+
                 var tokenExpired = false;
                 if (!string.IsNullOrEmpty(expirationStr) && DateTime.TryParse(expirationStr, out var expiration))
                 {
@@ -425,7 +422,7 @@ namespace TranslationWeb.Infrastructure.Services
                     {
                         _logger.LogInformation("Sử dụng token từ user_session: {Token}",
                             authResult.Token.Substring(0, Math.Min(10, authResult.Token.Length)) + "...");
-                            
+
                         // Lưu token để sử dụng trong tương lai
                         await _localStorage.SetItemAsync("authToken", authResult.Token);
                         await _localStorage.SetItemAsync("authExpiration", authResult.ExpiresAt.ToString("o"));

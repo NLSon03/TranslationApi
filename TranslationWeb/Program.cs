@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
 using Polly;
-using System.Linq;
 using TranslationWeb;
 using TranslationWeb.Core.Authentication;
 using TranslationWeb.Infrastructure.Interfaces;
@@ -97,13 +96,13 @@ catch (AggregateException ex)
 {
     // Hiển thị chi tiết về các dịch vụ không thể khởi tạo
     Console.Error.WriteLine("Lỗi nghiêm trọng khi xây dựng ứng dụng:");
-    
+
     foreach (var innerEx in ex.InnerExceptions)
     {
         Console.Error.WriteLine($"- {innerEx.Message}");
         Console.Error.WriteLine($"  {innerEx.StackTrace}");
     }
-    
+
     // Hiển thị thông báo lỗi gốc
     throw new Exception("Ứng dụng không thể khởi động vì một số dịch vụ không thể được khởi tạo. Xem chi tiết trong console.", ex);
 }

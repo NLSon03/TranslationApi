@@ -9,7 +9,7 @@ namespace TranslationWeb.Models.AIModel
         public string Version { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public string ApiEndpoint { get; set; } = string.Empty;
-        public string ApiKey {  get; set; } = string.Empty;
+        public string ApiKey { get; set; } = string.Empty;
         [JsonPropertyName("success")]
         public bool Success { get; set; }
 

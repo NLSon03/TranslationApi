@@ -61,7 +61,7 @@ namespace TranslationApi.Application.Services
         public async Task<TranslationResponse> TranslateTextAsync(TranslationRequest request)
         {
             _logger.LogInformation($"Translating text from {request.SourceLanguage} to {request.TargetLanguage}");
-            
+
             // Kiểm tra dữ liệu đầu vào
             if (string.IsNullOrWhiteSpace(request.SourceText))
             {
@@ -73,7 +73,7 @@ namespace TranslationApi.Application.Services
                     TargetLanguage = request.TargetLanguage
                 };
             }
-            
+
             // Kiểm tra ngôn ngữ nguồn và đích không giống nhau
             if (request.SourceLanguage != "auto" && request.SourceLanguage == request.TargetLanguage)
             {
@@ -86,11 +86,11 @@ namespace TranslationApi.Application.Services
                     Success = true
                 };
             }
-            
+
             try
             {
                 var result = await TranslateWithGeminiAsync(request);
-                
+
                 // Lưu thông tin về ngôn ngữ nguồn được phát hiện (nếu có)
                 if (request.SourceLanguage == "auto" && result.SourceLanguage == "auto")
                 {
@@ -98,7 +98,7 @@ namespace TranslationApi.Application.Services
                     var detectedLanguage = await DetectLanguageAsync(request.SourceText);
                     result.SourceLanguage = detectedLanguage;
                 }
-                
+
                 return result;
             }
             catch (Exception ex)
@@ -131,7 +131,7 @@ namespace TranslationApi.Application.Services
                 foreach (var chunk in textChunks)
                 {
                     string prompt = $"Translate the following text from {GetLanguageName(sourceLanguage)} to {GetLanguageName(request.TargetLanguage)}. " +
-                                    $"Follow these guidelines: " + 
+                                    $"Follow these guidelines: " +
                                     $"1. Provide a natural and accurate translation that preserves the tone, formality, and nuances of the original text. " +
                                     $"2. Maintain all formatting, paragraph breaks, and bullet points from the original. " +
                                     $"3. Preserve proper names, brands, and technical terms unless their translation is well-established. " +
@@ -449,10 +449,10 @@ namespace TranslationApi.Application.Services
             {
                 using var doc = JsonDocument.Parse(responseBody);
 
-                if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || 
-                    candidates.GetArrayLength() == 0 || 
-                    !candidates[0].TryGetProperty("content", out var content) || 
-                    !content.TryGetProperty("parts", out var parts) || 
+                if (!doc.RootElement.TryGetProperty("candidates", out var candidates) ||
+                    candidates.GetArrayLength() == 0 ||
+                    !candidates[0].TryGetProperty("content", out var content) ||
+                    !content.TryGetProperty("parts", out var parts) ||
                     parts.GetArrayLength() == 0)
                 {
                     _logger.LogWarning("Invalid response format for language detection");
@@ -460,7 +460,7 @@ namespace TranslationApi.Application.Services
                 }
 
                 var languageCode = parts[0].GetProperty("text").GetString()?.Trim().ToLower();
-                
+
                 // Làm sạch mã ngôn ngữ (có thể có dấu ngoặc, dấu chấm, v.v.)
                 if (!string.IsNullOrEmpty(languageCode))
                 {

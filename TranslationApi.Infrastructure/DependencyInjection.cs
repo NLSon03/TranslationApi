@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Application.Services;
 using TranslationApi.Domain.Interfaces;
+using TranslationApi.Infrastructure.Application;
 using TranslationApi.Infrastructure.Data;
 using TranslationApi.Infrastructure.Repositories;
-using TranslationApi.Infrastructure.Services;
 
 namespace TranslationApi.Infrastructure
 {

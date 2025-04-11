@@ -1,6 +1,5 @@
 
 using TranslationApi.Application.DTOs;
-using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Application.Interfaces
 {

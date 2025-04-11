@@ -88,7 +88,7 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang gọi API để lấy chi tiết AI model: {ModelId}", id);
-                
+
                 var response = await _httpService.GetAsync<ApiResponse<AIModelResponse>>(
                     ApiEndpoints.AIModel.ById(id)
                 );
@@ -127,7 +127,7 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang gọi API để tạo AI model mới: {ModelName}", request.Name);
-                
+
                 var response = await _httpService.PostAsync<AIModelRequest, AIModelResponse>(
                     ApiEndpoints.AIModel.Base,
                     request
@@ -156,7 +156,7 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 _logger.LogInformation("Đang gọi API để cập nhật AI model: {ModelId}", request.Id);
-                
+
                 var response = await _httpService.PutAsync<AIModelRequest, AIModelResponse>(
                     ApiEndpoints.AIModel.ById(request.Id),
                     request
@@ -191,10 +191,10 @@ namespace TranslationWeb.Infrastructure.Services
 
                 if (response == null)
                 {
-                    return new AIModelResponse 
-                    { 
-                        Success = false, 
-                        Message = "Không nhận được phản hồi từ server" 
+                    return new AIModelResponse
+                    {
+                        Success = false,
+                        Message = "Không nhận được phản hồi từ server"
                     };
                 }
 
@@ -207,10 +207,10 @@ namespace TranslationWeb.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error activating AI model with ID: {Id}", id);
-                return new AIModelResponse 
-                { 
-                    Success = false, 
-                    Message = "Lỗi khi kích hoạt model: " + ex.Message 
+                return new AIModelResponse
+                {
+                    Success = false,
+                    Message = "Lỗi khi kích hoạt model: " + ex.Message
                 };
             }
         }
@@ -226,10 +226,10 @@ namespace TranslationWeb.Infrastructure.Services
 
                 if (response == null)
                 {
-                    return new AIModelResponse 
-                    { 
-                        Success = false, 
-                        Message = "Không nhận được phản hồi từ server" 
+                    return new AIModelResponse
+                    {
+                        Success = false,
+                        Message = "Không nhận được phản hồi từ server"
                     };
                 }
 
@@ -242,10 +242,10 @@ namespace TranslationWeb.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deactivating AI model with ID: {Id}", id);
-                return new AIModelResponse 
-                { 
-                    Success = false, 
-                    Message = "Lỗi khi vô hiệu hóa model: " + ex.Message 
+                return new AIModelResponse
+                {
+                    Success = false,
+                    Message = "Lỗi khi vô hiệu hóa model: " + ex.Message
                 };
             }
         }
@@ -255,13 +255,13 @@ namespace TranslationWeb.Infrastructure.Services
             try
             {
                 var response = await _httpService.DeleteAsync<ApiResponse<object>>(ApiEndpoints.AIModel.ById(id));
-                
+
                 if (response == null)
                 {
-                    return new AIModelResponse 
-                    { 
-                        Success = false, 
-                        Message = "Không nhận được phản hồi từ server" 
+                    return new AIModelResponse
+                    {
+                        Success = false,
+                        Message = "Không nhận được phản hồi từ server"
                     };
                 }
 
@@ -274,10 +274,10 @@ namespace TranslationWeb.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting AI model with ID: {Id}", id);
-                return new AIModelResponse 
-                { 
-                    Success = false, 
-                    Message = "Lỗi khi xóa model: " + ex.Message 
+                return new AIModelResponse
+                {
+                    Success = false,
+                    Message = "Lỗi khi xóa model: " + ex.Message
                 };
             }
         }

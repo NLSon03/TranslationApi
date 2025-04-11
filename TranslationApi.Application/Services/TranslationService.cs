@@ -14,7 +14,7 @@ namespace TranslationApi.Application.Services
         private readonly IAIModelService _aiModelService;
         private readonly HttpClient _httpClient;
         private readonly List<Language> _supportedLanguages = SupportedLanguages.All;
-        
+
         public TranslationService(ILogger<TranslationService> logger, HttpClient httpClient, IAIModelService aiModelService)
         {
             _logger = logger;
