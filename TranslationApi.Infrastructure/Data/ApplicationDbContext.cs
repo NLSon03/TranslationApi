@@ -1,5 +1,6 @@
-﻿﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using TranslationApi.Domain.Entities;
 
 namespace TranslationApi.Infrastructure.Data
@@ -19,6 +20,19 @@ namespace TranslationApi.Infrastructure.Data
 
             // Configure table names
             builder.Entity<AIModel>().ToTable("AIModel");
+
+            // Configure ApplicationUser
+            builder.Entity<ApplicationUser>()
+                .Property(e => e.FrequentlyUsedLanguages)
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
+                    new ValueComparer<List<string>>(
+                        (c1, c2) => c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()
+                    )
+                );
 
             // Configure relationships and constraints here
             builder.Entity<ChatSession>()

@@ -11,6 +11,22 @@ namespace TranslationApi.Application.DTOs
         public bool LockoutEnabled { get; set; }
         public DateTimeOffset? LockoutEnd { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
+
+        // Thông tin cơ bản
+        public string? DisplayName { get; set; }
+        public string? AvatarUrl { get; set; }
+        public string? Bio { get; set; }
+
+        // Thông tin ngôn ngữ và tùy chọn
+        public string PreferredLanguage { get; set; } = "vi-VN";
+        public List<string> FrequentlyUsedLanguages { get; set; } = new List<string>();
+        public string Theme { get; set; } = "light";
+        public DateTime LastActive { get; set; }
+        public string TimeZone { get; set; } = "Asia/Ho_Chi_Minh";
+
+        // Thống kê
+        public int TranslationCount { get; set; }
+        public DateTime MemberSince { get; set; }
     }
 
     public class UpdateUserDto
@@ -23,7 +39,32 @@ namespace TranslationApi.Application.DTOs
         [EmailAddress]
         public required string Email { get; set; }
 
+        [StringLength(50)]
+        public string? DisplayName { get; set; }
+
+        [Url]
+        public string? AvatarUrl { get; set; }
+
+        [StringLength(500)]
+        public string? Bio { get; set; }
+
         public List<string> Roles { get; set; } = new List<string>();
+    }
+
+    public class UpdateUserPreferencesDto
+    {
+        [Required]
+        public string PreferredLanguage { get; set; } = "vi-VN";
+
+        public List<string> FrequentlyUsedLanguages { get; set; } = new List<string>();
+
+        [Required]
+        public string Theme { get; set; } = "light";
+
+        [Required]
+        public string TimeZone { get; set; } = "Asia/Ho_Chi_Minh";
+
+        public bool EmailNotificationsEnabled { get; set; } = true;
     }
 
     public class ChangePasswordDto

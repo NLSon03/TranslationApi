@@ -6,6 +6,7 @@ using TranslationApi.Application.Services;
 using TranslationApi.Domain.Interfaces;
 using TranslationApi.Infrastructure.Data;
 using TranslationApi.Infrastructure.Repositories;
+using TranslationApi.Infrastructure.Services;
 
 namespace TranslationApi.Infrastructure
 {
@@ -38,6 +39,7 @@ namespace TranslationApi.Infrastructure
             services.AddScoped<IChatMessageService, ChatMessageService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserProfileService, UserProfileService>();
 
             return services;
         }
