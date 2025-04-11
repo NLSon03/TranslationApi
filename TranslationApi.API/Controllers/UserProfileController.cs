@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
+using TranslationApi.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace TranslationApi.API.Controllers
 {
@@ -12,10 +14,20 @@ namespace TranslationApi.API.Controllers
     public class UserProfileController : ControllerBase
     {
         private readonly IUserProfileService _userProfileService;
+        private readonly IFileStorageService _fileStorageService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<UserProfileController> _logger;
 
-        public UserProfileController(IUserProfileService userProfileService)
+        public UserProfileController(
+            IUserProfileService userProfileService,
+            IFileStorageService fileStorageService,
+            UserManager<ApplicationUser> userManager,
+            ILogger<UserProfileController> logger)
         {
             _userProfileService = userProfileService;
+            _fileStorageService = fileStorageService;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet("profile")]

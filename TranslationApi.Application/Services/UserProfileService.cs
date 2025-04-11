@@ -3,7 +3,7 @@ using TranslationApi.Application.DTOs;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Domain.Entities;
 
-namespace TranslationApi.Infrastructure.Application
+namespace TranslationApi.Application.Services
 {
     public class UserProfileService : IUserProfileService
     {

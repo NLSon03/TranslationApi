@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net.Http.Headers;
@@ -169,6 +170,24 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
     });
 });
+
+// Đảm bảo WebRootPath tồn tại
+var webRootPath = builder.Environment.WebRootPath;
+if (string.IsNullOrEmpty(webRootPath))
+{
+    webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    Directory.CreateDirectory(webRootPath);
+    builder.Environment.WebRootPath = webRootPath;
+}
+
+// Tạo thư mục uploads nếu chưa tồn tại
+var uploadPath = Path.Combine(webRootPath, "uploads", "avatars");
+Directory.CreateDirectory(uploadPath);
+
+if (!Directory.Exists(uploadPath))
+{
+    throw new Exception($"Không thể tạo thư mục upload: {uploadPath}");
+}
 
 var app = builder.Build();
 

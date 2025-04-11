@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using TranslationApi.Application.Interfaces;
 using TranslationApi.Application.Services;
 using TranslationApi.Domain.Interfaces;
-using TranslationApi.Infrastructure.Application;
 using TranslationApi.Infrastructure.Data;
 using TranslationApi.Infrastructure.Repositories;
 
@@ -40,6 +39,7 @@ namespace TranslationApi.Infrastructure
             services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserProfileService, UserProfileService>();
+            services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
             return services;
         }

@@ -126,7 +126,7 @@ namespace TranslationApi.API.Controllers
         [HttpGet("current-user")]
         public async Task<ActionResult<AuthResponseDto>> GetCurrentUser()
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value);
+            var user = await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)?.Value);
 
             if (user == null)
             {
