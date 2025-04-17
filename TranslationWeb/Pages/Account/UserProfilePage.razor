@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
 @page "/account/profile"
 @using System.Security.Claims
 @inject IUserProfileService UserProfileService
@@ -108,7 +109,7 @@
 </div>
 
 @code {
-    private UserProfileModel? _user;
+    private UserProfileModel? _user = new UserProfileModel();
     private int SelectedTab = 0;
     private bool isEditing = false;
     private UserProfileModel? _backupUser;
