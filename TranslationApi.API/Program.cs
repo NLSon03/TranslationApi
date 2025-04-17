@@ -194,6 +194,9 @@ var app = builder.Build();
 // Luôn bật HTTPS Redirection dù là môi trường nào
 app.UseHttpsRedirection();
 
+// Bật Static Files Middleware
+app.UseStaticFiles();
+
 // Middleware để chặn hoàn toàn HTTP request trong Development
 if (app.Environment.IsDevelopment())
 {

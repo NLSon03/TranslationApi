@@ -67,7 +67,7 @@ namespace TranslationApi.Application.Services
                     "File uploaded successfully. User: {UserId}, Type: {FileType}, Name: {FileName}", 
                     userId, fileType, fileName);
 
-                return Path.Combine(UploadDirectory, fileType, userId, fileName).Replace("\\", "/");
+                return "/" + Path.Combine(UploadDirectory, fileType, userId, fileName).Replace("\\", "/");
             }
             catch (Exception ex)
             {

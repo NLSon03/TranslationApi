@@ -282,7 +282,52 @@ namespace TranslationWeb.Infrastructure.Services
 
             throw new HttpRequestException($"Failed to execute PUT request to {url} after {_maxRetries} attempts");
         }
+        public async Task<TResponse?> PostMultipartAsync<TResponse>(string url, MultipartFormDataContent content)
+        {
+            if (!await CheckServerConnection())
+                throw new HttpRequestException("Server is not available", null, System.Net.HttpStatusCode.ServiceUnavailable);
 
+            for (int i = 0; i < _maxRetries; i++)
+            {
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_timeoutSeconds));
+                    await AddJwtHeader();
+
+                    var response = await _httpClient.PostAsync(url, content, cts.Token);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                    {
+                        await HandleUnauthorized();
+                        continue;
+                    }
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    if (!response.IsSuccessStatusCode)
+                        throw new HttpRequestException($"API error: {response.StatusCode}", null, response.StatusCode);
+
+                    return JsonSerializer.Deserialize<TResponse>(responseContent, _jsonOptions);
+                }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogWarning("Request timeout for POST {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (HttpRequestException ex)
+                {
+                    _logger.LogError(ex, "Error executing POST request to {Url}", url);
+                    if (i == _maxRetries - 1) throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error executing POST request to {Url}", url);
+                    throw;
+                }
+                await Task.Delay((int)Math.Min(100 * Math.Pow(2, i), 1000));
+            }
+
+            throw new HttpRequestException($"Failed to execute POST request to {url} after {_maxRetries} attempts");
+        }
         public async Task<TResponse?> PatchAsync<TRequest, TResponse>(string url, TRequest data)
         {
             for (int i = 0; i < _maxRetries; i++)

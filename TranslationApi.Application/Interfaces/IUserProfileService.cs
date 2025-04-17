@@ -11,5 +11,7 @@ namespace TranslationApi.Application.Interfaces
         Task<bool> IncrementTranslationCountAsync(string userId);
         Task<bool> UpdateLastActiveAsync(string userId);
         Task<List<string>> GetFrequentlyUsedLanguagesAsync(string userId);
+        Task<bool> UpdateUserAvatarAsync(string userId, string avatarUrl);
+        
     }
 }

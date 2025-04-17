@@ -28,6 +28,17 @@ namespace TranslationWeb.Core.Constants
             }
         }
 
+        public static class UserProfile{
+            public static string Base => $"{BaseUrl}/api/UserProfile";
+            public static string UploadAvatar => $"{Base}/avatar";
+            public static string Profile => $"{Base}/profile";
+            public static string UpdateProfile => $"{Base}/profile";
+            public static string UpdatePreferences => $"{Base}/preferences";
+            public static string FrequentlyUsedLanguages => $"{Base}/languages/frequent";
+            public static string IncrementTranslationCount => $"{Base}/translation/increment";
+            public static string UpdateLastActive => $"{Base}/lastactive/update";
+        }
+
         public static class Translation
         {
             public static string Base => $"{BaseUrl}/api/Translation";

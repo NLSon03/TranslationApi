@@ -138,5 +138,17 @@ namespace TranslationApi.Application.Services
 
             return user.FrequentlyUsedLanguages;
         }
+
+        public async Task<bool> UpdateUserAvatarAsync(string userId, string avatarUrl)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            user.AvatarUrl = avatarUrl;
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
+        }
     }
 }

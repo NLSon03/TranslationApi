@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TranslationApi.Application.DTOs;
@@ -133,6 +132,27 @@ namespace TranslationApi.API.Controllers
             }
 
             return BadRequest("Không thể cập nhật thời gian hoạt động.");
+        }
+
+        [HttpPost("avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile file)
+        {
+            var userId = User.FindFirst("uid")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("File không hợp lệ");
+            }
+            var url = await _fileStorageService.SaveFileAsync(file, userId, "avatars");
+            var fullUrl = $"{Request.Scheme}://{Request.Host}{url}";
+            // Cập nhật AvatarUrl cho user
+            var updateResult = await _userProfileService.UpdateUserAvatarAsync(userId, url);
+            if (!updateResult)
+                return BadRequest("Không thể cập nhật avatar");
+            return Ok(new { avatarUrl = fullUrl });
         }
     }
 }

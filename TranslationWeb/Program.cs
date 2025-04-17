@@ -82,7 +82,7 @@ builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
 builder.Services.AddScoped<IAIModelService, AIModelService>();
 builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 // Commented out Blazored.Toast registration
 // builder.Services.AddBlazoredToast();
 
