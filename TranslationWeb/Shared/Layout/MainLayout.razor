@@ -41,22 +41,6 @@
                                 <i class="bi bi-translate nav-icon"></i> <span>Dịch thuật</span>
                             </NavLink>
                         </li>
-                        <AuthorizeView>
-                            <Authorized>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle ai-nav-link" href="#" id="chatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-chat-dots nav-icon"></i> <span>Chat</span>
-                                    </a>
-                                    <ul class="dropdown-menu ai-dropdown" aria-labelledby="chatDropdown">
-                                        <li class="mb-1">
-                                            <NavLink class="dropdown-item ai-dropdown-item" href="/chat">
-                                                <i class="bi bi-chat me-2"></i> Chat với AI
-                                            </NavLink>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </Authorized>
-                        </AuthorizeView>
                         <AuthorizeView Roles="Admin">
                             <Authorized>
                                 <li class="nav-item dropdown">
