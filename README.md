@@ -1,135 +1,88 @@
 # Translation API System
 
-A comprehensive translation and chat system built with .NET, utilizing Google's Gemini API for translations and AI-powered conversations.
+Hệ thống dịch thuật đa ngôn ngữ(Phiên bản thu nhỏ của Google Translate) được xây dựng bằng .NET và Blazor WebAssembly, sử dụng Google's Gemini API.
 
-## Features
+## Chức năng chính
 
-### Translation Service
-- Multi-language translation support using Google's Gemini API
-- Efficient handling of large text translations with automatic text chunking
-- Robust error handling and retry mechanisms
+### Hệ thống xác thực và phân quyền
+- Đăng nhập/đăng ký tài khoản
+- Quản lý thông tin người dùng và phân quyền
+- Hỗ trợ JWT (JSON Web Token) để bảo mật API
+- Quản lý phiên làm việc và token
 
-### Chat System
-- Real-time AI-powered chat sessions
-- Support for multiple AI models
-- Message tracking and history
-- Response time monitoring
-- User feedback system for messages
+### Dịch thuật thông minh
+- Hỗ trợ dịch đa ngôn ngữ (hơn 30 ngôn ngữ) thông qua Gemini API
+- Tính năng tự động nhận diện ngôn ngữ nguồn
+- Xử lý văn bản dài thông qua chia nhỏ tự động
+- Bảo toàn định dạng văn bản (xuống dòng, bullet points)
+- Giữ nguyên các tên riêng, thương hiệu và thuật ngữ kỹ thuật
+- Xử lý lỗi thông minh và thông báo chi tiết
 
-### Authentication & User Management
-- Secure user authentication
-- User profile management
-- Role-based access control
+### Tính năng người dùng
+- Giao diện dịch thuật thân thiện với người dùng
+- Chức năng hoán đổi ngôn ngữ nguồn/đích
+- Tính năng sao chép nhanh kết quả dịch
 
-### Web Interface
-- Modern Blazor WebAssembly frontend
-- Responsive design
-- Real-time chat interface
-- User-friendly translation form
+### Quản lý hệ thống
+- Quản lý mô hình AI (thêm/sửa/xóa/kích hoạt)
+- Theo dõi và quản lý người dùng
+- Xử lý lỗi và logging chi tiết
+- Tối ưu hóa hiệu suất hệ thống
 
-## Technical Architecture
+## Kiến trúc kỹ thuật
 
-### API Layer (TranslationApi.API)
-- RESTful API endpoints
-- Controllers for Translation, Chat, Authentication, and Feedback
-- Swagger documentation
+### Backend (ASP.NET Core)
+- RESTful API với chuẩn OpenAPI/Swagger
+- Xử lý đồng thời và tối ưu hiệu suất
+- Tích hợp với Gemini API
+- Hệ thống cache và retry policy
+- Entity Framework Core cho quản lý dữ liệu
 
-### Application Layer (TranslationApi.Application)
-- Business logic implementation
-- Translation service with Gemini API integration
-- Chat and user management services
-- DTOs and interfaces
+### Frontend (Blazor WebAssembly)
+- Giao diện người dùng phản hồi nhanh
+- State management hiệu quả
+- Xử lý lỗi trực quan
+- Tương thích đa nền tảng
 
-### Domain Layer (TranslationApi.Domain)
-- Core business entities
-- Domain models:
-  - AIModel
-  - ChatSession
-  - ChatMessage
-  - User
-  - Feedback
-- Business rules and validation
+## Yêu cầu hệ thống
 
-### Infrastructure Layer (TranslationApi.Infrastructure)
-- Data persistence
-- Entity Framework Core
-- Repository implementations
-- Database migrations
-- External service integrations
-
-### Web UI (TranslationWeb)
-- Blazor WebAssembly frontend
-- Component-based architecture
-- Responsive design
-- Real-time updates
-
-## Getting Started
-
-### Prerequisites
-- .NET 7.0 or later
+### Môi trường phát triển
+- .NET 7.0 trở lên
 - SQL Server
 - Gemini API key
 
-### Configuration
-1. Clone the repository
-2. Update the connection string in `appsettings.json`
-3. Configure your Gemini API key in the configuration
-4. Run database migrations:
+### Cấu hình triển khai
+1. Clone repository
+2. Cập nhật connection string trong `appsettings.json`
+3. Cấu hình Gemini API key
+4. Chạy database migrations:
    ```
    dotnet ef database update
    ```
 
-### Running the Application
-1. Start the API:
+### Chạy ứng dụng
+1. Khởi động API:
    ```
    cd TranslationApi.API
    dotnet run
    ```
-2. Start the Web UI:
+2. Khởi động Web UI:
    ```
    cd TranslationWeb
    dotnet run
    ```
 
-## Project Structure
+## Cấu trúc project
 
 ```
 TranslationApi/
-├── TranslationApi.API/          # API endpoints and controllers
-├── TranslationApi.Application/  # Business logic and services
-├── TranslationApi.Domain/       # Core business entities and rules
-├── TranslationApi.Infrastructure/ # Data access and external services
-└── TranslationWeb/              # Blazor WebAssembly frontend
+├── TranslationApi.API/          # API endpoints và controllers
+├── TranslationApi.Application/  # Business logic và services
+├── TranslationApi.Domain/       # Entities và business rules
+├── TranslationApi.Infrastructure/ # Data access và external services
+└── TranslationWeb/              # Blazor WebAssembly UI
 ```
-
-## Key Features Implementation
-
-### Translation Service
-- Implements chunking for large text translations
-- Handles special characters and text normalization
-- Provides detailed error information
-- Implements retry mechanism with exponential backoff
-
-### Chat System
-- Real-time message handling
-- Support for different message types
-- Session management
-- Performance monitoring (response time tracking)
-
-### Security
-- JWT authentication
-- Role-based authorization
-- Secure API endpoints
-- Input validation and sanitization
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License
