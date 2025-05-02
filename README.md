@@ -1,88 +1,121 @@
-# Translation API System
+# Translation API System 🌐
 
-Hệ thống dịch thuật đa ngôn ngữ(Phiên bản thu nhỏ của Google Translate) được xây dựng bằng .NET và Blazor WebAssembly, sử dụng Google's Gemini API.
+[![.NET](https://img.shields.io/badge/.NET%207.0-512BD4?style=for-the-badge&logo=.net&logoColor=white)](https://dotnet.microsoft.com/download/dotnet/7.0)
+[![Blazor](https://img.shields.io/badge/Blazor-512BD4?style=for-the-badge&logo=blazor&logoColor=white)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)
+[![Gemini API](https://img.shields.io/badge/Gemini%20API-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/docs/gemini_api)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)](https://www.microsoft.com/sql-server)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## Chức năng chính
+A powerful multilingual translation system built with .NET and Blazor WebAssembly, leveraging Google's Gemini API for intelligent translations.
 
-### Hệ thống xác thực và phân quyền
-- Đăng nhập/đăng ký tài khoản
-- Quản lý thông tin người dùng và phân quyền
-- Hỗ trợ JWT (JSON Web Token) để bảo mật API
-- Quản lý phiên làm việc và token
+## ✨ Key Features
 
-### Dịch thuật thông minh
-- Hỗ trợ dịch đa ngôn ngữ (hơn 30 ngôn ngữ) thông qua Gemini API
-- Tính năng tự động nhận diện ngôn ngữ nguồn
-- Xử lý văn bản dài thông qua chia nhỏ tự động
-- Bảo toàn định dạng văn bản (xuống dòng, bullet points)
-- Giữ nguyên các tên riêng, thương hiệu và thuật ngữ kỹ thuật
-- Xử lý lỗi thông minh và thông báo chi tiết
+### 🔐 Authentication & Authorization
+- Secure user registration and login system
+- User profile management with role-based access control
+- JWT (JSON Web Token) based API security
+- Session management and token handling
 
-### Tính năng người dùng
-- Giao diện dịch thuật thân thiện với người dùng
-- Chức năng hoán đổi ngôn ngữ nguồn/đích
-- Tính năng sao chép nhanh kết quả dịch
+### 🎯 Intelligent Translation
+- Support for 30+ languages through Gemini API integration
+- Automatic source language detection
+- Smart handling of long texts with automatic chunking
+- Preserves text formatting (line breaks, bullet points)
+- Maintains proper names, brands, and technical terms
+- Intelligent error handling with detailed notifications
 
-### Quản lý hệ thống
-- Quản lý mô hình AI (thêm/sửa/xóa/kích hoạt)
-- Theo dõi và quản lý người dùng
-- Xử lý lỗi và logging chi tiết
-- Tối ưu hóa hiệu suất hệ thống
+### 👥 User Experience
+- Clean and intuitive translation interface
+- Quick language swap functionality
+- One-click result copying
+- Real-time translation updates
 
-## Kiến trúc kỹ thuật
+### ⚙️ System Administration
+- AI model management (CRUD operations)
+- User monitoring and management
+- Detailed error logging and handling
+- System performance optimization
 
-### Backend (ASP.NET Core)
-- RESTful API với chuẩn OpenAPI/Swagger
-- Xử lý đồng thời và tối ưu hiệu suất
-- Tích hợp với Gemini API
-- Hệ thống cache và retry policy
-- Entity Framework Core cho quản lý dữ liệu
+## 🏗️ Technical Architecture
 
-### Frontend (Blazor WebAssembly)
-- Giao diện người dùng phản hồi nhanh
-- State management hiệu quả
-- Xử lý lỗi trực quan
-- Tương thích đa nền tảng
+### 🔧 Backend (ASP.NET Core)
+- RESTful API with OpenAPI/Swagger documentation
+- Concurrent request handling and performance optimization
+- Seamless Gemini API integration
+- Entity Framework Core for data management
 
-## Yêu cầu hệ thống
+```mermaid
+graph TD
+    A[Client] -->|HTTP Requests| B[API Layer]
+    B --> C[Application Layer]
+    C --> D[Domain Layer]
+    C --> E[Infrastructure Layer]
+    E -->|Entity Framework| F[(Database)]
+    C -->|Gemini API| G[External Services]
+```
 
-### Môi trường phát triển
-- .NET 7.0 trở lên
+### 🎨 Frontend (Blazor WebAssembly)
+- Responsive and interactive UI
+- Efficient state management
+- Visual error handling
+- Cross-platform compatibility
+- Real-time updates
+
+## 🚀 Getting Started
+
+### 📋 Prerequisites
+- .NET 7.0 or later
 - SQL Server
 - Gemini API key
 
-### Cấu hình triển khai
+### ⚙️ Configuration
 1. Clone repository
-2. Cập nhật connection string trong `appsettings.json`
-3. Cấu hình Gemini API key
-4. Chạy database migrations:
-   ```
+2. Update connection string in `appsettings.json`
+3. Configure Gemini API key
+4. Run database migrations:
+   ```bash
    dotnet ef database update
    ```
 
-### Chạy ứng dụng
-1. Khởi động API:
-   ```
+### 🏃‍♂️ Running the Application
+1. Start the API:
+   ```bash
    cd TranslationApi.API
    dotnet run
    ```
-2. Khởi động Web UI:
-   ```
+2. Launch the Web UI:
+   ```bash
    cd TranslationWeb
    dotnet run
    ```
 
-## Cấu trúc project
+## 📁 Project Structure
 
 ```
 TranslationApi/
-├── TranslationApi.API/          # API endpoints và controllers
-├── TranslationApi.Application/  # Business logic và services
-├── TranslationApi.Domain/       # Entities và business rules
-├── TranslationApi.Infrastructure/ # Data access và external services
+├── TranslationApi.API/          # API endpoints and controllers
+├── TranslationApi.Application/  # Business logic and services
+├── TranslationApi.Domain/       # Entities and business rules
+├── TranslationApi.Infrastructure/ # Data access and integrations
 └── TranslationWeb/              # Blazor WebAssembly UI
 ```
 
-## License
+## 📊 System Architecture
 
-MIT License
+```mermaid
+flowchart LR
+    A[Frontend] -->|HTTP/WebSocket| B[Backend API]
+    B --> C[Business Logic]
+    C --> D[Data Layer]
+    C --> E[Gemini API]
+    D --> F[(Database)]
+```
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+<div align="center">
+Made with ❤️ using .NET and Blazor
+</div>
